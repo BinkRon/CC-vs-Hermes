@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>设计系统 · Harness 对比研究</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+/* ============ 设计系统（所有 findings 页面复用这套 <style> 与 <script>）============ */
+:root{
+  --bg:#0d1017; --surface:#161b26; --surface-2:#1e2531; --border:#2a3342;
+  --text:#e6edf3; --muted:#8b98a9; --faint:#5a6675;
+  --blue:#4b8bf5; --green:#3fb950; --purple:#a371f7; --amber:#d9a441; --red:#f0603a;
+  --radius:14px; --maxw:1080px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Inter,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:48px 28px 120px}
+a{color:var(--blue);text-decoration:none}
+
+/* 顶部：badge + 标题 + 副标题 + chips */
+.eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.badge{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
+  padding:4px 10px;font-size:13px;font-weight:700;letter-spacing:.5px;color:var(--muted)}
+.tag{font-size:13px;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 40%,transparent);
+  border-radius:999px;padding:3px 12px}
+h1{font-size:34px;margin:.1em 0 .15em;letter-spacing:-.5px}
+.subtitle{font-size:18px;color:var(--muted);margin:0 0 16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.chip{background:var(--surface);border:1px solid var(--border);border-radius:999px;
+  padding:4px 12px;font-size:13px;color:var(--muted)}
+
+/* 一句话核心洞察：渐变高亮框 */
+.thesis{background:linear-gradient(120deg,#12241f,#0f1e2e);border:1px solid #234;
+  border-left:4px solid var(--green);border-radius:12px;padding:18px 22px;margin:28px 0 8px;font-size:17px}
+.thesis b{color:var(--green)}
+
+/* 分节标题 */
+h2{font-size:24px;margin:52px 0 6px;padding-top:18px;border-top:1px solid var(--border)}
+h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
+.lead{color:var(--muted);margin:0 0 20px}
+
+/* 卡片 / 机制块 */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin:16px 0}
+.card h3{margin:0 0 6px;font-size:18px}
+.card .why{color:var(--muted);font-size:15px}
+
+/* “问题”叙事块（讲具体故事） */
+.story{background:var(--surface);border:1px dashed var(--border);border-radius:12px;padding:18px 22px;color:var(--muted)}
+.story b{color:var(--text)}
+
+/* Mermaid 图容器 */
+.diagram{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;
+  padding:20px;margin:16px 0;overflow:auto;text-align:center}
+.diagram .cap{color:var(--faint);font-size:13px;margin-top:10px}
+/* 流程图规范：一律用「纵向」flowchart TD。两图对比用「两列」左右并排，
+   宽度对齐正文（不通栏破版）。两列等高、图垂直居中；将来真放不下再考虑横滑组件。 */
+.flow2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
+.flow2 .diagram{margin:0;display:flex;flex-direction:column}
+.flow2 .diagram h3{margin:0 0 6px;font-size:16px}
+.flow2 .diagram .dlead{color:var(--muted);font-size:13px;margin:0 0 12px;text-align:left}
+.flow2 .diagram .mermaid{flex:1;display:flex;align-items:center;justify-content:center;min-width:0}
+@media(max-width:820px){.flow2{grid-template-columns:1fr}}
+
+/* 分步演示 stepper（Hero 机制用） */
+.stepper{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:0;overflow:hidden;margin:18px 0}
+.stepper .stage{padding:26px;min-height:200px;display:flex;align-items:center;justify-content:center}
+.stepper .frame{display:none;width:100%}
+.stepper .frame.on{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.stepper .caption{background:color-mix(in srgb,var(--blue) 14%,transparent);
+  border-top:1px solid var(--border);padding:14px 22px;font-size:15px}
+.stepper .caption b{color:var(--blue)}
+.ctrl{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid var(--border)}
+.ctrl button{background:var(--surface);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:6px 14px;cursor:pointer;font-size:14px}
+.ctrl button:hover{border-color:var(--blue)}
+.dots{display:flex;gap:6px}.dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+.dot.on{background:var(--blue)}
+.count{color:var(--muted);font-size:13px}
+/* ===== 详情入口标准（§1.5：论点留主线、收据入入口；两型都是档三·弱、别用带框按钮）===== */
+/* ① 证据型入口：紧贴它解释的那个块的档三文字链「↳ 描述 →」，相邻自带锚定。先例 ch02 .cmpl .receipts（那里额外的 padding-left 是对齐阶梯两列的用途微调、不属标准） */
+.entry-note{display:inline-flex;align-items:baseline;gap:7px;cursor:pointer;font-size:12.5px;
+  color:var(--muted);line-height:1.5;transition:color .15s}
+.entry-note:hover{color:var(--green)}
+.entry-note:hover .cp{text-decoration:underline;text-underline-offset:3px}
+.entry-note .tie{color:var(--faint);font-size:13px}
+.entry-note .go{color:var(--green)}
+/* ② 集合型入口：排在 chip 集合末尾的第 N+1 格「… 查看全部 N 种 →」，继承集合的 chip 语汇。可点性靠「末尾位置＋箭头＋计数」三个语境信号，不靠边框重量。先例 ch02 .cl .more */
+/* 【废弃 · 2026-07-06 CH-A1R-02】.detail-btn：带框按钮＝档二、与真内容抢眼、易飘成孤儿，违反 §1.5「别用带框按钮」；已被上面两型取代。保留定义仅为不破坏历史，勿再新引用。 */
+.detail-btn{display:inline-flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);
+  border-radius:9px;padding:9px 16px;margin:14px 0 2px;cursor:pointer;font-family:inherit;font-size:14px;
+  font-weight:600;color:var(--text);line-height:1.4;text-align:left;transition:border-color .15s,background .15s}
+.detail-btn:hover{border-color:var(--blue);background:var(--surface-2)}
+.detail-btn .di{flex:none;font-size:15px;color:var(--blue)}
+/* stepper 里的盒子（画“进程/上下文”这类概念用） */
+.box{border:1.5px solid var(--border);border-radius:10px;padding:16px;background:var(--bg)}
+.box.blue{border-color:var(--blue)} .box.purple{border-color:var(--purple)} .box.dim{opacity:.4}
+.box .t{font-weight:700;margin-bottom:8px} .box code{color:var(--muted);font-size:13px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* 对比块（产品逻辑，非技术表格） */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+.compare .side{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.compare .side.cc{border-top:3px solid var(--blue)}
+.compare .side.hm{border-top:3px solid var(--purple)}
+.compare .side h4{margin:0 0 8px;font-size:15px;color:var(--muted)}
+.verdict{background:var(--surface-2);border:1px solid var(--border);border-left:4px solid var(--amber);
+  border-radius:10px;padding:14px 20px;margin-top:12px}
+.verdict b{color:var(--amber)}
+
+/* 悬而未决 */
+.open li{color:var(--muted);margin:6px 0}
+.foot{margin-top:60px;color:var(--faint);font-size:13px;border-top:1px solid var(--border);padding-top:16px}
+
+/* 维度小标题 + 单组对比（综合篇用） */
+.matrix-row{margin:22px 0}
+.matrix-row h3{font-size:16px;margin:0 0 10px;color:var(--text)}
+.matrix-row h3 .n{color:var(--faint);font-weight:400;margin-right:8px}
+
+/* 多维对照矩阵：左列维度名 + CC/Hermes 两列答案（多行对比时比堆叠 .compare 更好扫读） */
+.matrix{display:grid;grid-template-columns:minmax(112px,1fr) 1.9fr 1.9fr;
+  gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:16px 0}
+.matrix>div{background:var(--surface);padding:11px 15px;font-size:14px;line-height:1.55}
+.matrix .mh{background:var(--surface-2);font-weight:700;font-size:13px;color:var(--muted)}
+.matrix .mh.cc{color:var(--blue)} .matrix .mh.hm{color:var(--purple)}
+.matrix .dim{background:var(--surface-2);font-weight:600;color:var(--text)}
+@media(max-width:760px){.matrix{grid-template-columns:1fr 1.4fr 1.4fr;font-size:12.5px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow"><span class="badge">S00 · 设计系统</span><span class="tag">DEMO</span></div>
+  <h1>组件样式参考页</h1>
+  <p class="subtitle">这一页是给渲染 subagent 的样式来源；正文用假数据演示每种组件。</p>
+  <div class="chips"><span class="chip">深色主题</span><span class="chip">Mermaid 图</span><span class="chip">分步 stepper</span></div>
+
+  <div class="thesis">一句话核心判断放这里：<b>关键结论用绿色强调</b>，让人 3 秒抓住重点。</div>
+
+  <h2><span class="num">01</span>问题（讲具体故事）</h2>
+  <p class="lead">用产品语言、具体场景讲这个机制到底解决什么问题，不出现代码。</p>
+  <div class="story">Agent 在修一个 bug，读了 <b>30 个文件</b>、聊了 60 轮，上下文里塞满与最终目标无关的中间过程……于是它越来越"健忘"。</div>
+
+  <h2><span class="num">02</span>流程对比（纵向 TD + 通栏两列）</h2>
+  <p class="lead">规范：流程图一律 <b>flowchart TD（纵向）</b>；两图对比用 <b>.flow2</b> 左右并排（宽度对齐正文、两列等高）。
+  精简主干、短标签、把边缘分支移到正文，保证可读。</p>
+  <div class="flow2">
+    <div class="diagram">
+      <h3 style="color:var(--blue)">Claude Code</h3>
+      <p class="dlead">出口只有「模型没点工具」。</p>
+      <pre class="mermaid">
+flowchart TD
+  A[用户输入] --> B[组装上下文]
+  B --> C[调模型]
+  C --> D{有工具调用?}
+  D -->|有| E[执行工具]
+  E --> B
+  D -->|无| F([结束 · 交还用户])
+      </pre>
+    </div>
+    <div class="diagram">
+      <h3 style="color:var(--purple)">Hermes</h3>
+      <p class="dlead">「没工具」还要过验证门。</p>
+      <pre class="mermaid">
+flowchart TD
+  A[用户消息] --> B[组装上下文]
+  B --> C[调模型]
+  C --> D{有工具调用?}
+  D -->|有| E[执行工具]
+  E --> B
+  D -->|无| G{改了代码却<br/>没测试证据?}
+  G -->|是| H[注入「先去验证」]
+  H --> B
+  G -->|否| F([结束 · 交还用户])
+      </pre>
+    </div>
+  </div>
+
+  <h2><span class="num">03</span>深潜（分步演示 · 组件化 stepper）</h2>
+  <p class="lead">约定（2026-07-02 起，契约 2/3）：每个 <b>.stepper</b> 内嵌一段 captions JSON、按钮用
+  <b>prev / next</b> class，自带状态；一章可放 1–3 个深潜 stepper，互不干扰。
+  ⚠️ captions 文案内不要出现英文双引号（会破坏 JSON），强调用「」。</p>
+  <div class="stepper">
+    <script type="application/json" class="captions">[
+      "<b>步骤 1</b> · 父进程已累积一长串对话。",
+      "<b>步骤 2</b> · 派生子进程，给它一份干净的上下文。",
+      "<b>步骤 3</b> · 子进程只回传结果摘要，中间过程全部丢弃。"
+    ]</script>
+    <div class="stage">
+      <div class="frame on">
+        <div class="cols">
+          <div class="box blue"><div class="t">Parent Process</div><code>messages[]</code></div>
+          <div class="box dim"><div class="t">Child Process</div><code>—</code></div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box blue"><div class="t">Parent Process</div><code>messages[]</code></div>
+          <div class="box purple"><div class="t">Child Process</div><code>messages[] (fresh)</code></div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box blue"><div class="t">Parent Process</div><code>messages[] + 结果摘要</code></div>
+          <div class="box dim"><div class="t">Child Process</div><code>已丢弃</code></div>
+        </div>
+      </div>
+    </div>
+    <div class="caption"><b>步骤 1</b> · 父进程已累积一长串对话。</div>
+    <div class="ctrl">
+      <div class="dots"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="count">1 / 3</span>
+        <button class="prev">‹ 上一步</button>
+        <button class="next">下一步 ›</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="lead">同章第二个 stepper（多深潜演示：各自计数、互不串台）：</p>
+  <div class="stepper">
+    <script type="application/json" class="captions">[
+      "<b>帧 1</b> · 第二个深潜的第一帧。",
+      "<b>帧 2</b> · 两个 stepper 状态独立，点这个不动上面那个。"
+    ]</script>
+    <div class="stage">
+      <div class="frame on"><div class="box blue"><div class="t">深潜 B · 帧 1</div><code>state A 不受影响</code></div></div>
+      <div class="frame"><div class="box purple"><div class="t">深潜 B · 帧 2</div><code>state B 独立推进</code></div></div>
+    </div>
+    <div class="caption"></div>
+    <div class="ctrl">
+      <div class="dots"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="count"></span>
+        <button class="prev">‹ 上一步</button>
+        <button class="next">下一步 ›</button>
+      </div>
+    </div>
+  </div>
+
+  <h2><span class="num">04</span>对比（产品逻辑，非技术表格）</h2>
+  <div class="compare">
+    <div class="side cc"><h4>Claude Code</h4><p>这一侧怎么做。</p></div>
+    <div class="side hm"><h4>Hermes Agent</h4><p>那一侧怎么做。</p></div>
+  </div>
+  <div class="verdict"><b>为何不同：</b>用"改模型 vs 改壳"或"什么现实逼出了它"来解释差异。</div>
+
+  <h2><span class="num">05</span>悬而未决</h2>
+  <ul class="open"><li>还没搞清的点。</li></ul>
+
+  <div class="foot">代码溯源（不在正文展示，仅存档）：<code>path/to/file.py:123</code></div>
+</div>
+
+<script>
+/* ============ 复用脚本（2026-07-02 起：组件化 stepper，与 build.py 的 SHARED_JS 同一段逻辑）============ */
+/* 离线守卫：CDN 掉线时 mermaid 未定义，不加守卫会抛 ReferenceError 掐死整段脚本 → stepper 全死。
+   加守卫后：图退化为原始文字，stepper 与正文照常可用。 */
+var MERMAID_OK = (typeof mermaid !== 'undefined');
+if(MERMAID_OK){
+  mermaid.initialize({startOnLoad:true,theme:"dark",
+    flowchart:{nodeSpacing:30,rankSpacing:38,padding:10,useMaxWidth:true},
+    themeVariables:{
+    background:"#1e2531",primaryColor:"#161b26",primaryBorderColor:"#2a3342",
+    primaryTextColor:"#e6edf3",lineColor:"#8b98a9",fontSize:"13.5px"}});
+}
+
+/* 组件化 stepper：每个 .stepper 自带状态，互不干扰（一章可放多个深潜 stepper）。
+   约定：.stepper 内嵌一段 type=application/json、class=captions 的 JSON 数组（条数=帧数），
+   按钮用 class="prev"/"next"。注意：脚本注释里绝不能写字面量的 script 闭合标签（会掐断本段脚本）。
+   此段逻辑必须与 build.py 的 SHARED_JS 保持一致（改这边要同步改那边）。 */
+document.querySelectorAll('.stepper').forEach(function(st){
+  var frames=[].slice.call(st.querySelectorAll('.frame'));
+  var caps=[]; var cj=st.querySelector('.captions'); if(cj){try{caps=JSON.parse(cj.textContent);}catch(e){}}
+  var cap=st.querySelector('.caption'), cnt=st.querySelector('.count'), dots=st.querySelector('.dots');
+  var cur=0;
+  if(dots){frames.forEach(function(_,i){var d=document.createElement('span');d.className='dot'+(i?'':' on');dots.appendChild(d);});}
+  function render(){
+    frames.forEach(function(f,i){f.classList.toggle('on',i===cur);});
+    if(cap&&caps[cur]!=null)cap.innerHTML=caps[cur];
+    if(cnt)cnt.textContent=(cur+1)+' / '+frames.length;
+    if(dots)[].slice.call(dots.querySelectorAll('.dot')).forEach(function(d,i){d.classList.toggle('on',i===cur);});
+  }
+  var p=st.querySelector('.prev'), n=st.querySelector('.next');
+  if(p)p.onclick=function(){cur=Math.max(0,cur-1);render();};
+  if(n)n.onclick=function(){cur=Math.min(frames.length-1,cur+1);render();};
+  render();
+});
+</script>
+</body>
+</html>

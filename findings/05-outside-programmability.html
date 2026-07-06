@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>轴二 · Loop 之外 · Loop 与用户</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+/* ============ 设计系统（所有 findings 页面复用这套 <style> 与 <script>）============ */
+:root{
+  --bg:#0d1017; --surface:#161b26; --surface-2:#1e2531; --border:#2a3342;
+  --text:#e6edf3; --muted:#8b98a9; --faint:#5a6675;
+  --blue:#4b8bf5; --green:#3fb950; --purple:#a371f7; --amber:#d9a441; --red:#f0603a;
+  --radius:14px; --maxw:1080px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Inter,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:48px 28px 120px}
+a{color:var(--blue);text-decoration:none}
+
+/* 顶部：badge + 标题 + 副标题 + chips */
+.eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.badge{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
+  padding:4px 10px;font-size:13px;font-weight:700;letter-spacing:.5px;color:var(--muted)}
+.tag{font-size:13px;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 40%,transparent);
+  border-radius:999px;padding:3px 12px}
+h1{font-size:34px;margin:.1em 0 .15em;letter-spacing:-.5px}
+.subtitle{font-size:18px;color:var(--muted);margin:0 0 16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.chip{background:var(--surface);border:1px solid var(--border);border-radius:999px;
+  padding:4px 12px;font-size:13px;color:var(--muted)}
+
+/* 一句话核心洞察：渐变高亮框 */
+.thesis{background:linear-gradient(120deg,#12241f,#0f1e2e);border:1px solid #234;
+  border-left:4px solid var(--green);border-radius:12px;padding:18px 22px;margin:28px 0 8px;font-size:17px}
+.thesis b{color:var(--green)}
+
+/* 分节标题 */
+h2{font-size:24px;margin:52px 0 6px;padding-top:18px;border-top:1px solid var(--border)}
+h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
+.lead{color:var(--muted);margin:0 0 20px}
+
+/* 卡片 / 机制块 */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin:16px 0}
+.card h3{margin:0 0 6px;font-size:18px}
+.card .why{color:var(--muted);font-size:15px}
+
+/* “问题”叙事块（讲具体故事） */
+.story{background:var(--surface);border:1px dashed var(--border);border-radius:12px;padding:18px 22px;color:var(--muted)}
+.story b{color:var(--text)}
+
+/* Mermaid 图容器 */
+.diagram{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;
+  padding:20px;margin:16px 0;overflow:auto;text-align:center}
+.diagram .cap{color:var(--faint);font-size:13px;margin-top:10px}
+.flow2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
+.flow2 .diagram{margin:0;display:flex;flex-direction:column}
+.flow2 .diagram h3{margin:0 0 6px;font-size:16px}
+.flow2 .diagram .dlead{color:var(--muted);font-size:13px;margin:0 0 12px;text-align:left}
+.flow2 .diagram .mermaid{flex:1;display:flex;align-items:center;justify-content:center;min-width:0}
+@media(max-width:820px){.flow2{grid-template-columns:1fr}}
+
+/* 分步演示 stepper（Hero 机制用） */
+.stepper{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:0;overflow:hidden;margin:18px 0}
+.stepper .stage{padding:26px;min-height:200px;display:flex;align-items:center;justify-content:center}
+.stepper .frame{display:none;width:100%}
+.stepper .frame.on{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.stepper .caption{background:color-mix(in srgb,var(--blue) 14%,transparent);
+  border-top:1px solid var(--border);padding:14px 22px;font-size:15px}
+.stepper .caption b{color:var(--blue)}
+.ctrl{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid var(--border)}
+.ctrl button{background:var(--surface);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:6px 14px;cursor:pointer;font-size:14px}
+.ctrl button:hover{border-color:var(--blue)}
+.dots{display:flex;gap:6px}.dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+.dot.on{background:var(--blue)}
+.count{color:var(--muted);font-size:13px}
+/* stepper 里的盒子（画“进程/上下文”这类概念用） */
+.box{border:1.5px solid var(--border);border-radius:10px;padding:16px;background:var(--bg)}
+.box.blue{border-color:var(--blue)} .box.purple{border-color:var(--purple)} .box.dim{opacity:.4}
+.box .t{font-weight:700;margin-bottom:8px} .box code{color:var(--muted);font-size:13px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* 对比块（产品逻辑，非技术表格） */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+.compare .side{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.compare .side.cc{border-top:3px solid var(--blue)}
+.compare .side.hm{border-top:3px solid var(--purple)}
+.compare .side h4{margin:0 0 8px;font-size:15px;color:var(--muted)}
+.verdict{background:var(--surface-2);border:1px solid var(--border);border-left:4px solid var(--amber);
+  border-radius:10px;padding:14px 20px;margin-top:12px}
+.verdict b{color:var(--amber)}
+
+/* 悬而未决 */
+.open li{color:var(--muted);margin:6px 0}
+.foot{margin-top:60px;color:var(--faint);font-size:13px;border-top:1px solid var(--border);padding-top:16px}
+
+/* 维度小标题 + 单组对比（综合篇用） */
+.matrix-row{margin:22px 0}
+.matrix-row h3{font-size:16px;margin:0 0 10px;color:var(--text)}
+.matrix-row h3 .n{color:var(--faint);font-weight:400;margin-right:8px}
+
+/* 多维对照矩阵：左列维度名 + CC/Hermes 两列答案（多行对比时比堆叠 .compare 更好扫读） */
+.matrix{display:grid;grid-template-columns:minmax(112px,1fr) 1.9fr 1.9fr;
+  gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:16px 0}
+.matrix>div{background:var(--surface);padding:11px 15px;font-size:14px;line-height:1.55}
+.matrix .mh{background:var(--surface-2);font-weight:700;font-size:13px;color:var(--muted)}
+.matrix .mh.cc{color:var(--blue)} .matrix .mh.hm{color:var(--purple)}
+.matrix .dim{background:var(--surface-2);font-weight:600;color:var(--text)}
+@media(max-width:760px){.matrix{grid-template-columns:1fr 1.4fr 1.4fr;font-size:12.5px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow"><span class="badge">第 5 篇 · 上 · 轴二 · Loop 之外</span><span class="tag">可编程性 · 人 → Loop</span></div>
+  <h1>Loop 与用户 · 上：你如何改写它</h1>
+  <p class="subtitle">铸好的壳，谁被允许改写哪一层？（这是双向关系的上半；下半「它如何适应你」见下篇）</p>
+  <div class="chips">
+    <span class="chip">谁拥有代码</span>
+    <span class="chip">固定插槽 vs 可换 provider</span>
+    <span class="chip">市场 vs 策展目录</span>
+    <span class="chip">厂商扛信任 vs 你自己扛</span>
+    <span class="chip">企业只读总闸</span>
+  </div>
+
+  <div class="thesis">
+    两家都把 harness 做成了<b>高度可编程的平台</b>——但开放的是<b>两种不同的东西</b>，而且「信任由谁来扛」正相反。分水岭还是那个隐藏变量的延伸：<b>谁拥有代码</b>。Claude Code 碰不到核心，只能在封死的引擎上凿一批固定插槽，并被迫自建一整套信任与治理；Hermes 把源码给你，几乎一切做成可替换 provider，而它不必自建那种「企业市场式」治理墙——「你拥有它」已替它回答了大半个信任问题（剩下用 opt-in、显式授权、安全扫描等轻边界兜底）。<b>但这只是人机关系的上半——你居高临下地改写它；</b>下半反过来：它趁你不在，把你记进文件、越用越懂你（见下篇）。
+  </div>
+
+  <h2><span class="num">01</span>问题：让它做设计者没预料过的事</h2>
+  <p class="lead">用产品语言讲：可编程性不是「功能多少」，而是「你想让它长成它出厂时没有的样子，路走不走得通」。</p>
+  <div class="story">
+    你想让 agent 做一些它的设计者<b>从没预料过</b>的事：强制「不过测试不许合并」、把它接到你公司内网的 API、灌进你团队的编码规范、换一个别家的模型来跑。怎么做到？<br><br>
+    答案取决于一件事：<b>你能不能碰源代码</b>。这一个事实，就把两家的设计劈成了两半——一边你只能用官方替你凿好的开口，另一边你可以把手伸进任何一层。
+  </div>
+
+  <h2><span class="num">02</span>两套扩展体系的形状，源自「你能不能碰核心」</h2>
+  <p class="lead">左蓝 Claude Code，右紫 Hermes。一个把核心封死、只留凿好的固定插槽、厂商替你扛信任；
+  另一个把源码交给你、几乎一切可换、信任随所有权交还你自己。</p>
+
+  <div class="flow2">
+    <div class="diagram">
+      <h3 style="color:var(--blue)">Claude Code：封死的引擎 + 凿好的插槽 + 厂商扛信任</h3>
+      <p class="dlead">碰不到核心，官方只能主动把开口留出来，并替陌生人之间的分发扛下信任。</p>
+      <pre class="mermaid">
+flowchart TD
+    A[用户想定制] --> B[核心闭源 · 碰不到]
+    B --> C[只能用官方凿好的固定插槽<br/>钩子 · 技能 · MCP<br/>子代理 · 权限 · 记忆]
+    C --> D[扩展要在陌生人间分发]
+    D --> E[厂商自建信任层<br/>信任门 · 白名单<br/>市场 · 审核]
+    E --> F([企业只读总闸<br/>可反向锁死开放面])
+      </pre>
+      <div class="cap">碰不到核心 → 被迫另建一座「治理城墙」</div>
+    </div>
+
+    <div class="diagram">
+      <h3 style="color:var(--purple)">Hermes：开放的核心 + 处处可换的 provider + 信任交还你</h3>
+      <p class="dlead">握着全部源码，终极扩展就是改源码；无需那座市场 / 企业治理墙，信任主要靠所有权 + 轻边界。</p>
+      <pre class="mermaid">
+flowchart TD
+    A[用户想定制] --> B[你握着全部源码]
+    B --> C{两条路}
+    C -->|换| D[换 provider<br/>模型 · 平台 · 搜索<br/>浏览器…几乎一切可换]
+    C -->|改| E[直接改源码 · 改配置]
+    D --> F[社区扩展走「零核心改动」插件<br/>可随主干升级]
+    E --> F
+    F --> G([信任主要靠所有权<br/>读源码 + 自己的机器<br/>目录=审核过的PR · 非市场])
+      </pre>
+      <div class="cap">拥有核心 → 省掉那座市场 / 企业治理墙</div>
+    </div>
+  </div>
+  <p class="lead" style="margin-top:16px">两套扩展体系的形状差异，全部源自一个问题的不同答案——<b>「你到底能不能碰它的核心代码」</b>。</p>
+
+  <h2><span class="num">03</span>Hero 机制 · Claude Code 把「决策」做成插槽</h2>
+  <p class="lead">挑一个最能说明「碰不到核心，就只能把会因人而异的判断凿成插槽外包给你」的例子：「这一轮到底算不算干完了」。看官方如何把一个不写死的决策，凿成一个你来填的插槽。</p>
+  <div class="stepper" id="stepper">
+    <div class="stage">
+      <!-- 6 帧，与 CAPTIONS 6 条一一对应 -->
+      <div class="frame on">
+        <div class="cols">
+          <div class="box blue"><div class="t">一个因团队而异的判断</div><code>这一轮到底算不算「干完了」？</code></div>
+          <div class="box purple"><div class="t">没有普适答案</div><code>A 团队：测试通过<br>B 团队：过了 lint</code></div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box"><div class="t">官方的选择：不写死</div><code>核心循环里没有一行判断「完成」</code></div>
+          <div class="box dim"><div class="t">默认行为</div><code>模型这轮不再点工具 ＝ 完成<br>（呼应第 01 篇控制侧）</code></div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box blue"><div class="t">把判断权凿成一个插槽</div><code>「停止钩子」</code></div>
+          <div class="box purple"><div class="t">你在配置里声明</div><code>想停下来之前，先跑一遍我的检查</code></div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box blue"><div class="t">它想收工的那一刻，先过你的钩子</div><code>钩子说「没过测试，不许停」</code></div>
+          <div class="box purple"><div class="t">理由被塞回去</div><code>逼它继续干<br>不是它自己说了算</code></div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box"><div class="t">同一个插槽，三种填法</div><code>跑一条本地脚本 · 发一个网络请求 · 让小模型用自然语言判断</code></div>
+          <div class="box dim"><div class="t">轻量还是智能</div><code>由你定</code></div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box blue"><div class="t">这就是可编程性的缩影</div><code>凡是因人 · 因项目 · 因组织而异的判断，都不写死，凿成插槽外包给你</code></div>
+          <div class="box purple"><div class="t">为什么只能这样</div><code>你改不了它的核心<br>官方只能主动留出开口</code></div>
+        </div>
+      </div>
+    </div>
+    <div class="caption" id="cap"></div>
+    <div class="ctrl">
+      <div class="dots" id="dots"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="count" id="count">1 / 6</span>
+        <button onclick="step(-1)">‹ 上一步</button>
+        <button onclick="step(1)">下一步 ›</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h3 style="color:var(--purple)">对照：Hermes 遇到同一个判断 —— 「直接改那段决策」</h3>
+    <p class="why">同样是「这一轮算不算干完」这类因团队而异的判断，Hermes 不必等官方凿出一个插槽——因为你握着全部源码，那段决策逻辑本身就在你手里，能直接改；要分享给别人、要随主干升级的定制，则收编成「零核心改动」的插件。它不需要「把每一个会变的判断都预先凿成固定开口」，因为改核心这条路本就为你敞开。这与 Claude Code 正好两极：一个把判断权凿成插槽外包给你，一个把整段代码交给你自己动手。</p>
+  </div>
+
+  <h2><span class="num">04</span>对比：七组对照看清分歧</h2>
+  <p class="lead">能不能改核心、扩展长什么形状、换不换得了模型、谁来扛信任……同一个「可编程」的目标，答案却指向两种所有权现实。</p>
+
+  <div class="matrix">
+    <div class="mh"></div>
+    <div class="mh cc">Claude Code</div>
+    <div class="mh hm">Hermes</div>
+
+    <div class="dim">你能改核心吗</div>
+    <div>不能（闭源，只能用官方开口）。</div>
+    <div>能（开源，可 fork / 改源码 / 改配置）。</div>
+
+    <div class="dim">扩展的形态</div>
+    <div>在封死引擎上凿的<b>固定插槽</b>——二十多个钩子节点由官方枚举、不可新增，也不能替换调度内核。</div>
+    <div>几乎一切是<b>可替换 provider</b>（模型 / 平台 / 搜索 / 浏览器 / 语音 / 调度…），中间件可改写请求，也能直接改源码。</div>
+
+    <div class="dim">换模型</div>
+    <div>锁的是<b>线协议 / 推理内核</b>（必须说 Anthropic API）——但可用 <code>ANTHROPIC_BASE_URL</code> 把请求指向任意网关（如 LiteLLM 代理），照样跑 GPT / 开源等第三方模型。即"换任意能说该协议的后端"可行，"换推理内核"不行。</div>
+    <div>一等公民——把提供商做成注册表，配好凭证后一条命令切任意模型，连自建端点都行。</div>
+
+    <div class="dim">分发与复用</div>
+    <div><b>插件市场</b>——可订阅任意市场、安装他人插件，像应用商店。</div>
+    <div><b>无市场</b>，策展式目录——进目录 ＝ 一个审核过的 PR，明确「没有目录之外的信任信号」。</div>
+
+    <div class="dim">信任谁来扛</div>
+    <div><b>厂商扛</b>——工作区信任门 ＋ 白名单 ＋ 市场治理（扩展在陌生人间流转、厂商负安全责任）。</div>
+    <div><b>你自己扛</b>——你读源码、你的机器，你决定装什么。</div>
+
+    <div class="dim">治理形态</div>
+    <div>有专门的<b>只读最高优先级管理层</b>，能反向锁死开放面（禁非白名单市场、锁定制来源、禁绕权限）——为企业多租户合规而建。</div>
+    <div>没有企业市场式治理（无多租户 RBAC、无插件市场信任体系），但有<b>与所有权匹配的轻治理</b>：插件默认 opt-in、覆盖内置须显式授权、平台允许名单 / 角色 / 配对门、技能安全扫描。</div>
+
+    <div class="dim">一次性私人定制</div>
+    <div>只能走官方插槽（改不了源码）。</div>
+    <div>直接改配置 / 改源码（开源天然赋予的近场路径）。</div>
+  </div>
+
+  <div class="verdict">
+    <b>为何不同（谁拥有代码）：</b>轴一我们问「谁拥有<b>模型</b>」，第 04 篇问「谁拥有<b>部署</b>」，这一篇问的是「<b>谁拥有代码</b>」。Anthropic 拥有代码、且闭源托管、要卖给从个人到大企业的所有人 → 用户碰不到核心，官方只能把「会因人而异的行为」凿成固定插槽；又因为扩展要在<b>陌生人之间分发</b>、厂商要背安全与合规责任，它必须自建一整套<b>信任与治理</b>（市场审核 ＋ 企业只读总闸）。Nous 把代码给你 → 终极扩展是改源码，于是它一面把几乎每类外部依赖做成<b>可替换 provider</b>（它分发的是产品不是服务，模型 / 平台 / 密钥都得你自己定），一面把「fork 改核心」这条不可维护的路收编成「零核心改动、可随主干升级」的插件；而它<b>不必自建那种「企业市场式」治理</b>——注意它并非"扩展不流转"（pip/PyPI 插件就是不折不扣的陌生人分发通道），而是没有多租户组织边界、也不做市场审核/信任评分，改用<b>更轻、与所有权匹配的边界</b>兜底：插件默认 opt-in、覆盖内置须显式授权、技能安全扫描、平台允许名单。换句话说，"能不能信这个扩展"很大程度上被"你拥有源码和机器、你自己决定装什么"这件事回答掉了。<b>反直觉的收尾：</b>开源不等于扩展点更少（Hermes 的可插拔面反而更铺得开）；真正的分野是<b>治理城墙的有无与归属</b>——闭源托管产品要为「陌生人间分发扩展 + 企业多租户合规」额外建一座市场＋总闸式的治理墙，开源自托管产品省掉的正是<b>这一种</b>墙，因为「你拥有它」已经替它回答了大半个信任问题。
+  </div>
+
+  <p class="lead" style="margin-top:28px">以上是这段关系的<b>上半</b>：你如何居高临下地改写它。但关系是双向的——它也在你看不见的地方反过来<b>记住你、适应你</b>。那是下篇 <a href="05b-outside-user-adaptation.html">「它如何适应你」</a> 的故事。</p>
+
+  <h2><span class="num">05</span>悬而未决 · 边界说明</h2>
+  <ul class="open">
+    <li><b>[CC · 已更正]</b> 早期稿说 CC「不能接任意第三方提供商」是<b>错的</b>：CC 可用 <code>ANTHROPIC_BASE_URL</code>(+ AUTH_TOKEN / CUSTOM_HEADERS) 把请求指向任意网关，业界普遍借 LiteLLM 之类代理让它跑 GPT / 开源等第三方模型，代码里还专门有 <code>isFirstPartyAnthropicBaseUrl()</code> 处理"指向别处"的情况。CC 真正锁死的只是<b>线协议 / 推理内核</b>（必须说 Anthropic API），不是"第三方模型"。所以两家的差别是"经协议网关接 vs 原生 provider 注册表"，不是"能不能接"。</li>
+    <li><b>[HM]</b> 「改源码是主路径」是<b>开源赋予的可能</b>，不代表多数用户真会去改核心；它的正式插件面主要服务「要分享给别人、要随主干升级」的定制，一次性私人定制才坦然交给改配置 / 改源码。</li>
+    <li><b>[定位而非成熟度]</b> Hermes 缺的是 CC 那种「企业市场式」治理（多租户 RBAC、插件市场信任体系），是<b>定位选择</b>而非成熟度问题。它并非「没有治理」——仍有插件 opt-in、覆盖内置须显式授权、平台允许名单 / 角色 / 配对门、技能安全扫描等轻边界；只是把大部分信任交还给「你能读全部源码、你自己的机器」。</li>
+    <li><b>[不评优劣]</b> 本篇讲的是「可编程性的<b>形态</b>与<b>信任归属</b>」，不评判两种模式孰优——取决于你是个人、团队还是企业，以及你能否 / 愿否碰源码。</li>
+    <li><b>[钩子枚举其实对称]</b> 「固定插槽 vs 几乎一切可换」在钩子这一层被我说得过于不对称：Hermes 的<b>插件</b>同样只能挂到固定的 VALID_HOOKS 集合、注册非法钩子名会被拒。真正的差别不在"插件能不能挂任意钩子"（两家都不能），而在"<b>能不能改源码新增钩子</b>"——CC 不能、Hermes 能。核心「谁拥有代码」结论不变。</li>
+    <li><b>[两家]</b> 两家扩展体系都在快速演进，本篇是某一时间切片（CC main / Hermes @daf4f1a7a）。</li>
+  </ul>
+
+  <nav style="max-width:1080px;margin:40px auto 0;padding:16px 28px;border-top:1px solid #2a3342;text-align:center;font-size:13px;color:#8b98a9">导读：<a href="04-outside-time-trigger.html">04 时间</a> · <b>05 上 · 你如何改写它</b> · <a href="05b-outside-user-adaptation.html">05 下 · 它如何适应你</a> · <a href="06-outside-environment.html">06 环境</a> · <a href="07-outside-multiagent.html">07 其他 Agent</a></nav>
+
+  <div class="foot">
+    代码溯源（不在正文展示，仅存档）：<br>
+    <b>Claude Code</b> — <code>src/utils/hooks.ts:1</code> · <code>src/entrypoints/sdk/coreTypes.ts:25</code>（钩子节点固定枚举，约 27 个）· <code>src/query/stopHooks.ts:268</code>（停止钩子接管「是否完成」）· <code>src/utils/hooks.ts:344</code>（allow/deny/ask 词汇表）· <code>src/skills/loadSkillsDir.ts:97</code> · <code>src/skills/bundled/</code>（技能）· <code>src/services/mcp/types.ts:173</code> · <code>src/utils/settings/types.ts:112</code>（MCP + 企业白名单）· <code>src/types/plugin.ts:26</code> · <code>src/utils/plugins/marketplaceManager.ts</code> · <code>src/utils/settings/types.ts:603</code>（插件与市场白名单）· <code>src/tools/AgentTool/loadAgentsDir.ts:75</code> · <code>src/utils/markdownConfigLoader.ts:543</code> · <code>src/outputStyles/loadOutputStylesDir.ts:14</code>（子代理 / 斜杠命令 / 输出风格）· <code>src/utils/settings/types.ts:40</code> · <code>src/utils/claudemd.ts:4</code>（权限与记忆）· <code>src/utils/settings/constants.ts:179</code>（policySettings 只读）· <code>src/utils/settings/types.ts:518</code>（strictPluginOnlyCustomization 锁定制来源）· <code>src/utils/settings/types.ts:603</code>（strictKnownMarketplaces 市场白名单）· <code>src/utils/hooks.ts:267</code>（工作区信任门）<br>
+    <b>Hermes</b> — <code>hermes_cli/plugins.py:135</code> · <code>hermes_cli/plugins.py:1290</code> · <code>hermes_cli/plugins.py:1324</code>（插件系统四来源 + 钩子 + pip 插件）· <code>hermes_cli/middleware.py:29</code>（中间件可改写）· <code>tools/registry.py:1</code> · <code>hermes_cli/plugins.py:417</code>（工具注册表 + 防覆盖）· <code>tools/mcp_tool.py:1</code> · <code>mcp_serve.py:1</code> · <code>hermes_cli/mcp_catalog.py:1</code>（MCP 双向 · 策展非市场）· <code>gateway/platforms/ADDING_A_PLATFORM.md:1</code>（可插拔平台 · 零核心改动）· <code>providers/__init__.py:53</code> · <code>README.md:21</code>（可换模型 provider · 无需改代码）· <code>hermes_cli/plugins.py:646</code> · <code>hermes_cli/plugins.py:713</code> · <code>hermes_cli/plugins.py:740</code> · <code>hermes_cli/plugins.py:768</code> · <code>hermes_cli/plugins.py:800</code>（十余类 provider：图像 / 视频 / 搜索 / 浏览器 / 语音）· <code>skills/github/github-auth/SKILL.md:1</code> · <code>cron/scheduler_provider.py:17</code> · <code>cli-config.yaml.example:1</code>（技能 / 可换调度 / 近千行配置）
+  </div>
+</div>
+
+<script>
+/* ============ 复用脚本 ============ */
+mermaid.initialize({startOnLoad:true,theme:"dark",
+  flowchart:{nodeSpacing:30,rankSpacing:38,padding:10,useMaxWidth:true},
+  themeVariables:{
+  background:"#1e2531",primaryColor:"#161b26",primaryBorderColor:"#2a3342",
+  primaryTextColor:"#e6edf3",lineColor:"#8b98a9",fontSize:"13.5px"}});
+
+/* stepper：每个 finding 只需改 CAPTIONS 数量与 .frame 数量一致 */
+const CAPTIONS = [
+  "<b>步骤 1</b> · 先看一个会因团队而异的判断：这一轮到底算不算「干完了」？对 A 团队是「测试通过」，对 B 团队是「过了 lint」——根本没有普适答案。",
+  "<b>步骤 2</b> · 官方的选择是：不写死。核心循环里其实没有一行代码判断「完成」——默认就是「模型这轮不再点工具＝完成」（这正呼应第 01 篇控制侧的发现）。",
+  "<b>步骤 3</b> · 但它把这个判断权凿成一个插槽：停止钩子。你在配置里声明「想停下来之前，先跑一遍我的检查」。",
+  "<b>步骤 4</b> · 于是它想收工的那一刻，先过你的钩子。钩子若说「没过测试、不许停」，这个理由就被塞回去，逼它继续干——而不是由它自己说了算。",
+  "<b>步骤 5</b> · 同一个插槽，三种填法任你选：跑一条本地脚本、发一个网络请求、或让一个小模型用自然语言来判断——轻量还是智能，由你定。",
+  "<b>步骤 6</b> · 这就是 Claude Code 可编程性的缩影：凡是会因人、因项目、因组织而异的判断（能不能执行、算不算完成），都不写死，凿成插槽外包给你——因为你改不了它的核心，官方只能主动把开口留出来。"
+];
+let cur=0; const frames=()=>document.querySelectorAll('#stepper .frame');
+function render(){
+  frames().forEach((f,i)=>f.classList.toggle('on',i===cur));
+  document.getElementById('cap').innerHTML=CAPTIONS[cur];
+  document.getElementById('count').textContent=(cur+1)+" / "+frames().length;
+  document.querySelectorAll('#dots .dot').forEach((d,i)=>d.classList.toggle('on',i===cur));
+}
+function step(d){cur=Math.max(0,Math.min(frames().length-1,cur+d));render();}
+(function init(){
+  const dots=document.getElementById('dots');
+  frames().forEach((_,i)=>{const s=document.createElement('span');s.className='dot'+(i?'':' on');dots.appendChild(s);});
+  render();
+})();
+</script>
+</body>
+</html>

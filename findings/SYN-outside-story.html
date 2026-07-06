@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>综合② · 轴二 · Loop 之外是怎么设计的</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+/* ============ 设计系统（单章自包含拷贝；合订本由 build.py 从 _design-system.html 单一真相注入）============ */
+:root{
+  --bg:#0d1017; --surface:#161b26; --surface-2:#1e2531; --border:#2a3342;
+  --text:#e6edf3; --muted:#8b98a9; --faint:#5a6675;
+  --blue:#4b8bf5; --green:#3fb950; --purple:#a371f7; --amber:#d9a441; --red:#f0603a;
+  --radius:14px; --maxw:1080px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Inter,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:48px 28px 120px}
+a{color:var(--blue);text-decoration:none}
+.eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.badge{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
+  padding:4px 10px;font-size:13px;font-weight:700;letter-spacing:.5px;color:var(--muted)}
+.tag{font-size:13px;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 40%,transparent);
+  border-radius:999px;padding:3px 12px}
+.foot{margin-top:60px;color:var(--faint);font-size:13px;border-top:1px solid var(--border);padding-top:16px}
+.open li{color:var(--muted);margin:8px 0}
+</style>
+<style class="bespoke">
+/* ============ 综合② 专属排版（scoped 于 .syn2；build.py 收进合订本 head，不污染共享系统、不泄漏别章）============ */
+/* 统一阅读栏：--col=100% 对齐全书 1080 版心（PM 裁定 2026-07-04：全书宽度一致优先）。全章从上到下同一个宽度，不做任何破栏。 */
+.syn2{--ink:#eef2f7;--soft:#aeb9c8;--fainter:#6b7686;--col:100%}
+.syn2 .kicker{font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--fainter);margin:0 0 8px}
+.syn2 h1{font-size:37px;line-height:1.16;letter-spacing:-.6px;margin:0 0 20px;font-weight:750;max-width:var(--col)}
+
+/* 大字引文式 thesis —— 不塞进重盒子，让核心判断压场 */
+.syn2 .lede{font-size:20px;line-height:1.64;color:var(--ink);max-width:var(--col);margin:24px 0 6px;font-weight:400}
+.syn2 .lede .hl{font-weight:700;color:#86d6a4;box-shadow:inset 0 -.48em 0 rgba(63,185,80,.15)}
+.syn2 .lede .ask{font-weight:700;color:#fff}
+.syn2 .lede .cc{color:var(--blue);font-weight:600}
+.syn2 .lede .hm{color:var(--purple);font-weight:600}
+
+/* 开场场景 —— 朴素散文 + 左侧色规，不做整盒 */
+.syn2 .scene{max-width:var(--col);margin:34px 0;padding:4px 0 4px 20px;border-left:2px solid var(--border);
+  color:var(--soft);font-size:16.5px;line-height:1.85}
+.syn2 .scene b{color:var(--ink);font-weight:600}
+
+/* 编辑式分节标题 —— 小字 kicker + 大标题，去掉描边横线的机械感 */
+.syn2 .sec{margin:66px 0 6px;max-width:var(--col)}
+.syn2 .sec .k{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--fainter);display:block;margin-bottom:9px}
+.syn2 .sec h2{font-size:24px;line-height:1.26;letter-spacing:-.3px;margin:0;font-weight:730}
+.syn2 p.body{max-width:var(--col);font-size:16.5px;line-height:1.85;color:var(--soft)}
+.syn2 p.body b{color:var(--ink);font-weight:600}
+.syn2 p.body .cc{color:var(--blue);font-weight:600}
+.syn2 p.body .hm{color:var(--purple);font-weight:600}
+
+/* ——— 主图：在场之脊（与正文同宽 --col，不破栏）——— */
+.syn2 .spine{margin:30px 0 6px;max-width:var(--col)}
+.syn2 .poles{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-bottom:16px}
+.syn2 .pole{font-size:14px;font-weight:700}
+.syn2 .pole.cc{color:var(--blue);text-align:right}
+.syn2 .pole.hm{color:var(--purple);text-align:left}
+.syn2 .axis-name{font-size:11.5px;color:var(--fainter);letter-spacing:.12em;padding:0 4px;white-space:nowrap}
+.syn2 .srow{display:grid;grid-template-columns:1fr 116px 1fr;align-items:stretch}
+.syn2 .srow+.srow{border-top:1px solid var(--border)}
+.syn2 .srow .cc,.syn2 .srow .hm{padding:15px 16px;font-size:14px;line-height:1.62;color:var(--soft)}
+.syn2 .srow .cc{text-align:right;background:linear-gradient(90deg,transparent,rgba(75,139,245,.055))}
+.syn2 .srow .hm{text-align:left;background:linear-gradient(270deg,transparent,rgba(163,113,247,.055))}
+.syn2 .srow .cc b,.syn2 .srow .hm b{color:var(--ink);font-weight:600}
+/* 中央脊柱：连续竖线 + 关系节点 */
+.syn2 .hub{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px 6px}
+.syn2 .hub::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:2px;background:var(--border);transform:translateX(-50%);z-index:0}
+.syn2 .hub .dot{width:17px;height:17px;border-radius:50%;background:var(--surface-2);border:2px solid var(--faint);position:relative;z-index:1;margin-bottom:9px}
+.syn2 .hub b{font-size:14px;color:var(--ink);position:relative;z-index:1}
+.syn2 .hub small{font-size:11.5px;color:var(--fainter);position:relative;z-index:1;margin-top:3px;display:block}
+.syn2 .dot.full{background:var(--amber);border-color:var(--amber)}
+.syn2 .dot.half{background:linear-gradient(90deg,var(--amber) 0 50%,var(--surface-2) 50% 100%);border-color:var(--amber)}
+.syn2 .dot.own{background:var(--surface-2);border-color:var(--faint)}
+.syn2 .own-tag{display:inline-block;font-size:11px;color:var(--purple);border:1px solid color-mix(in srgb,var(--purple) 42%,transparent);
+  border-radius:999px;padding:1px 9px;margin-top:8px;letter-spacing:.02em}
+.syn2 .legend{display:flex;flex-wrap:wrap;gap:18px;margin:16px 2px 0;font-size:12.5px;color:var(--fainter)}
+.syn2 .legend span{display:inline-flex;align-items:center;gap:8px}
+.syn2 .legend i{width:13px;height:13px;border-radius:50%;display:inline-block;flex:none}
+.syn2 .legend i.full{background:var(--amber)}
+.syn2 .legend i.half{background:linear-gradient(90deg,var(--amber) 0 50%,var(--surface-2) 50% 100%);border:1px solid var(--amber)}
+.syn2 .legend i.own{background:var(--surface-2);border:1px solid var(--faint)}
+
+/* ——— 根：所有权链 ——— */
+.syn2 .chain{max-width:var(--col);margin:26px 0 8px;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.syn2 .clink{display:grid;grid-template-columns:1fr minmax(150px,auto) 1fr;align-items:center;gap:10px;padding:15px 20px}
+.syn2 .clink+.clink{border-top:1px solid var(--border)}
+.syn2 .clink .q{text-align:center;font-weight:700;font-size:14px;color:var(--ink)}
+.syn2 .clink .q small{display:block;color:var(--fainter);font-weight:400;font-size:11px;letter-spacing:.04em;margin-top:3px}
+.syn2 .clink .ca{text-align:right;color:var(--blue);font-size:14px}
+.syn2 .clink .ha{text-align:left;color:var(--purple);font-size:14px}
+.syn2 .clink.last{background:linear-gradient(90deg,rgba(75,139,245,.07),rgba(163,113,247,.07))}
+.syn2 .clink.last .q{font-size:15px}
+.syn2 .clink.last .ca,.syn2 .clink.last .ha{font-weight:600}
+
+/* ——— 收官判断（轻量 callout，不做重盒）——— */
+.syn2 .punch{max-width:var(--col);margin:26px 0;padding:18px 22px;border-left:3px solid var(--amber);
+  background:linear-gradient(100deg,rgba(217,164,65,.08),transparent);border-radius:0 10px 10px 0;
+  font-size:16.5px;line-height:1.72;color:var(--ink)}
+.syn2 .punch b{color:var(--amber)}
+
+/* ——— PM 收纳 ——— */
+.syn2 .take{max-width:var(--col);margin:20px 0}
+.syn2 .take .row{display:grid;grid-template-columns:88px 1fr;gap:16px;padding:15px 0}
+.syn2 .take .row+.row{border-top:1px solid var(--border)}
+.syn2 .take .who{font-weight:700;font-size:14px;padding-top:1px}
+.syn2 .take .who.cc{color:var(--blue)}
+.syn2 .take .who.hm{color:var(--purple)}
+.syn2 .take .who.both{color:var(--amber)}
+.syn2 .take .txt{font-size:15.5px;line-height:1.72;color:var(--soft)}
+.syn2 .take .txt b{color:var(--ink);font-weight:600}
+
+.syn2 .open{max-width:var(--col)}
+.syn2 .open li{font-size:15.5px;line-height:1.78}
+.syn2 .open li b{color:var(--ink)}
+
+@media(max-width:720px){
+  .syn2 h1{font-size:32px}
+  .syn2 .lede{font-size:19px}
+  .syn2 .srow{grid-template-columns:1fr}
+  .syn2 .srow .cc,.syn2 .srow .hm{text-align:left;background:none}
+  .syn2 .srow .cc{border-bottom:1px solid var(--border)}
+  .syn2 .hub{flex-direction:row;gap:10px;justify-content:flex-start;padding:12px 0}
+  .syn2 .hub::before{display:none}
+  .syn2 .hub small{display:inline;margin:0 0 0 6px}
+  .syn2 .clink{grid-template-columns:1fr}
+  .syn2 .clink .ca,.syn2 .clink .ha{text-align:left}
+  .syn2 .take .row{grid-template-columns:1fr;gap:4px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="syn2">
+
+  <div class="eyebrow"><span class="badge">综合② · 轴二</span><span class="tag">Loop 之外是怎么设计的</span></div>
+  <p class="kicker">五种关系 · 一个总变量</p>
+  <h1>它假设，有没有人正盯着？</h1>
+
+  <p class="lede">五种关系看着是五件事——<b class="hl">何时醒来、听谁改写、在哪动手、和谁协作、怎么变强</b>。但把它们并在一起，每一次分野都由同一个问题决定：<span class="ask">这个 agent，假设有没有人正盯着它？</span> <span class="cc">Claude Code</span> 处处假设「有人」，<span class="hm">Hermes</span> 处处假设「没人」。而这个假设不是品味选择——是所有权处境替它选好的。</p>
+
+  <div class="sec"><span class="k">The scene</span><h2>半夜三点，没有人在屏幕前</h2></div>
+  <div class="scene">一个任务被触发了——也许是定时器，也许是一条消息推送。<b>此刻五个问题同时冒出来</b>：谁让它醒着？它要改的东西，谁批准？它闯了祸，谁兜底？它派出去的分身，谁协调？它这一趟学到的，算谁的？<br><br>每一个答案，都取决于设计者当初<b>赌没赌「会有人在」</b>。这就是把轴二五章串成一个故事的那根脊。</div>
+
+  <div class="sec"><span class="k">The spine · 主图</span><h2>同一个变量，五次落到同一侧</h2></div>
+  <p class="body">下面这张图是全章的骨。中间一条脊，是「假不假设有人在场」这个总变量；五种关系横跨其上——每一次，<span class="cc">CC</span> 都落向「有人」一侧，<span class="hm">Hermes</span> 都落向「没人」一侧。节点上的圆点，标的是<b>这一行到底有多「在场」</b>：并非五等份，后两行真正在起作用的是另一条线（所有权），在场只是它的侧面。</p>
+
+  <div class="spine">
+    <div class="poles">
+      <span class="pole cc">假设「有人在」 · Claude Code</span>
+      <span class="axis-name">◀ 在 场 之 脊 ▶</span>
+      <span class="pole hm">Hermes · 假设「没人在」</span>
+    </div>
+
+    <div class="srow">
+      <div class="cc">假设<b>人会回到会话</b>；本地进程有意不做常驻守护，真·无人长跑外包给厂商云</div>
+      <div class="hub"><span class="dot full"></span><b>对时间</b><small>谁让它醒着</small></div>
+      <div class="hm">没人保活，<b>自己变成常驻实体</b>：被时钟／消息叫醒，跑完主动推给不在场的人</div>
+    </div>
+
+    <div class="srow">
+      <div class="cc">原生弹窗＋Shift+Tab 旋钮，<b>为「有人点」设计</b>；无人化靠预授权把点击提前签好，没人回答默认拒</div>
+      <div class="hub"><span class="dot full"></span><b>对环境</b><small>谁点确认</small></div>
+      <div class="hm"><b>为「没人点」定义确定行为</b>：cron 默认拒、沉默≠同意、硬禁地板永在，且诚实承认边界只有 OS</div>
+    </div>
+
+    <div class="srow">
+      <div class="cc">把分身编成<b>互相发消息的同事团队</b>，人当队长坐在同一张消息网里</div>
+      <div class="hub"><span class="dot half"></span><b>对同类</b><small>谁当队长</small></div>
+      <div class="hm">日常自主 fan-out（分身不对话），重活靠<b>共享数据库状态协调</b>，不需要人在场当协调者</div>
+    </div>
+
+    <div class="srow">
+      <div class="cc">闭源托管＋多租户，假设有<b>企业管理员</b>在治理层把关：建市场＋企业只读总闸<span class="own-tag">实为·谁拥有代码</span></div>
+      <div class="hub"><span class="dot own"></span><b>对人</b><small>谁在治理层</small></div>
+      <div class="hm">开源自托管，<b>开发者自己拥有一切、自己对自己负责</b>，靠 opt-in／显式授权等轻边界</div>
+    </div>
+
+    <div class="srow">
+      <div class="cc">可证的变强都在壳里；权重级变强外包给下一代基座，还得<b>你逐次同意上传转录</b>（人在场签字）<span class="own-tag">实为·谁拥有模型</span></div>
+      <div class="hub"><span class="dot own"></span><b>对自己</b><small>变强算谁的</small></div>
+      <div class="hm">握着把轨迹喂回训练的杠杆，但产数据管线<b>吃研究员策划集、不接你的活会话</b>（绕开你的在场）</div>
+    </div>
+
+    <div class="legend">
+      <span><i class="full"></i>在场契约主导——这一行就是「有没有人」在分</span>
+      <span><i class="half"></i>在场成立、但属合理解读（非代码可证）</span>
+      <span><i class="own"></i>实为所有权链在分，在场只是侧面</span>
+    </div>
+  </div>
+
+  <div class="sec"><span class="k">The root · 为什么</span><h2>在场契约，是所有权逼出来的</h2></div>
+  <p class="body">为什么 CC 敢假设「有人」，Hermes 只能假设「没人」？不是胆量差别，是<b>处境</b>差别。顺着"谁拥有什么"往下推，每一环都在把两家推向相反的默认——直到最后那个问题：<b>敢不敢假设有人会在。</b></p>
+
+  <div class="chain">
+    <div class="clink"><div class="ca">不拥有（用厂商的）</div><div class="q">谁拥有模型？<small>轴一</small></div><div class="ha">自己训、自己拥有</div></div>
+    <div class="clink"><div class="ca">厂商托管</div><div class="q">谁拥有部署？<small>04 对时间</small></div><div class="ha">自托管</div></div>
+    <div class="clink"><div class="ca">闭源</div><div class="q">谁拥有代码？<small>05 对人</small></div><div class="ha">开源</div></div>
+    <div class="clink"><div class="ca">有</div><div class="q">背后有没有「厂商」兜底？</div><div class="ha">没有，只有你自己</div></div>
+    <div class="clink last"><div class="ca">敢 → 为「有人在」设计</div><div class="q">敢不敢假设有人会在？</div><div class="ha">不敢 → 为「没人在」设计</div></div>
+  </div>
+
+  <div class="punch">反直觉的收尾：做「最小开源壳」的一方，反而必须把<b>「独立存在」做到最重</b>——正因为没有一个厂商替它在场，它只能<b>自己一直在</b>。谁拥有得多，谁就得独自面对「没人兜底」。</div>
+
+  <div class="sec"><span class="k">For PMs · 怎么用</span><h2>先回答这一个问题，后面五件事就定了</h2></div>
+  <div class="take">
+    <div class="row"><div class="who cc">学 CC</div><div class="txt">如果你的 agent 活在<b>「有人盯着」的世界</b>（IDE 里、有人随时能拍板）：把拍板权留给人，无人时保守到默认拒。天花板随人的在场自然抬高。</div></div>
+    <div class="row"><div class="who hm">学 Hermes</div><div class="txt">如果你的 agent 要在<b>「没人盯着」的世界</b>跑（后台、被消息叫醒、自托管）：每一个「本该有人点头」的地方，都得<b>提前定义「没人点头时怎么办」</b>；并诚实到白纸黑字承认边界在哪，别假装有隔离。</div></div>
+    <div class="row"><div class="who both">一句话</div><div class="txt">先问<b>「我假设有没有人在场」</b>——这一个答案会决定你后面五件事怎么设计。而它往往不是你能自由选的：<b>你的所有权处境（托管还是自托管、闭源还是开源）已经替你选了。</b></div></div>
+  </div>
+
+  <div class="sec"><span class="k">Loose ends · 诚实边界</span><h2>这根脊，不是五等份</h2></div>
+  <ul class="open">
+    <li><b>两条线，别硬拧成一条。</b>对时间／环境／同类，「在场」是正面主轴；对人／对自己，真正在分的是<b>所有权链</b>，在场只是它的侧面（治理层有没有人盯／变强要不要你签字）。硬说成「在场的五次显形」就是以偏概全——所以本章把两条线分开画（脊上的空心点即标此）。</li>
+    <li><b>「对同类」那一行是解读，不是铁证。</b>「人当队长 vs 数据库协调」是对机制的合理解读，非代码里可直接证的设计意图（半点标注即此）。</li>
+    <li><b>「变强」这一行，两家都别信自己。</b>无论 CC 的「外包给下一代基座」还是 Hermes 的「握着训练杠杆」，画的都是<b>意图与潜力、不是已经做到</b>——两家仓库<b>都证不到「你的使用让它权重级变强」</b>（CC 断在没这能力，Hermes 断在产数据管线没接你的活会话）。脊上 row5 标的是「谁有可能」，别读成「谁已经在越用越强」。</li>
+    <li><b>五关系的边界仍有一处未闭。</b>「对同类」是否还应含<b>外来 agent 互通</b>（如 Hermes 的 ACP 适配器），07 章尚未覆盖、待查证；若那格材料成立，本综合「五关系」的完备性自评要回来再调——不因为故事顺就盖章。</li>
+  </ul>
+
+  <nav style="max-width:1080px;margin:44px auto 0;padding:16px 0 0;border-top:1px solid #2a3342;font-size:13px;color:#8b98a9">编织自 · <a href="04-outside-time-trigger.html">04 与时间</a> · <a href="05-outside-programmability.html">05 与用户</a> · <a href="06-outside-environment.html">06 与环境</a> · <a href="07-outside-multiagent.html">07 与其他 Agent</a> · <a href="08-outside-self-improvement.html">08 与自己</a></nav>
+
+  <div class="foot">综合② · 轴二：Loop 之外是怎么设计的 —— 本章不新增机制断言，只编织已过三道门的 04–08 五章结论（契约：综合只编织、不开采）。各机制的 <code>file:line</code> 溯源见对应单章页脚。</div>
+
+</div>
+</div>
+
+<script>
+/* 本章无 mermaid、无 stepper（主图为手工排版）。保留设计系统脚本骨架：离线守卫 + 组件化 stepper 扫描（此页无 stepper，扫描为空，无副作用），以与其它章一致、并满足合订本装配的 body 边界识别。 */
+var MERMAID_OK = (typeof mermaid !== 'undefined');
+if(MERMAID_OK){
+  mermaid.initialize({startOnLoad:true,theme:"dark",
+    flowchart:{nodeSpacing:30,rankSpacing:38,padding:10,useMaxWidth:true},
+    themeVariables:{
+    background:"#1e2531",primaryColor:"#161b26",primaryBorderColor:"#2a3342",
+    primaryTextColor:"#e6edf3",lineColor:"#8b98a9",fontSize:"13.5px"}});
+}
+document.querySelectorAll('.stepper').forEach(function(st){
+  var frames=[].slice.call(st.querySelectorAll('.frame'));
+  var caps=[]; var cj=st.querySelector('.captions'); if(cj){try{caps=JSON.parse(cj.textContent);}catch(e){}}
+  var cap=st.querySelector('.caption'), cnt=st.querySelector('.count'), dots=st.querySelector('.dots');
+  var cur=0;
+  if(dots){frames.forEach(function(_,i){var d=document.createElement('span');d.className='dot'+(i?'':' on');dots.appendChild(d);});}
+  function render(){
+    frames.forEach(function(f,i){f.classList.toggle('on',i===cur);});
+    if(cap&&caps[cur]!=null)cap.innerHTML=caps[cur];
+    if(cnt)cnt.textContent=(cur+1)+' / '+frames.length;
+    if(dots)[].slice.call(dots.querySelectorAll('.dot')).forEach(function(d,i){d.classList.toggle('on',i===cur);});
+  }
+  var p=st.querySelector('.prev'), n=st.querySelector('.next');
+  if(p)p.onclick=function(){cur=Math.max(0,cur-1);render();};
+  if(n)n.onclick=function(){cur=Math.min(frames.length-1,cur+1);render();};
+  render();
+});
+</script>
+</body>
+</html>

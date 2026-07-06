@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>轴一 · 输入侧 · 每轮那个请求怎么拼出来</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+/* ============ 设计系统（单章自包含拷贝；合订本由 build.py 从 _design-system.html 单一真相注入）============ */
+:root{
+  --bg:#0d1017; --surface:#161b26; --surface-2:#1e2531; --border:#2a3342;
+  --text:#e6edf3; --muted:#8b98a9; --faint:#5a6675;
+  --blue:#4b8bf5; --green:#3fb950; --purple:#a371f7; --amber:#d9a441; --red:#f0603a;
+  --radius:14px; --maxw:1080px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Inter,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:48px 28px 120px}
+a{color:var(--blue);text-decoration:none}
+.eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.badge{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
+  padding:4px 10px;font-size:13px;font-weight:700;letter-spacing:.5px;color:var(--muted)}
+.tag{font-size:13px;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 40%,transparent);
+  border-radius:999px;padding:3px 12px}
+h1{font-size:34px;margin:.1em 0 .15em;letter-spacing:-.5px}
+.subtitle{font-size:18px;color:var(--muted);margin:0 0 16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.chip{background:var(--surface);border:1px solid var(--border);border-radius:999px;
+  padding:4px 12px;font-size:13px;color:var(--muted)}
+.thesis{background:linear-gradient(120deg,#12241f,#0f1e2e);border:1px solid #234;
+  border-left:4px solid var(--green);border-radius:12px;padding:18px 22px;margin:28px 0 8px;font-size:17px}
+.thesis b{color:var(--green)}
+h2{font-size:24px;margin:52px 0 6px;padding-top:18px;border-top:1px solid var(--border)}
+h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
+.lead{color:var(--muted);margin:0 0 20px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin:16px 0}
+.card h3{margin:0 0 6px;font-size:18px}
+.card .why{color:var(--muted);font-size:15px}
+.story{background:var(--surface);border:1px dashed var(--border);border-radius:12px;padding:18px 22px;color:var(--muted)}
+.story b{color:var(--text)}
+.diagram{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;
+  padding:20px;margin:16px 0;overflow:auto;text-align:center}
+.diagram .cap{color:var(--faint);font-size:13px;margin-top:10px}
+.flow2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
+.flow2 .diagram{margin:0;display:flex;flex-direction:column}
+.flow2 .diagram h3{margin:0 0 6px;font-size:16px}
+.flow2 .diagram .dlead{color:var(--muted);font-size:13px;margin:0 0 12px;text-align:left}
+.flow2 .diagram .mermaid{flex:1;display:flex;align-items:center;justify-content:center;min-width:0}
+@media(max-width:820px){.flow2{grid-template-columns:1fr}}
+.stepper{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:0;overflow:hidden;margin:18px 0}
+.stepper .stage{padding:26px;min-height:200px;display:flex;align-items:center;justify-content:center}
+.stepper .frame{display:none;width:100%}
+.stepper .frame.on{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.stepper .caption{background:color-mix(in srgb,var(--blue) 14%,transparent);
+  border-top:1px solid var(--border);padding:14px 22px;font-size:15px}
+.stepper .caption b{color:var(--blue)}
+.ctrl{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid var(--border)}
+.ctrl button{background:var(--surface);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:6px 14px;cursor:pointer;font-size:14px}
+.ctrl button:hover{border-color:var(--blue)}
+.dots{display:flex;gap:6px}.dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+.dot.on{background:var(--blue)}
+.count{color:var(--muted);font-size:13px}
+.box{border:1.5px solid var(--border);border-radius:10px;padding:16px;background:var(--bg)}
+.box.blue{border-color:var(--blue)} .box.purple{border-color:var(--purple)} .box.dim{opacity:.4}
+.box .t{font-weight:700;margin-bottom:8px} .box code{color:var(--muted);font-size:13px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+.compare .side{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.compare .side.cc{border-top:3px solid var(--blue)}
+.compare .side.hm{border-top:3px solid var(--purple)}
+.compare .side h4{margin:0 0 8px;font-size:15px;color:var(--muted)}
+.verdict{background:var(--surface-2);border:1px solid var(--border);border-left:4px solid var(--amber);
+  border-radius:10px;padding:14px 20px;margin-top:12px}
+.verdict b{color:var(--amber)}
+.open li{color:var(--muted);margin:6px 0}
+.foot{margin-top:60px;color:var(--faint);font-size:13px;border-top:1px solid var(--border);padding-top:16px}
+.matrix-row{margin:22px 0}
+.matrix-row h3{font-size:16px;margin:0 0 10px;color:var(--text)}
+.matrix-row h3 .n{color:var(--faint);font-weight:400;margin-right:8px}
+.matrix{display:grid;grid-template-columns:minmax(112px,1fr) 1.9fr 1.9fr;
+  gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:16px 0}
+.matrix>div{background:var(--surface);padding:11px 15px;font-size:14px;line-height:1.55}
+.matrix .mh{background:var(--surface-2);font-weight:700;font-size:13px;color:var(--muted)}
+.matrix .mh.cc{color:var(--blue)} .matrix .mh.hm{color:var(--purple)}
+.matrix .dim{background:var(--surface-2);font-weight:600;color:var(--text)}
+@media(max-width:760px){.matrix{grid-template-columns:1fr 1.4fr 1.4fr;font-size:12.5px}}
+</style>
+<style class="bespoke">
+/* ============ 第 02 章专属排版（scoped 于 .ch02；build.py 收进合订本 head，不污染共享系统、不泄漏别章）============ */
+.ch02{--col:100%}
+
+/* Hero 硬指标行 */
+.ch02 .metrics{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12.5px;letter-spacing:.02em;color:var(--muted);margin:4px 0 26px;line-height:1.7}
+.ch02 .metrics b{color:var(--text);font-weight:600}
+
+.ch02 .lede-note{max-width:100%;font-size:13.5px;line-height:1.66;color:var(--faint);margin:10px 0 0}
+
+/* 开篇两框：内部分段 */
+.ch02 .thesis p{margin:0 0 12px;line-height:1.75}
+.ch02 .thesis p:last-child{margin-bottom:0}
+.ch02 .thesis .hl{font-weight:700;color:#e8c06a;box-shadow:inset 0 -.46em 0 rgba(217,164,65,.16)}
+.ch02 .thesis .cc{color:var(--blue);font-weight:600}
+.ch02 .thesis .hm{color:var(--purple);font-weight:600}
+.ch02 .story p{margin:0 0 14px;line-height:1.78}
+.ch02 .story p:last-child{margin-bottom:0}
+.ch02 .story b{color:var(--text)}
+
+/* 编辑式分节标题 */
+.ch02 .sec{margin:60px 0 8px;max-width:var(--col)}
+.ch02 .sec .k{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:9px}
+.ch02 .sec h2{font-size:24px;line-height:1.28;letter-spacing:-.3px;margin:0;font-weight:730;border:0;padding:0}
+
+/* 叙事裸文 */
+.ch02 p.body{max-width:var(--col);font-size:16.5px;line-height:1.8;color:var(--muted);margin:16px 0}
+.ch02 p.body b{color:var(--text);font-weight:600}
+.ch02 p.body .cc{color:var(--blue);font-weight:600}
+.ch02 p.body .hm{color:var(--purple);font-weight:600}
+
+/* 「为何不同」裸文 */
+.ch02 .why-diff{max-width:var(--col);margin:20px 0}
+.ch02 .why-diff p{font-size:15.5px;line-height:1.78;color:var(--muted);margin:16px 0}
+.ch02 .why-diff p .d{color:var(--text);font-weight:700}
+.ch02 .why-diff p b{color:var(--text);font-weight:600}
+.ch02 .why-diff p .cc{color:var(--blue);font-weight:600}
+.ch02 .why-diff p .hm{color:var(--purple);font-weight:600}
+
+/* 词条悬停解释（继承批一：高度概括的词条必须可解码） */
+.ch02 .pchip{position:relative;cursor:help}
+.ch02 .pchip[data-tip]:hover::after{
+  content:attr(data-tip);position:absolute;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%);
+  background:var(--surface-2);border:1px solid var(--border);color:var(--text);
+  font-size:12.5px;line-height:1.6;font-weight:400;padding:10px 13px;border-radius:9px;
+  width:max-content;max-width:320px;white-space:normal;z-index:30;text-align:left;
+  box-shadow:0 8px 24px rgba(0,0,0,.55);pointer-events:none}
+
+/* ========== §01 请求包三层装配骨架（重档 #1） ========== */
+.ch02 .stack{margin:22px 0 6px}
+.ch02 .stack-top,.ch02 .stack-bot{font-size:12px;color:var(--faint);text-align:center;letter-spacing:.04em;margin:0 0 10px}
+.ch02 .stack-bot{margin:12px 0 0}
+.ch02 .srow{display:grid;grid-template-columns:172px 1fr 120px;gap:1px;background:var(--border);
+  border:1px solid var(--border);margin-bottom:9px;border-radius:12px;overflow:visible}
+.ch02 .srow>div{background:var(--surface);padding:14px 16px}
+.ch02 .srail{background:var(--surface-2);display:flex;flex-direction:column;justify-content:center}
+.ch02 .srail .sn{font-size:14.5px;font-weight:730;color:var(--text)}
+.ch02 .srail .ss{font-size:12px;color:var(--faint);margin-top:4px;line-height:1.45}
+.ch02 .sbody .sh{font-size:12.5px;color:var(--muted);margin-bottom:9px}
+.ch02 .pchips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ch02 .pchip{font-size:12px;color:var(--text);background:var(--bg);border:1px solid var(--border);
+  border-radius:7px;padding:3px 9px;line-height:1.4;white-space:nowrap}
+.ch02 .scache{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:6px}
+.ch02 .cf{font-size:11px;font-weight:700;letter-spacing:.02em;border-radius:999px;padding:2px 10px;white-space:nowrap}
+.ch02 .cf.froze{color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);
+  background:color-mix(in srgb,var(--green) 10%,transparent)}
+.ch02 .cf.perturn{color:var(--amber);border:1px solid color-mix(in srgb,var(--amber) 45%,transparent);
+  background:color-mix(in srgb,var(--amber) 10%,transparent)}
+.ch02 .cf.stable{color:var(--muted);border:1px solid var(--border);background:transparent}
+.ch02 .svalve{display:grid;grid-template-columns:172px 1fr 120px;gap:1px;background:transparent;margin-top:2px}
+.ch02 .svalve .vlab{background:transparent;padding:8px 16px;font-size:12px;color:var(--faint);text-align:right}
+.ch02 .svalve .vbody{background:color-mix(in srgb,var(--amber) 7%,transparent);
+  border:1px dashed color-mix(in srgb,var(--amber) 45%,transparent);border-radius:10px;padding:12px 16px;
+  font-size:12.5px;color:var(--muted);line-height:1.55}
+.ch02 .svalve .vbody b{color:var(--amber)}
+.ch02 .svalve .vpad{background:transparent}
+.ch02 .map-foot{font-size:12.5px;color:var(--muted);margin:14px 0 0;line-height:1.65}
+.ch02 .map-foot b{color:var(--text);font-weight:600}
+.ch02 .map-cap{color:var(--faint);font-size:12px;margin:8px 0 0}
+.ch02 .map-cap b{color:var(--muted)}
+@media(max-width:820px){.ch02 .srow{grid-template-columns:1fr}.ch02 .svalve{grid-template-columns:1fr}.ch02 .svalve .vlab{text-align:left}}
+
+/* ========== §02 静态层 · 模型分叉 chips ========== */
+.ch02 .mbranch{display:flex;flex-wrap:wrap;gap:9px;margin:18px 0 6px}
+.ch02 .mbranch .mb{background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--purple);
+  border-radius:10px;padding:12px 15px;font-size:13px;color:var(--text);max-width:240px}
+.ch02 .mbranch .mb .mbt{font-weight:700;color:var(--purple);font-size:12.5px;margin-bottom:5px}
+.ch02 .mbranch .mb .mbd{color:var(--muted);font-size:12px;line-height:1.55}
+
+/* ========== §03 动态层 · 注入清单对照（真实制品） ========== */
+.ch02 .cat{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0 6px}
+.ch02 .cat .side{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.ch02 .cat .side.cc{border-top:3px solid var(--blue)}
+.ch02 .cat .side.hm{border-top:3px solid var(--purple)}
+.ch02 .cat .side .ct{font-size:13px;font-weight:700;margin-bottom:4px}
+.ch02 .cat .side.cc .ct{color:var(--blue)} .ch02 .cat .side.hm .ct{color:var(--purple)}
+.ch02 .cat .side .cn{font-size:11.5px;color:var(--faint);margin-bottom:11px}
+.ch02 .cat .side .cl{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.ch02 .cat .side .cl span{font-size:11.5px;color:var(--muted);background:var(--bg);
+  border:1px solid var(--border);border-radius:6px;padding:2px 8px}
+.ch02 .cat pre{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:11px 13px;margin:0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:1.6;
+  color:var(--text);white-space:pre-wrap;overflow-x:auto}
+.ch02 .cat .side.cc pre{border-left:3px solid color-mix(in srgb,var(--blue) 55%,transparent)}
+.ch02 .cat .side.hm pre{border-left:3px solid color-mix(in srgb,var(--purple) 55%,transparent)}
+.ch02 .cat .al{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;margin:11px 0 6px}
+.ch02 .cat .side.cc .al{color:var(--blue)} .ch02 .cat .side.hm .al{color:var(--purple)}
+.ch02 .cat .an{font-size:11.5px;color:var(--faint);margin:8px 0 0;line-height:1.5}
+@media(max-width:760px){.ch02 .cat{grid-template-columns:1fr}}
+
+/* §03 注入全表弹窗（入口＝末尾那颗可点 chip，样式区别于普通 chip；内联 onclick，合订本 extract_body 保留） */
+.ch02 .cl .more{cursor:pointer;font-weight:600;border-style:dashed}
+.ch02 .side.cc .cl .more{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 50%,transparent)}
+.ch02 .side.hm .cl .more{color:var(--purple);border-color:color-mix(in srgb,var(--purple) 50%,transparent)}
+.ch02 .side.cc .cl .more:hover{background:color-mix(in srgb,var(--blue) 15%,transparent)}
+.ch02 .side.hm .cl .more:hover{background:color-mix(in srgb,var(--purple) 15%,transparent)}
+.ch02 .modal{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.66);
+  align-items:center;justify-content:center;padding:24px}
+.ch02 .modal.open{display:flex}
+.ch02 .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  max-width:820px;width:100%;max-height:84vh;display:flex;flex-direction:column;overflow:hidden}
+.ch02 .modal-head{background:var(--surface-2);border-bottom:1px solid var(--border);
+  padding:15px 22px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.ch02 .modal-head .mh-t{font-size:15px;font-weight:730;color:var(--text)}
+.ch02 .modal-head .mh-t.cc{color:var(--blue)} .ch02 .modal-head .mh-t.hm{color:var(--purple)}
+.ch02 .modal-head .mh-s{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6}
+.ch02 .modal-x{cursor:pointer;color:var(--muted);font-size:24px;line-height:1;flex:0 0 auto;padding:0 4px}
+.ch02 .modal-x:hover{color:var(--text)}
+.ch02 .modal-body{overflow-y:auto;padding:16px 22px 24px}
+.ch02 .mgrp{font-size:12px;letter-spacing:.05em;color:var(--faint);font-weight:700;margin:18px 0 6px}
+.ch02 .mgrp:first-child{margin-top:0}
+.ch02 .ment{display:grid;grid-template-columns:158px 70px 1fr;gap:10px;padding:8px 0;border-top:1px solid var(--border);align-items:baseline;font-size:12.5px}
+.ch02 .ment .mn{color:var(--text);font-weight:600}
+.ch02 .ment .mc{font-size:10.5px;font-weight:700;border-radius:999px;padding:1px 7px;text-align:center;white-space:nowrap}
+.ch02 .ment .mc.always{color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent)}
+.ch02 .ment .mc.cond{color:var(--amber);border:1px solid color-mix(in srgb,var(--amber) 45%,transparent)}
+.ch02 .ment .mc.gate{color:var(--faint);border:1px solid var(--border)}
+.ch02 .ment .mtrig{color:var(--muted);line-height:1.5}
+@media(max-width:600px){.ch02 .ment{grid-template-columns:1fr;gap:2px}.ch02 .ment .mc{justify-self:start}}
+
+/* §04 压缩细节：卡内具名手段 + 卡内弹窗入口 + 弹窗内两列/制品/结构对照 */
+.ch02 .cmpl .cell .means{margin:0;padding:0;list-style:none}
+.ch02 .cmpl .cell .means li{margin:5px 0;font-size:13px;line-height:1.5}
+.ch02 .cmpl .cell .means li:first-child{margin-top:0}
+.ch02 .cmpl .cell .means .mm{font-weight:700}
+.ch02 .cmpl .cell.cc .means .mm{color:color-mix(in srgb,var(--blue) 78%,var(--text))}
+.ch02 .cmpl .cell.hm .means .mm{color:color-mix(in srgb,var(--purple) 78%,var(--text))}
+.ch02 .modal .struct{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px 0 6px}
+.ch02 .modal .struct .sc{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:13px 15px}
+.ch02 .modal .struct .sc.cc{border-top:2px solid var(--blue)} .ch02 .modal .struct .sc.hm{border-top:2px solid var(--purple)}
+.ch02 .modal .struct .sch{font-size:12.5px;font-weight:700;margin-bottom:8px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ch02 .modal .struct .sc.cc .sch{color:var(--blue)} .ch02 .modal .struct .sc.hm .sch{color:var(--purple)}
+.ch02 .modal .struct .sch .cnt{font-size:11px;color:var(--faint);font-weight:600;white-space:nowrap}
+.ch02 .modal .struct ol{margin:0;padding-left:22px}
+.ch02 .modal .struct li{font-size:11.5px;line-height:1.7;color:var(--muted)}
+.ch02 .modal .struct li.extra{color:var(--amber);font-weight:600}
+.ch02 .modal .struct-note{font-size:12px;color:var(--muted);margin:4px 0 2px;line-height:1.6}
+.ch02 .modal .struct-note b{color:var(--amber)}
+.ch02 .modal .mart pre{max-height:300px;overflow:auto}
+.ch02 .modal .mart{margin:14px 0}
+.ch02 .modal .mart .mal{font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+.ch02 .modal .mart.cc .mal{color:var(--blue)} .ch02 .modal .mart.hm .mal{color:var(--purple)}
+.ch02 .modal .mart pre{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin:0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:1.62;
+  color:var(--text);white-space:pre-wrap;overflow-x:auto}
+.ch02 .modal .mart.cc pre{border-left:3px solid color-mix(in srgb,var(--blue) 55%,transparent)}
+.ch02 .modal .mart.hm pre{border-left:3px solid color-mix(in srgb,var(--purple) 55%,transparent)}
+.ch02 .modal .mart pre .hit{color:var(--amber)}
+.ch02 .modal .mnote{font-size:11.5px;color:var(--faint);margin:8px 0 0;line-height:1.55}
+.ch02 .modal .mnote b{color:var(--muted)}
+@media(max-width:600px){.ch02 .modal .struct{grid-template-columns:1fr}}
+
+/* 防以偏概全 callout（红边警戒，区别于 amber verdict） */
+.ch02 .guard{background:color-mix(in srgb,var(--red) 6%,var(--surface-2));border:1px solid var(--border);
+  border-left:4px solid var(--red);border-radius:10px;padding:15px 20px;margin:18px 0 6px;font-size:14.5px;line-height:1.72;color:var(--muted)}
+.ch02 .guard .gt{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--red);font-weight:700;margin-bottom:7px}
+.ch02 .guard b{color:var(--text);font-weight:600}
+
+/* ========== §04 压缩阶梯（复用旧稿 .cmpl，重新 scoped 于 .ch02 + 按新事实修正）========== */
+.ch02 .cmpl{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin:18px 0}
+.ch02 .cmpl .chd{display:grid;grid-template-columns:118px 1fr 1fr;gap:10px;align-items:end;margin-bottom:10px}
+.ch02 .cmpl .chd .axis{font-size:12px;color:var(--faint)}
+.ch02 .cmpl .chd .cc,.ch02 .cmpl .chd .hm{font-weight:700;font-size:14px;padding-left:13px}
+.ch02 .cmpl .chd .cc{color:var(--blue)} .ch02 .cmpl .chd .hm{color:var(--purple)}
+.ch02 .cmpl .tier{display:grid;grid-template-columns:118px 1fr 1fr;gap:10px;align-items:stretch;margin-bottom:8px}
+.ch02 .cmpl .tier:last-of-type{margin-bottom:0}
+.ch02 .cmpl .tlab{display:flex;flex-direction:column;justify-content:center;font-size:13px;font-weight:700;color:var(--muted);padding:10px 4px 10px 0}
+.ch02 .cmpl .tlab .tag{font-size:11px;font-weight:700;color:var(--amber);margin-top:3px}
+.ch02 .cmpl .cell{font-size:13.5px;line-height:1.55;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:11px 13px}
+.ch02 .cmpl .cell.cc{border-left:3px solid color-mix(in srgb,var(--blue) 45%,transparent)}
+.ch02 .cmpl .cell.hm{border-left:3px solid color-mix(in srgb,var(--purple) 45%,transparent)}
+.ch02 .cmpl .tier.heavy .cell{background:color-mix(in srgb,var(--green) 6%,transparent)}
+.ch02 .cmpl .tier.heavy .tlab{color:var(--green)}
+.ch02 .cmpl .cell b{color:var(--text)}
+.ch02 .cmpl .cell .own{display:block;margin-top:5px;font-size:12px;color:var(--faint)}
+.ch02 .cmpl .cmplcap{color:var(--muted);font-size:13px;margin-top:12px;line-height:1.65}
+.ch02 .cmpl .cmplcap b{color:var(--text)}
+/* 证据型入口：紧贴它解释的那一步（③）正下方、缩进对齐到两列下方读作子注；档三文字链、收据而非论点，相邻自带锚定不需标识 */
+.ch02 .cmpl .receipts{display:flex;align-items:baseline;gap:7px;width:max-content;max-width:100%;
+  margin:-1px 0 9px;padding-left:128px;cursor:pointer;font-size:12.5px;color:var(--muted);line-height:1.5;transition:color .15s}
+.ch02 .cmpl .receipts:hover{color:var(--green)}
+.ch02 .cmpl .receipts:hover .cp{text-decoration:underline;text-underline-offset:3px}
+.ch02 .cmpl .receipts .tie{color:var(--faint);font-size:13px}
+.ch02 .cmpl .receipts .go{color:var(--green)}
+@media(max-width:700px){.ch02 .cmpl .receipts{padding-left:0}.ch02 .cmpl .chd,.ch02 .cmpl .tier{grid-template-columns:1fr}.ch02 .cmpl .chd .cc,.ch02 .cmpl .chd .hm{padding-left:0}}
+
+/* ========== §04 标记对齐 · 第二根杠杆真实制品（重档 #2）========== */
+.ch02 .marker{display:grid;grid-template-columns:1fr 40px 1fr;gap:0;align-items:center;margin:20px 0 6px}
+.ch02 .mpanel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.ch02 .mpanel.rt{border-top:3px solid var(--purple)}
+.ch02 .mpanel.tr{border-top:3px solid var(--purple)}
+.ch02 .mpanel .ml{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:4px}
+.ch02 .mpanel .ms{font-size:11.5px;color:var(--faint);margin-bottom:10px}
+.ch02 .mpanel pre{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:11px 13px;margin:0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:1.62;
+  color:var(--text);white-space:pre-wrap;overflow-x:auto}
+.ch02 .mpanel pre .hit{color:var(--amber);font-weight:700}
+.ch02 .mjoin{display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--amber);font-size:20px;font-weight:700}
+.ch02 .mjoin .eq{line-height:1}
+.ch02 .marker-cap{font-size:13px;color:var(--muted);margin:14px 0 0;line-height:1.68}
+.ch02 .marker-cap b{color:var(--text);font-weight:600}
+.ch02 .marker-bound{background:var(--surface-2);border:1px solid var(--border);border-left:4px solid var(--amber);
+  border-radius:10px;padding:14px 20px;margin:14px 0 0;font-size:14px;line-height:1.72;color:var(--muted)}
+.ch02 .marker-bound b{color:var(--amber)}
+@media(max-width:760px){.ch02 .marker{grid-template-columns:1fr}.ch02 .mjoin{padding:6px 0;transform:rotate(90deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="ch02">
+
+  <div class="eyebrow"><span class="badge">轴一 · 输入侧</span><span class="tag">Loop 之内</span></div>
+  <h1>每轮那个请求怎么拼出来</h1>
+  <p class="subtitle">壳每一轮要现拼一个发给模型的请求包——这个包分三层，你以为每轮全新，其实八成逐字复用。</p>
+  <p class="metrics">一次请求 = <b>静态前缀 + 工具 + 历史与每轮注入</b> &nbsp;·&nbsp; 两家都冻前缀吃缓存 &nbsp;·&nbsp; CC 面对 <b>1 个</b>模型 / Hermes 前缀按<b>模型名分叉</b> &nbsp;·&nbsp; 压缩都「先删后摘」外包给 LLM &nbsp;·&nbsp; 训回权重是 <b>Hermes 独有</b></p>
+
+  <div class="thesis">
+    <p>拼同一个请求包，两家的手艺<span class="hl">八成是重合的</span>——都为吃缓存把稳定内容冻在最前，都把每轮变化的东西塞进消息窗口、变了才补，都跑几乎一样的「先删后摘」压缩阶梯。</p>
+    <p>真正的分叉都挤在同几条缝上，而每条缝都在泄露<b>它到底是什么</b>：<span class="cc">Claude Code</span> 首先是个<b>产品</b>（动态层塞满 IDE、终端、任务的信号）；<span class="hm">Hermes</span> 首先是个<b>面对一群自家开源模型的拥有者</b>（连冻在最前的『静态』前缀都得按模型分叉，且只有它能把压缩训回权重）。</p>
+  </div>
+  <p class="lede-note">本章只拆「每轮那个请求包怎么拼、分几层」；循环为什么能一直转下去见 01 章；记忆<b>怎么写、怎么蒸馏、跨会话怎么演化</b>的完整生命周期见 08／05 章。</p>
+
+  <div class="sec"><span class="k">The illusion</span><h2>你以为每轮是一份新输入，其实八成是逐字搬过来的</h2></div>
+  <div class="story">
+    <p>直觉里，模型每轮"看到"的，应该是一份为这一轮现写的输入。实际恰恰相反——壳每一轮都在拼<b>同一个请求包</b>，而这个包的绝大部分，是上一轮<b>逐字不变</b>地搬过来的。</p>
+    <p>原因是钱和速度。给模型发一次请求，最贵的成本是让它把长长的前缀重新"读"一遍；只要前缀一个字节都没变，服务端就能"认出这叠没动过"、直接命中缓存、又快又省（这就是 prompt cache）。于是两家做同一件事：把几乎不变的东西（身份守则、工具目录）死死钉在最前面当"冻结前缀"，把每轮要变的东西全赶到后面去——为的就是别惊动缓存。</p>
+    <p>所以"每轮那个请求怎么拼"，可以干净地拆成三层：最前面<b>冻起来吃缓存的静态层</b>，后面<b>每轮现塞进去的动态层</b>，以及当整个包快撑爆窗口时才启动的<b>压缩应急阀</b>。这一章就沿这三层各走一遍——你会看到两家在每一层都先高度趋同，再在同一处分叉。</p>
+  </div>
+
+  <div class="sec"><span class="k">The anatomy</span><h2>一次请求长什么样：两家共享的三层装配骨架</h2></div>
+  <p class="body">先把一次请求摊平成一张图。最该看清的不是每一格写了什么，而是<b>两家的装配骨架几乎是同一张</b>——差异不在骨架，而在骨架的每一层内部（后面三节逐层拆）。自上而下就是发给模型的顺序：冻结的静态层在最前吃缓存，动态层每轮补在后面，压缩阀只在快撑爆时才动。</p>
+
+  <div class="stack">
+    <p class="stack-top">▲ 请求包顶部 · 最先发给模型 · 最该保持字节不变</p>
+
+    <div class="srow">
+      <div class="srail"><span class="sn">① 静态层</span><span class="ss">身份与规矩<br>冻在最前吃缓存</span></div>
+      <div class="sbody">
+        <div class="sh">几乎不变的东西，钉死在最前面当缓存键：</div>
+        <div class="pchips">
+          <span class="pchip" data-tip="告诉模型「你是谁、怎么做事、危险动作先确认、语气怎样」的一大段固定守则——两家都全程不改，好让服务端认出这叠没动过、直接复用">身份守则</span>
+          <span class="pchip" data-tip="模型能调哪些工具、每个工具怎么用的清单。会话期间基本固定；工具太多超阈值时才改成「按需拉取」">工具目录</span>
+          <span class="pchip" data-tip="项目级规矩：CC 的 CLAUDE.md、Hermes 的 AGENTS.md/.cursorrules 等。会话开始时读一次、之后当快照不再变">项目规矩</span>
+        </div>
+      </div>
+      <div class="scache"><span class="cf froze">冻结 · 吃缓存</span></div>
+    </div>
+
+    <div class="srow">
+      <div class="srail"><span class="sn">② 动态层</span><span class="ss">每轮现塞的<br>塞进消息窗口</span></div>
+      <div class="sbody">
+        <div class="sh">每轮真正变的东西，全赶到这里、绝不写回冻结前缀：</div>
+        <div class="pchips">
+          <span class="pchip" data-tip="至今为止的整段对话——上一轮历史 + 模型这轮说的话 + 工具执行结果。会一直变长，直到压缩阀动手">对话历史</span>
+          <span class="pchip" data-tip="壳每轮临时观察到的东西（文件被改了、有新报错、记忆召回…），包成一条条注入塞进窗口。变了才补、没变不发——这样不惊动缓存">每轮注入</span>
+        </div>
+      </div>
+      <div class="scache"><span class="cf perturn">每轮变</span></div>
+    </div>
+
+    <div class="srow">
+      <div class="srail"><span class="sn">工具目录</span><span class="ss">会话稳定<br>随前缀一起缓存</span></div>
+      <div class="sbody">
+        <div class="sh">严格说工具目录也在缓存前缀里（放在身份守则之后）——单列出来，是因为它是「超阈值就改按需拉取」那条例外的主角（见 §02）。</div>
+      </div>
+      <div class="scache"><span class="cf stable">会话稳定</span></div>
+    </div>
+
+    <div class="svalve">
+      <div class="vlab">发出去之前 →</div>
+      <div class="vbody"><b>③ 压缩应急阀</b>：只有当整个包快撑爆模型窗口时才启动，跑一条「先删后摘」的阶梯把中间那段冗长历史缩短，然后才真的发出去（见 §04）。</div>
+      <div class="vpad"></div>
+    </div>
+
+    <p class="stack-bot">▼ 请求包底部 · 最后发出 · 每轮增长</p>
+  </div>
+  <p class="map-foot">读法：<b>静态层</b>冻在最前吃缓存、<b>动态层</b>每轮补在后面、<b>压缩阀</b>满了才动——这套骨架两家同构。真正的分叉全在每一层内部：静态层里谁的前缀更"静"、动态层里各自塞些什么、压缩层里谁能把它训回权重。下面三节逐层拆。</p>
+  <p class="map-cap"><b>鼠标悬停任一词条，可见一句话解释。</b>「三层」是为讲清楚而搭的分析框架，Hermes 代码里恰好也把系统提示词显式分了三层（stable/context/volatile），但两者不是一回事——见 §02 与文末边界。</p>
+
+  <div class="sec"><span class="k">Layer 1 · 静态层</span><h2>冻结吃缓存是共识，但 Hermes 连『静态』前缀都得看模型下菜</h2></div>
+  <p class="body">两家都把稳定内容冻在最前面吃缓存，逻辑一模一样。<span class="cc">Claude Code</span> 用一个字面分界符 <code>__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__</code> 把系统提示词切开，只有它<b>之前</b>的部分（身份→任务政策→执行守则→工具用法→语气）跨会话冻结进全局缓存；<span class="hm">Hermes</span> 干脆把系统提示词显式设计成三层——stable / context / volatile，拼成一整串、每会话只建一次、之后逐字重放，代码注释直说这是「唯一能让上游缓存保温的办法」。到这里，两家是同一套缓存经济学。</p>
+  <p class="body">分叉在于——<span class="cc">Claude Code</span> 只面对一个自家托管的模型，这段"静态"前缀就是真·统一的。<span class="hm">Hermes</span> 要伺候一群异质开源模型，它的"静态"前缀<b>根本不是一整块</b>：命中 gemini/gemma 就注入一段 Google 模型执行守则，命中 gpt/codex/grok 换一段，遇到阿里的模型还要专门写一句「你其实是某某模型」去纠正 API 返回的错名字，弱模型名单上的还要再加一段工具强制纪律。<b>两个不同模型，拿到的"静态层"实质是不同的。</b></p>
+
+  <div class="mbranch">
+    <div class="mb"><div class="mbt">Google 系（gemini / gemma）</div><div class="mbd">注入一段专属执行守则——自主干到彻底解决、别给个计划就停</div></div>
+    <div class="mb"><div class="mbt">OpenAI · Grok 系（gpt / codex / grok）</div><div class="mbd">换一段执行铁律——工具结果空就换姿势重试、别早停</div></div>
+    <div class="mb"><div class="mbt">阿里系（alibaba provider）</div><div class="mbd">专门写「你其实是 X 模型」——纠正该 provider 返回的错误模型名</div></div>
+    <div class="mb"><div class="mbt">弱模型名单（tool-enforcement）</div><div class="mbd">再加一段工具使用强制——必须同一条回复里立刻调工具</div></div>
+  </div>
+
+  <p class="body">更彻底的一层：连"缓存"这件事，都得挑模型/provider。显式的 <code>cache_control</code> 断点主要给 Anthropic 系、外加少数几个经特定网关的兼容 provider（如 Qwen / MiniMax / 阿里）开着；更多本地/开源模型吃不到，只能退而求其次——靠把消息空白和工具调用的 JSON 规范成"逐字节一致"，去蹭底层推理引擎（llama.cpp / vLLM / Ollama）的 KV 复用。<b>同一套省钱机制，不同模型享受的档位不同。</b></p>
+  <div class="verdict"><b>接回轴一：</b>这正是 01 章那根「按模型加压」的独有轴，在装配层的第二次现身——CC 只面对一个模型，前缀能真·统一；Hermes 面对一群模型，连冻在最前面的料、连吃不吃得到缓存，都得看是哪个模型。<b>所有权与异质性，从纪律层一路渗到了装配层。</b></div>
+
+  <div class="sec"><span class="k">Layer 2 · 动态层</span><h2>每轮现塞什么：都塞进消息窗口、变了才补——但塞的东西暴露了产品 vs 底座</h2></div>
+  <p class="body">冻结前缀之外，才是每轮真正变的东西。两家的<b>机制</b>惊人地一致：都不把这些新内容写回那个冻结的前缀（否则缓存全废），而是塞进<b>消息窗口</b>——<span class="cc">Claude Code</span> 包成一个个 <code>&lt;system-reminder&gt;</code> 的"合成 user 回合"（模型看得见、你在对话里看不见），<span class="hm">Hermes</span> 直接追加到当轮 user 消息的尾部。而且两家都<b>只在内容变了才补</b>：CC 用一本 <code>readFileState</code> 台账记住每个文件上次的样子、只发变化的，还给这些信号限流（待办/任务每 10 轮、计划/自主模式每 5 轮才补一次）；Hermes 在回合开场一次性预取、整轮复用、不重复查。</p>
+  <p class="body">分叉在于——<b>塞进去的都是些什么</b>。<span class="cc">Claude Code</span> 每轮可注入的信号有四十多种，绝大多数是<b>产品面信号</b>：被外部或 linter 改动过的文件、IDE 报来的 lint/类型诊断、你在编辑器里选中的行、打开的文件、待办/计划/自主模式状态、钩子输出、伴生宠物、队友信箱……<span class="hm">Hermes</span> 每轮的主注入只有八种左右，都是<b>底座信号</b>：记忆召回、插件 hook、<code>/steer</code> 打断、几个网关注入。</p>
+
+  <div class="cat">
+    <div class="side cc">
+      <div class="ct">Claude Code · 产品面信号</div>
+      <div class="cn">约 44 种真正注入，绝大多数是<b style="color:var(--muted)">条件触发</b>（少数每轮常算）。下面是跨类<b style="color:var(--muted)">举例</b>——完整清单与每种的触发条件见弹窗：</div>
+      <div class="cl"><span>文件被改</span><span>lint 诊断</span><span>IDE 选中行</span><span>打开的文件</span><span>待办/计划</span><span>自主模式</span><span>钩子输出</span><span>日期变更</span><span>队友信箱</span><span>伴生宠物</span><span class="more" onclick="document.getElementById('ch02-cc-inject').classList.add('open')">… 查看全部 44 种 →</span></div>
+      <div class="al">注入示例 · 外部改动文件</div>
+      <pre>&lt;system-reminder&gt;
+Note: {file} was modified, either by the user or by
+a linter... don't revert it unless the user asks...
+Don't tell the user this, since they are already aware.
+&lt;/system-reminder&gt;</pre>
+      <p class="an">绝大多数注入都长这样：包在 <code>&lt;system-reminder&gt;</code> 里、标记 isMeta（模型可见、你在对话里看不见），贴在触发它的那一回合旁；少数例外（你排队输入的命令、@提及的文件）走别的形态。</p>
+    </div>
+    <div class="side hm">
+      <div class="ct">Hermes · 底座信号</div>
+      <div class="cn">8 种主注入 + 4 种出错兜底。下面是<b style="color:var(--muted)">全部主注入</b>（其中标「网关」的仅调用方 opt-in）——触发条件见弹窗：</div>
+      <div class="cl"><span>记忆召回</span><span>插件 pre_llm_call</span><span>/steer 打断</span><span>网关 ephemeral</span><span>网关 prefill</span><span>MoA 聚合</span><span>cache_control</span><span>系统提示易变层</span><span class="more" onclick="document.getElementById('ch02-hm-inject').classList.add('open')">… 查看全部 12 种 →</span></div>
+      <div class="al">注入示例 · 记忆召回</div>
+      <pre>&lt;memory-context&gt;
+[System note: ...recalled memory context, NOT new user
+input. Treat as authoritative reference data...]
+{recalled text}
+&lt;/memory-context&gt;</pre>
+      <p class="an">追加到当轮 user 消息尾部；只改这一次调用的副本，绝不写回持久化历史（不污染会话库）。</p>
+    </div>
+  </div>
+
+  <div class="modal" id="ch02-cc-inject" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div><div class="mh-t cc">Claude Code · 每轮可注入的约 44 种信号（全表）</div>
+          <div class="mh-s"><b style="color:var(--green)">每轮</b>＝对应子系统开启时每轮都算 &nbsp;·&nbsp; <b style="color:var(--amber)">条件</b>＝变化/事件/模式触发才发 &nbsp;·&nbsp; <b style="color:var(--faint)">特性门</b>＝内部灰度或默认关，外部 build 多半不出现。<b>真正"每轮无条件"发的极少——这正是"44"不该被读成"每轮都塞 44 条"的原因。</b></div>
+        </div>
+        <span class="modal-x" onclick="document.getElementById('ch02-cc-inject').classList.remove('open')">×</span>
+      </div>
+      <div class="modal-body">
+        <div class="mgrp">A · 上下文与用量</div>
+        <div class="ment"><span class="mn">用户上下文</span><span class="mc always">每轮</span><span class="mtrig">CLAUDE.md + 当前日期，拼进合成首条 user 消息；几乎每次请求都带</span></div>
+        <div class="ment"><span class="mn">token / 预算用量</span><span class="mc always">每轮</span><span class="mtrig">主线程且开了用量/预算追踪时，每轮报一次剩余额度</span></div>
+        <div class="ment"><span class="mn">output_style</span><span class="mc cond">条件</span><span class="mtrig">激活了非默认输出风格</span></div>
+        <div class="ment"><span class="mn">压缩提醒</span><span class="mc gate">特性门</span><span class="mtrig">auto-compact 开且上下文渐满</span></div>
+
+        <div class="mgrp">B · 文件与代码变化（readFileState 台账去重）</div>
+        <div class="ment"><span class="mn">文件被改</span><span class="mc cond">条件</span><span class="mtrig">某文件被用户或 linter 改动（mtime 变新）才发</span></div>
+        <div class="ment"><span class="mn">@提及文件 / 目录</span><span class="mc cond">条件</span><span class="mtrig">你 @提及了文件/目录/PDF/MCP 资源；截断与转存另有配套注入</span></div>
+        <div class="ment"><span class="mn">嵌套 CLAUDE.md</span><span class="mc cond">条件</span><span class="mtrig">模型触及含未加载嵌套项目规矩的目录</span></div>
+
+        <div class="mgrp">C · IDE 集成（仅主线程 + 接了 IDE）</div>
+        <div class="ment"><span class="mn">lint / 类型诊断</span><span class="mc cond">条件</span><span class="mtrig">自上轮以来 IDE/LSP 报了新诊断</span></div>
+        <div class="ment"><span class="mn">选中行 / 打开的文件</span><span class="mc cond">条件</span><span class="mtrig">IDE 报告你选了文本 / 打开或聚焦了某文件</span></div>
+
+        <div class="mgrp">D · 任务与模式治理（限流 / 模式激活）</div>
+        <div class="ment"><span class="mn">待办 / 任务提醒</span><span class="mc cond">条件</span><span class="mtrig">待办工具搁置太久，每 10 轮补一次软提醒</span></div>
+        <div class="ment"><span class="mn">plan 模式全套</span><span class="mc cond">条件</span><span class="mtrig">进入/重回/退出 plan 模式、或存在 plan 文件</span></div>
+        <div class="ment"><span class="mn">auto 模式</span><span class="mc cond">条件</span><span class="mtrig">进入/退出自主模式（每 5 轮完整、否则精简）</span></div>
+        <div class="ment"><span class="mn">验证计划提醒</span><span class="mc gate">特性门</span><span class="mtrig">plan 看似完成，每 10 轮催一次调验证工具</span></div>
+
+        <div class="mgrp">E · 记忆与技能</div>
+        <div class="ment"><span class="mn">语义记忆召回</span><span class="mc gate">特性门</span><span class="mtrig">默认关（tengu_moth_copse=false）；开旗后每轮对你输入召回≤5 条</span></div>
+        <div class="ment"><span class="mn">技能指引 / 清单</span><span class="mc cond">条件</span><span class="mtrig">本会话调过技能 / 有可用技能时注入其指引</span></div>
+        <div class="ment"><span class="mn">技能语义发现</span><span class="mc gate">特性门</span><span class="mtrig">实验特性：turn-0 对你输入做技能匹配</span></div>
+
+        <div class="mgrp">F · 钩子 · MCP · Agent</div>
+        <div class="ment"><span class="mn">钩子输出（5 类）</span><span class="mc cond">条件</span><span class="mtrig">异步钩子返回内容 / 拦截命令 / 阻止收工等，各成一条</span></div>
+        <div class="ment"><span class="mn">MCP 指令 / 工具增删</span><span class="mc cond">条件</span><span class="mtrig">MCP server 连/断、可延迟工具集合变化才发（delta）</span></div>
+        <div class="ment"><span class="mn">agent 类型变化 / @提及</span><span class="mc cond">条件</span><span class="mtrig">可用 agent 类型变化，或你 @提及某 agent</span></div>
+        <div class="ment"><span class="mn">后台 agent 状态</span><span class="mc cond">条件</span><span class="mtrig">压缩后报告后台/子任务 agent 的运行/结束</span></div>
+
+        <div class="mgrp">G · 多智能体与其他</div>
+        <div class="ment"><span class="mn">队友信箱 / 团队身份</span><span class="mc gate">特性门</span><span class="mtrig">agent-swarms 开且有未读队友消息</span></div>
+        <div class="ment"><span class="mn">伴生宠物</span><span class="mc gate">特性门</span><span class="mtrig">BUDDY 特性配了 companion</span></div>
+        <div class="ment"><span class="mn">排队命令</span><span class="mc cond">条件</span><span class="mtrig">你在回合中途排了消息，被抽进本轮</span></div>
+        <div class="ment"><span class="mn">跨天 / ultrathink / 关键提醒</span><span class="mc cond">条件</span><span class="mtrig">日历翻篇 / 输入含思考关键词 / 运行时抛出关键提醒</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="ch02-hm-inject" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div><div class="mh-t hm">Hermes · 每轮请求装配的 12 种注入（全表）</div>
+          <div class="mh-s"><b style="color:var(--green)">每轮</b>＝配置了就每轮带 &nbsp;·&nbsp; <b style="color:var(--amber)">条件</b>＝事件/出错触发 &nbsp;·&nbsp; <b style="color:var(--faint)">网关</b>＝仅网关/调用方 opt-in，普通本地跑见不到。</div>
+        </div>
+        <span class="modal-x" onclick="document.getElementById('ch02-hm-inject').classList.remove('open')">×</span>
+      </div>
+      <div class="modal-body">
+        <div class="mgrp">主注入 · 每轮</div>
+        <div class="ment"><span class="mn">系统提示易变层</span><span class="mc always">每轮</span><span class="mtrig">记忆快照/USER.md/时间戳，在缓存的系统提示词内（只在重建时刷新）</span></div>
+        <div class="ment"><span class="mn">cache_control 断点</span><span class="mc always">每轮</span><span class="mtrig">Anthropic 系及若干兼容 provider，每轮打缓存断点</span></div>
+        <div class="ment"><span class="mn">外部记忆召回</span><span class="mc cond">条件</span><span class="mtrig">配了外部记忆 provider（honcho/mem0 等），预取相关片段追加到 user 消息</span></div>
+        <div class="ment"><span class="mn">插件 pre_llm_call</span><span class="mc cond">条件</span><span class="mtrig">注册了插件且其 pre_llm_call 钩子返回内容</span></div>
+
+        <div class="mgrp">主注入 · 网关 / 调用方 opt-in</div>
+        <div class="ment"><span class="mn">ephemeral 系统提示</span><span class="mc gate">网关</span><span class="mtrig">调用方临时追加的系统串（不持久化）</span></div>
+        <div class="ment"><span class="mn">prefill 消息</span><span class="mc gate">网关</span><span class="mtrig">调用方预置消息，插在系统提示后、历史前</span></div>
+        <div class="ment"><span class="mn">MoA 聚合上下文</span><span class="mc gate">网关</span><span class="mtrig">开了 mixture-of-agents，把参考模型输出聚合追加</span></div>
+
+        <div class="mgrp">打断</div>
+        <div class="ment"><span class="mn">/steer 打断</span><span class="mc cond">条件</span><span class="mtrig">上一次调用途中收到带外 /steer 消息，贴在最近工具输出后</span></div>
+
+        <div class="mgrp">出错兜底 · 条件（弱模型常见病）</div>
+        <div class="ment"><span class="mn">空响应恢复</span><span class="mc cond">条件</span><span class="mtrig">模型交白卷，注入合成回合逼它继续</span></div>
+        <div class="ment"><span class="mn">verify-on-stop</span><span class="mc cond">条件</span><span class="mtrig">改了码没验证就想停，注入"先去验证"</span></div>
+        <div class="ment"><span class="mn">pre-verify 续跑</span><span class="mc cond">条件</span><span class="mtrig">pre_verify 钩子改了文件且未超 nudge 上限</span></div>
+        <div class="ment"><span class="mn">坏 JSON 恢复</span><span class="mc cond">条件</span><span class="mtrig">工具调用 JSON 损坏，注入合成错误结果让它自纠</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="guard">
+    <div class="gt">⚠ 防以偏概全 · 这里最容易读错</div>
+    「四十多 vs 八」<b>不等于</b>「CC 的壳做得多、更强」。这个差的根因是<b>产品 vs 底座</b>——CC 是一个接进 IDE、终端 UI、后台任务的<b>产品</b>，才需要那么多产品面信号；Hermes 是一个被你嵌进去的<b>库</b>，动态需求本就少。而且要诚实：CC 那四十多种里，有一大批（snip、cached-microcompact、每轮语义记忆召回、验证代理…）是<b>内部灰度或默认关</b>的，外部默认 build 里根本不出现；Hermes 那八种里也有几种（MoA、prefill、网关注入）只在<b>网关模式</b>才有，普通本地跑一轮根本见不到。<b>这是"长什么样不同"，不是"谁的装配哲学更厚"。</b>
+  </div>
+
+  <div class="sec"><span class="k">Layer 3 · 压缩层</span><h2>满了怎么办：几乎一样的阶梯，只有一家能把它训回权重</h2></div>
+  <p class="body">当请求包快撑爆窗口，压缩阀启动。两家的阶梯几乎是同一条，从轻到重：先做不花钱的确定性瘦身（去重/裁掉超大的旧工具结果、换成一行摘要占位），护住开头的任务锚点和最近的现场，只对<b>中间那一大段</b>下手；实在不够，才叫一个 LLM 把中段摘成一份结构化检查点。连"谁来写这份摘要"都一样——<b>都是外包给一个 LLM</b>（CC 用同一个通用主模型，摘要提示词打头就一句「You are a helpful AI assistant tasked with summarizing conversations」、再接一份 9 段模板；Hermes 默认也用主模型、可选配一个便宜的辅助模型）。<b>到这一步为止，两家都是纯改壳。</b></p>
+
+  <div class="cmpl">
+    <div class="chd"><div class="axis">阶梯 · 由轻到重</div><div class="cc">Claude Code</div><div class="hm">Hermes</div></div>
+    <div class="tier">
+      <div class="tlab">① 何时动手</div>
+      <div class="cell cc">派生阈值≈有效窗口−13k（200k 模型约 83% 满）才触发</div>
+      <div class="cell hm">有效预算约 50% 就触发、地板 64k、小窗退到 85%——整体更早、更保守</div>
+    </div>
+    <div class="tier">
+      <div class="tlab">② 免费先省<span style="font-weight:400;color:var(--faint);font-size:11px;margin-top:3px">都保首尾·只动中段·无 LLM</span></div>
+      <div class="cell cc">
+        <ul class="means">
+          <li><span class="mm">① 工具结果预算</span>：单条结果超上限（约 50k 字符）就落盘、正文只留 <code>2KB 预览</code></li>
+          <li><span class="mm">② snip-compact</span>：掐中段、保首尾（ant-only 内部特性）</li>
+          <li><span class="mm">③ micro-compact</span>：清 8 类工具的旧结果、留最近 5 条，换占位 <code>[Old tool result content cleared]</code></li>
+        </ul>
+      </div>
+      <div class="cell hm">
+        <ul class="means">
+          <li><span class="mm">一步做完</span>：① 相同结果去重（旧的换回指）② 老输出压一行（「命令 → 退出码 → 行数」）③ 截断超大参数，换占位 <code>[Old tool output cleared…]</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="tier heavy">
+      <div class="tlab">③ 最后一招<span class="tag">调 LLM 写摘要</span></div>
+      <div class="cell cc">让<b>通用主模型</b>写 <b>9 段式</b>摘要 → 画边界丢原文 → 读回最近文件<span class="own">外包给 LLM · 纯改壳</span></div>
+      <div class="cell hm">让<b>主模型/便宜辅助模型</b>把中段填进<b>结构化模板（13 小节）</b><span class="own">同样外包给 LLM · 也是改壳</span></div>
+    </div>
+    <span class="receipts" onclick="document.getElementById('ch02-compress-detail').classList.add('open')"><span class="tie">↳</span><span class="cp">看两家摘要 prompt 的逐字原文（外包给 LLM 的证据）</span><span class="go">→</span></span>
+    <div class="tier">
+      <div class="tlab">④ 下次再满</div>
+      <div class="cell cc">再触发一次整段压缩</div>
+      <div class="cell hm">迭代更新上一份摘要，而非从零重写</div>
+    </div>
+    <div class="cmplcap">两家骨架相同——<b>能省则先省、最后一招才真调 LLM 写摘要，而且都只是外包给一个通用/辅助模型</b>。<b style="color:var(--green)">第 ③ 级在运行时并没有分出"改壳 vs 改模型"</b>——真正的分野不在这条阶梯上，而在阶梯<b>之外</b>，见下。</div>
+  </div>
+
+  <p class="body">真正的分叉不在运行时这条阶梯上，而在阶梯<b>之外</b>。<span class="hm">Hermes</span> 仓库里另有一条<b>独立的离线管线</b>（<code>batch_runner</code> + <code>trajectory_compressor</code>），专门把跑完的任务轨迹压缩、做成训练数据，教模型"看到一段压缩摘要后照常继续干活"。铁证不在运行时那条阀里，而在这条离线管线本身：它把跑完的轨迹压成训练样本，还往训练数据里注入一句 notice，直白告诉模型「你之前的一些工具响应可能被摘要过」——教它把「被压过的历史」当成正常。</p>
+
+  <div class="marker">
+    <div class="mpanel tr">
+      <div class="ml">训练数据 · 注入的 notice</div>
+      <div class="ms">教模型「摘要过的历史是正常的」 · trajectory_compressor.py:108-110</div>
+      <pre>summary_notice_text =
+  <span class="hit">"Some of your previous tool responses
+   may be summarized to preserve context."</span></pre>
+    </div>
+    <div class="mjoin"><span class="eq">＋</span></div>
+    <div class="mpanel tr">
+      <div class="ml">训练摘要 · 怎么写</div>
+      <div class="ms">中段被一条摘要替换、后面工具调用照旧 · trajectory_compressor.py:616-631</div>
+      <pre>This summary will replace these turns in
+the conversation history.
+...
+Write only the summary, starting with
+  <span class="hit">"[CONTEXT SUMMARY]:"</span> prefix.</pre>
+    </div>
+  </div>
+  <p class="marker-cap">这条离线管线把跑完的任务轨迹压成训练样本，<b>训练样本本身就在教模型：看到摘要，别停、接着干</b>。它产出的摘要用 <code>[CONTEXT SUMMARY]:</code> 标记——正是运行时压缩器<b>至今仍认得</b>的 legacy 格式（<code>context_compressor.py:71</code>；运行时如今实际吐的是更长的「<code>[CONTEXT COMPACTION — REFERENCE ONLY]</code>」交接前缀）。两者不是"同一个字符串"，但<b>同源</b>：运行时保留着对训练标记的识别。这是 CC 结构上不可能有的东西——它不拥有模型，压缩这件事只能一路改壳到底。</p>
+  <div class="marker-bound"><b>诚实边界：</b>能证到的，只到「这条训练管线存在、且它和运行时压缩器同源（运行时还认得它那个 legacy 标记）」；<b>证不到</b>的是——线上跑的那个模型权重，是否真在这批数据上训练过、训了多少。所以这根"第二根杠杆"必须诚实标注：<b>仓库内到"管线与同源"为止，权重级效果是意图、非本仓库可证</b>。但方向清楚：拥有模型，就多出这一根"把壳里的形态训回权重"的杠杆——正是轴一那句「拥有模型才能动第二根杠杆」在输入侧的落点。</div>
+
+  <div class="modal" id="ch02-compress-detail" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div><div class="mh-t">最后一招 · 调 LLM 写摘要：prompt 与输出结构完整对照</div>
+          <div class="mh-s">阶梯里 ③ 那一步——真调 LLM 把中段摘成一份检查点。先看两家摘要的<b>输出结构</b>（谁把历史拆得更细），再看逐字抄自源码的<b>完整 prompt</b>。</div>
+        </div>
+        <span class="modal-x" onclick="document.getElementById('ch02-compress-detail').classList.remove('open')">×</span>
+      </div>
+      <div class="modal-body">
+
+        <div class="mgrp">输出结构对照：谁更细</div>
+        <div class="struct">
+          <div class="sc cc">
+            <div class="sch"><span>Claude Code · 输出 9 段</span><span class="cnt">9 节</span></div>
+            <ol>
+              <li>Primary Request and Intent</li>
+              <li>Key Technical Concepts</li>
+              <li>Files and Code Sections</li>
+              <li>Errors and fixes</li>
+              <li>Problem Solving</li>
+              <li>All user messages</li>
+              <li>Pending Tasks</li>
+              <li>Current Work</li>
+              <li>Optional Next Step（须带原话引用）</li>
+            </ol>
+          </div>
+          <div class="sc hm">
+            <div class="sch"><span>Hermes · 结构化检查点</span><span class="cnt">13 节</span></div>
+            <ol>
+              <li>Historical Task Snapshot（最重要·逐字抄）</li>
+              <li>Goal</li>
+              <li class="extra">Constraints &amp; Preferences</li>
+              <li>Completed Actions</li>
+              <li>Active State</li>
+              <li class="extra">Historical In-Progress State</li>
+              <li>Blocked</li>
+              <li>Key Decisions</li>
+              <li class="extra">Resolved Questions</li>
+              <li>Historical Pending User Asks</li>
+              <li class="extra">Relevant Files</li>
+              <li class="extra">Historical Remaining Work</li>
+              <li>Critical Context</li>
+            </ol>
+          </div>
+        </div>
+        <p class="struct-note">「更细」在哪一眼可见：<b>橙色</b>那几节是 Hermes 拆得比 CC 更碎的地方——它把「约束/偏好」「已答问题 vs 未答请求」「进行中 vs 待完成」「相关文件」都单列，还专门把一批标成「Historical（历史·别再去做）」，因为它更怕弱模型压缩后把旧任务当成新指令。</p>
+
+        <div class="mgrp" style="margin-top:20px">完整 prompt：逐字抄自源码</div>
+        <div class="mart cc">
+          <div class="mal">Claude Code · 完整摘要 prompt（可滚动 · 逐字抄自 prompt.ts）</div>
+          <pre>【系统提示】
+You are a helpful AI assistant tasked with summarizing conversations.
+
+【用户提示 · 完整】
+CRITICAL: Respond with TEXT ONLY. Do NOT call any tools.
+
+- Do NOT use Read, Bash, Grep, Glob, Edit, Write, or ANY other tool.
+- You already have all the context you need in the conversation above.
+- Tool calls will be REJECTED and will waste your only turn — you will fail the task.
+- Your entire response must be plain text: an &lt;analysis&gt; block followed by a &lt;summary&gt; block.
+
+Your task is to create a detailed summary of the conversation so far, paying close attention to the user&#x27;s explicit requests and your previous actions.
+This summary should be thorough in capturing technical details, code patterns, and architectural decisions that would be essential for continuing development work without losing context.
+
+Before providing your final summary, wrap your analysis in &lt;analysis&gt; tags to organize your thoughts and ensure you&#x27;ve covered all necessary points. In your analysis process:
+
+1. Chronologically analyze each message and section of the conversation. For each section thoroughly identify:
+   - The user&#x27;s explicit requests and intents
+   - Your approach to addressing the user&#x27;s requests
+   - Key decisions, technical concepts and code patterns
+   - Specific details like:
+     - file names
+     - full code snippets
+     - function signatures
+     - file edits
+   - Errors that you ran into and how you fixed them
+   - Pay special attention to specific user feedback that you received, especially if the user told you to do something differently.
+2. Double-check for technical accuracy and completeness, addressing each required element thoroughly.
+
+Your summary should include the following sections:
+
+1. Primary Request and Intent: Capture all of the user&#x27;s explicit requests and intents in detail
+2. Key Technical Concepts: List all important technical concepts, technologies, and frameworks discussed.
+3. Files and Code Sections: Enumerate specific files and code sections examined, modified, or created. Pay special attention to the most recent messages and include full code snippets where applicable and include a summary of why this file read or edit is important.
+4. Errors and fixes: List all errors that you ran into, and how you fixed them. Pay special attention to specific user feedback that you received, especially if the user told you to do something differently.
+5. Problem Solving: Document problems solved and any ongoing troubleshooting efforts.
+6. All user messages: List ALL user messages that are not tool results. These are critical for understanding the users&#x27; feedback and changing intent.
+7. Pending Tasks: Outline any pending tasks that you have explicitly been asked to work on.
+8. Current Work: Describe in detail precisely what was being worked on immediately before this summary request, paying special attention to the most recent messages from both user and assistant. Include file names and code snippets where applicable.
+9. Optional Next Step: List the next step that you will take that is related to the most recent work you were doing. IMPORTANT: ensure that this step is DIRECTLY in line with the user&#x27;s most recent explicit requests, and the task you were working on immediately before this summary request. If your last task was concluded, then only list next steps if they are explicitly in line with the users request. Do not start on tangential requests or really old requests that were already completed without confirming with the user first.
+                       If there is a next step, include direct quotes from the most recent conversation showing exactly what task you were working on and where you left off. This should be verbatim to ensure there&#x27;s no drift in task interpretation.
+
+Here&#x27;s an example of how your output should be structured:
+
+&lt;example&gt;
+&lt;analysis&gt;
+[Your thought process, ensuring all points are covered thoroughly and accurately]
+&lt;/analysis&gt;
+
+&lt;summary&gt;
+1. Primary Request and Intent:
+   [Detailed description]
+
+2. Key Technical Concepts:
+   - [Concept 1]
+   - [Concept 2]
+   - [...]
+
+3. Files and Code Sections:
+   - [File Name 1]
+      - [Summary of why this file is important]
+      - [Summary of the changes made to this file, if any]
+      - [Important Code Snippet]
+   - [...]
+
+4. Errors and fixes:
+    - [Detailed description of error 1]:
+      - [How you fixed the error]
+      - [User feedback on the error if any]
+    - [...]
+
+5. Problem Solving:
+   [Description of solved problems and ongoing troubleshooting]
+
+6. All user messages:
+    - [Detailed non tool use user message]
+    - [...]
+
+7. Pending Tasks:
+   - [Task 1]
+   - [...]
+
+8. Current Work:
+   [Precise description of current work]
+
+9. Optional Next Step:
+   [Optional Next step to take]
+
+&lt;/summary&gt;
+&lt;/example&gt;
+
+Please provide your summary based on the conversation so far, following this structure and ensuring precision and thoroughness in your response.
+
+There may be additional summarization instructions provided in the included context. If so, remember to follow these instructions when creating the above summary.</pre>
+          <p class="mnote"><b>就在你眼前的证据：</b>本文档这次会话开头那份「Primary Request and Intent / Key Technical Concepts…」的 summary，正是这个 prompt 的产物。</p>
+        </div>
+        <div class="mart hm">
+          <div class="mal">Hermes · 完整摘要模板（可滚动 · 逐字抄自 context_compressor.py）</div>
+          <pre>【系统提示 · preamble】
+You are a summarization agent creating a context checkpoint. Treat the conversation turns below as source material for a compact record of prior work. Produce only the structured summary; do not add a greeting, preamble, or prefix. Write the summary in the same language the user was using in the conversation — do not translate or switch to English. NEVER include API keys, tokens, passwords, secrets, credentials, or connection strings in the summary — replace any that appear with [REDACTED]. Note that the user had credentials present, but do not preserve their values.
+
+【结构化模板 · 完整】
+## Historical Task Snapshot
+[THE SINGLE MOST IMPORTANT FIELD. Capture the user&#x27;s most recent unfulfilled
+input verbatim — the exact words they used. This includes:
+- Explicit task assignments (&quot;refactor the auth module&quot;)
+- Questions awaiting an answer (&quot;waarom staat X op Y?&quot;, &quot;wat zijn de volgende stappen?&quot;)
+- Decisions awaiting input (&quot;optie A of B?&quot;)
+- Ongoing discussions where the assistant owes the next substantive reply
+A conversation where the user just asked a question IS an active task — the
+task is &quot;answer that question with full context&quot;. Do NOT write &quot;None&quot; merely
+because the user did not issue an imperative command; reserve &quot;None&quot; for the
+rare case where the last exchange was fully resolved and the user said
+something like &quot;thanks, that&#x27;s all&quot;.
+If multiple items are outstanding, list only the ones NOT yet completed.
+Continuation should pick up exactly here. Examples:
+&quot;User asked: &#x27;Now refactor the auth module to use JWT instead of sessions&#x27;&quot;
+&quot;User asked: &#x27;Waarom stond provider ineens op openrouter?&#x27; — needs investigation + answer&quot;
+&quot;User chose option A; awaiting implementation of step 2&quot;
+If the user&#x27;s most recent message was a reverse signal (stop, undo, roll
+back, never mind, just verify, change of topic) that supersedes earlier
+work, write the reverse signal verbatim and DO NOT carry forward the
+cancelled task. Example: &quot;User asked: &#x27;Stop the i18n refactor and just
+verify the current diff&#x27; — earlier i18n in-flight work is cancelled.&quot;
+If no outstanding task exists, write &quot;None.&quot;]
+
+## Goal
+[What the user is trying to accomplish overall]
+
+## Constraints &amp; Preferences
+[User preferences, coding style, constraints, important decisions]
+
+## Completed Actions
+[Numbered list of concrete actions taken — include tool used, target, and outcome.
+Format each as: N. ACTION target — outcome [tool: name]
+Example:
+1. READ config.py:45 — found `==` should be `!=` [tool: read_file]
+2. PATCH config.py:45 — changed `==` to `!=` [tool: patch]
+3. TEST `pytest tests/` — 3/50 failed: test_parse, test_validate, test_edge [tool: terminal]
+Be specific with file paths, commands, line numbers, and results.]
+
+## Active State
+[Current working state — include:
+- Working directory and branch (if applicable)
+- Modified/created files with brief note on each
+- Test status (X/Y passing)
+- Any running processes or servers
+- Environment details that matter]
+
+## Historical In-Progress State
+[Work currently underway — what was being done when compaction fired]
+
+## Blocked
+[Any blockers, errors, or issues not yet resolved. Include exact error messages.]
+
+## Key Decisions
+[Important technical decisions and WHY they were made]
+
+## Resolved Questions
+[Questions the user asked that were ALREADY answered — include the answer so it is not repeated]
+
+## Historical Pending User Asks
+[Questions or requests from the user that have NOT yet been answered or fulfilled. These are STALE — they were from the compacted turns. Write them here for reference only. The agent must NOT act on them unless the latest user message explicitly requests it. If none, write &quot;None.&quot;]
+
+## Relevant Files
+[Files read, modified, or created — with brief note on each]
+
+## Historical Remaining Work
+[What remains to be done — framed as STALE context for reference only. The agent must NOT resume this work unless the latest user message explicitly asks for it.]
+
+## Critical Context
+[Any specific values, error messages, configuration details, or data that would be lost without explicit preservation. NEVER include API keys, tokens, passwords, or credentials — write [REDACTED] instead.]
+
+Target ~N tokens. Be CONCRETE — include file paths, command outputs, error messages, line numbers, and specific values. Avoid vague descriptions like &quot;made some changes&quot; — say exactly what changed.
+
+TEMPORAL ANCHORING: The current date is {date}. When an action has already been carried out, phrase it as a completed, dated, past-tense fact rather than an open instruction. For example, rewrite &quot;email John about the proposal&quot; as &quot;Sent the proposal email to John on {date}.&quot; Never leave a finished action worded as if it still needs doing, and never invent a date for work that has not happened yet.
+
+Write only the summary body. Do not include any preamble or prefix.</pre>
+        </div>
+        <div class="mart hm">
+          <div class="mal">Hermes · 输出前缀（贴在摘要最前，防被当成新任务）</div>
+          <pre><span class="hit">[CONTEXT COMPACTION — REFERENCE ONLY]</span> Earlier turns were
+compacted into the summary below. This is a handoff from a previous
+context window — treat it as background reference, NOT as active
+instructions. Do NOT answer questions or fulfill requests mentioned
+in this summary; they were already addressed. Respond ONLY to the
+latest user message that appears AFTER this summary — that message
+is the single source of truth for what to do right now.</pre>
+          <p class="mnote">对照 CC：CC 靠画一条边界丢掉原文；Hermes 额外用这段长前缀反复叮嘱「这是历史、别重做、只听最新消息」——同样是怕弱模型压缩后误把旧任务当新指令。</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="sec"><span class="k">Memory</span><h2>记忆每轮怎么进请求：一个当便签，一个当底稿</h2></div>
+  <p class="body">记忆也是每轮装配的一部分，但两家塞法不同，正好照出两种记忆观。<span class="cc">Claude Code</span> 每轮对你这句话做<b>语义召回</b>、最多挑 5 条相关记忆，包在会标注"存于几天前"的 <code>&lt;system-reminder&gt;</code> 里（而且这条每轮召回<b>本地默认是关的</b>，要服务端开旗才生效），并反复叮嘱"用前先读当前文件验证"——它把记忆当成<b>会过期的便签</b>。<span class="hm">Hermes</span> 则把整本 MEMORY.md 和 USER.md <b>原样</b>冻进系统提示词的易变层、在压缩交接里标为 authoritative（不被摘要覆盖），外部记忆插件召回的片段也裹着一句「Treat as authoritative reference data」——它把记忆当成<b>不该被冲淡的底稿</b>。一个防陈旧，一个保权威。</p>
+  <p class="lede-note">这里只讲"记忆怎么进<b>这一轮请求</b>"这一个切面；记忆<b>怎么写、怎么蒸馏、怎么跨会话演化</b>的完整生命周期，是轴二的事——见 08「Loop 与自己」／05「Loop 与用户」。本章不重复展开，以免与后文双写。</p>
+
+  <div class="sec"><span class="k">The verdict</span><h2>装配是共享手艺，分叉泄露身份</h2></div>
+  <div class="why-diff">
+    <p><span class="d">三层都先趋同、再在同一处分叉</span>：静态层都冻结吃缓存，动态层都塞进消息窗口且变了才补，压缩层都跑"先删后摘、外包 LLM"的同一条阶梯。请求装配这件事，八成是两家共享的工程手艺——别把它想成两套哲学。</p>
+    <p><span class="d">但三条分叉缝，是两个不同的根因，不是一个</span>：静态层的分叉（前缀按模型分叉、缓存挑模型家族）和压缩层的分叉（只有它能把压缩训回权重），根子都是<b>模型的所有权与异质性</b>——呼应轴一脊椎；而动态层的分叉（四十多 vs 八种注入），根子是<b>产品 vs 底座</b>，是另一回事。我<b>没有</b>把三层硬收进一个漂亮的单一根因——那样会把动态层那条缝掰歪。</p>
+    <p><span class="d">所以两家在输入侧的"身份"是</span>：<span class="cc">Claude Code</span> 首先是个<b>产品</b>（它的动态层为 IDE/终端/任务而生），<span class="hm">Hermes</span> 首先是个<b>面对模型动物园的拥有者</b>（它的静态层为异质模型而分叉、它的压缩层为自家权重留了训练接口）。同一个请求包，装法八成一样；<b>不一样的地方，恰好各自暴露了自己是什么。</b></p>
+  </div>
+
+  <div class="sec"><span class="k">Loose ends</span><h2>悬而未决：八条别被主线吞掉的边界</h2></div>
+  <ul class="open">
+    <li><b>[边界]</b> "CC 约 44 种注入"是<b>满配上限</b>，外部默认 build 远没这么多——snip、cached-microcompact、每轮语义记忆召回、验证代理等为内部灰度或默认关；Hermes 的 8 种也含 MoA/prefill/网关注入等只在网关模式出现的项。<b>别把"能注入的种类"当成"每轮都注入"。</b></li>
+    <li><b>[HM]</b> Hermes 那层叫"volatile 易变"的其实<b>名不副实</b>：记忆快照/USER.md/时间戳虽叫易变，却冻在缓存的系统提示词内部，只在压缩/重建时才刷新，并非每轮变；真正每轮变的在消息窗口。所以"静态/动态"并不等于"系统提示词/volatile 层"。</li>
+    <li><b>[CC]</b> "静态前缀"也不是整个系统提示词：分界符之后的记忆索引/环境/语言/输出风格虽在同一个 system 数组里，却按会话变、不进全局缓存。CLAUDE.md 更是根本不在系统提示词正文里，而是搭在一条<b>合成的首条 user 消息</b>上；git 状态又落在系统提示词尾部——三样东西分居三处。</li>
+    <li><b>[CC]</b> prompt cache 其实有<b>三套模式</b>（自家全局缓存 / 含 MCP / 第三方），断点位置和块数都不同；而且"缓存断点检测器"只是事后监控 break 原因、不负责放断点。"缓存断点打在哪"没有单一答案。</li>
+    <li><b>[边界·压缩]</b> CC 的压缩不止"整段摘要"一种：默认的 auto-compact 确实丢中段原文，但还有 partial 压缩（保留首尾原文消息）、session-memory、context-collapse 等路径（多为手动或特性门后）。"CC 只会整段摘要"只在默认路径成立。</li>
+    <li><b>[HM]</b> 别把运行时压缩器和训练管线当成同一套：它们是<b>两个独立模块、代码不共用</b>，也<b>不吐同一个字符串</b>——运行时如今实际吐「<code>[CONTEXT COMPACTION — REFERENCE ONLY]</code>」长前缀，训练管线吐「<code>[CONTEXT SUMMARY]:</code>」，后者只是运行时<b>至今仍认得的 legacy 格式</b>。这道"同源"痕迹能证的是格式同源与管线存在，<b>证不到</b>线上权重真训过——第二根杠杆的权重级效果是意图、非本仓库可证。</li>
+    <li><b>[HM]</b> Hermes 的请求其实有<b>四套 api_mode</b>（chat-completions / codex / anthropic / bedrock），序列化路径各不同，本章讲的是默认 chat-completions 那条；给 GPT-5/Codex 的系统提示词还会以 <code>developer</code> 角色而非 <code>system</code> 角色发出。"一次请求"并不是单一形状。</li>
+    <li><b>[边界]</b> 压缩触发阈值两家都是<b>派生值</b>、不是固定百分比：CC≈有效窗口−13k（200k 模型约 83%），Hermes≈有效预算 50%、地板 64k、小窗退到 85%。数字差别背后是"多晚才肯动手"的不同保守度——Hermes 明显更早出手。</li>
+  </ul>
+
+  <nav style="max-width:1080px;margin:40px auto 0;padding:16px 28px;border-top:1px solid #2a3342;text-align:center;font-size:13px;color:#8b98a9">导读：<a href="SYN-inside-story.html" style="color:var(--blue)">综合①·一个 Loop 是怎么设计的</a> · <a href="01-inside-control-loop.html" style="color:var(--blue)">01 控制侧</a> · <b>02 输入侧</b> · <a href="03-inside-output.html" style="color:var(--blue)">03 输出行动侧</a></nav>
+
+  <div class="foot">
+    代码溯源（不在正文展示，仅存档）：<br><br>
+    <b>Claude Code：</b>
+    <code>src/constants/prompts.ts:175-442 静态前缀顺序</code> · <code>:573 __SYSTEM_PROMPT_DYNAMIC_BOUNDARY__</code> · <code>:491-576 boundary 后动态段</code> · <code>:450-489 SIMPLE/PROACTIVE 装配分支</code>&nbsp;&nbsp;
+    <code>src/services/api/claude.ts:1358-1369 请求层拼装</code> · <code>:3213-3237 系统提示断点</code> · <code>:3078-3089 恰好一个消息级断点</code> · <code>:1118-1255 tool-search 延迟加载</code>&nbsp;&nbsp;
+    <code>src/services/api/api.ts:449-474 CLAUDE.md 注入首条 user</code> · <code>:321-435 缓存断点三模式</code>&nbsp;&nbsp;
+    <code>src/utils/context.ts:116-189 git status/用户上下文</code>&nbsp;&nbsp;
+    <code>src/utils/attachments.ts:743-1003 getAttachments</code> · <code>:2117 外部改动文件</code> · <code>:2854 诊断</code> · <code>:1415-1443 date_change</code> · <code>:3266-3309 todo</code> · <code>:2196-2241/2365-2370 语义召回(tengu_moth_copse 默认关)</code>&nbsp;&nbsp;
+    <code>src/utils/messages.ts:3097 system-reminder wrapper · :3453-4278 渲染</code>&nbsp;&nbsp;
+    <code>src/query.ts:369-468 压缩阶梯次序</code>&nbsp;&nbsp;
+    <code>src/utils/toolResultStorage.ts:189-199 2KB 预览</code> · <code>microCompact.ts:36/461 · timeBasedMCConfig.ts:33 keepRecent=5</code> · <code>autoCompact.ts:72-91 阈值 · :70 熔断3</code> · <code>compact.ts:1302 摘要提示词</code>&nbsp;&nbsp;
+    <code>src/memdir/memdir.ts:34 MEMORY.md · findRelevantMemories.ts:17-19 选择器</code>
+    <br><br>
+    <b>Hermes Agent：</b>
+    <code>agent/system_prompt.py:10-20/147-461 三层 stable/context/volatile</code> · <code>:127-129 缓存保温注释</code> · <code>:224-304 模型名分叉</code> · <code>:423-461 volatile 内含 · 时间戳只到天</code> · <code>:496-504 压缩后重载</code>&nbsp;&nbsp;
+    <code>agent/conversation_loop.py:782-825 每轮重建副本</code> · <code>:826-846 护缓存注入纪律</code> · <code>:883-888 cache_control</code> · <code>:909-939 非 Anthropic KV 规范化</code>&nbsp;&nbsp;
+    <code>agent/prompt_caching.py:1-79 system_and_3 布局</code>&nbsp;&nbsp;
+    <code>agent/turn_context.py:485-492 记忆预取一次/轮</code>&nbsp;&nbsp;
+    <code>agent/memory_manager.py:336-350 memory-context 块</code> · <code>agent/agent_init.py:1199 MEMORY/USER 进 volatile</code>&nbsp;&nbsp;
+    <code>tools/tool_search.py:63-114/255-258 10% 阈值延迟加载</code>&nbsp;&nbsp;
+    <code>agent/context_compressor.py:44 运行时 REFERENCE ONLY 前缀 · :71 legacy [CONTEXT SUMMARY] 标记</code> · <code>:862-902 阈值 · :1130-1291 免费瘦身 · :1593-1790 结构化摘要 · :912 summary_model 可配</code>&nbsp;&nbsp;
+    <code>batch_runner.py:1-25 训练轨迹产出</code> · <code>trajectory_compressor.py:108-110 notice · :597-631/616-631 训练 [CONTEXT SUMMARY] 标记+摘要提示词</code>
+  </div>
+
+</div>
+</div>
+
+<script>
+/* ============ 复用脚本（组件化 stepper + mermaid 离线守卫；与 build.py 的 SHARED_JS 同一段逻辑）============ */
+/* 离线守卫：CDN 掉线时 mermaid 未定义，不加守卫会抛 ReferenceError 掐死整段脚本。本章无 mermaid 实体，守卫仍保留以防合订本注入。 */
+var MERMAID_OK = (typeof mermaid !== 'undefined');
+if(MERMAID_OK){
+  mermaid.initialize({startOnLoad:true,theme:"dark",
+    flowchart:{nodeSpacing:30,rankSpacing:38,padding:10,useMaxWidth:true},
+    themeVariables:{
+    background:"#1e2531",primaryColor:"#161b26",primaryBorderColor:"#2a3342",
+    primaryTextColor:"#e6edf3",lineColor:"#8b98a9",fontSize:"15px"}});
+}
+/* 组件化 stepper：本章暂无 stepper，脚本空转无害（未来加图照抄批一约定）。 */
+document.querySelectorAll('.stepper').forEach(function(st){
+  var frames=[].slice.call(st.querySelectorAll('.frame'));
+  var caps=[]; var cj=st.querySelector('.captions'); if(cj){try{caps=JSON.parse(cj.textContent);}catch(e){}}
+  var cap=st.querySelector('.caption'), cnt=st.querySelector('.count'), dots=st.querySelector('.dots');
+  var cur=0;
+  if(dots){frames.forEach(function(_,i){var d=document.createElement('span');d.className='dot'+(i?'':' on');dots.appendChild(d);});}
+  function render(){
+    frames.forEach(function(f,i){f.classList.toggle('on',i===cur);});
+    if(cap&&caps[cur]!=null)cap.innerHTML=caps[cur];
+    if(cnt)cnt.textContent=(cur+1)+' / '+frames.length;
+    if(dots)[].slice.call(dots.querySelectorAll('.dot')).forEach(function(d,i){d.classList.toggle('on',i===cur);});
+  }
+  var p=st.querySelector('.prev'), n=st.querySelector('.next');
+  if(p)p.onclick=function(){cur=Math.max(0,cur-1);render();};
+  if(n)n.onclick=function(){cur=Math.min(frames.length-1,cur+1);render();};
+  render();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>轴一 · 控制侧 · 核心 Agent Loop</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+/* ============ 设计系统（单章自包含拷贝；合订本由 build.py 从 _design-system.html 单一真相注入）============ */
+:root{
+  --bg:#0d1017; --surface:#161b26; --surface-2:#1e2531; --border:#2a3342;
+  --text:#e6edf3; --muted:#8b98a9; --faint:#5a6675;
+  --blue:#4b8bf5; --green:#3fb950; --purple:#a371f7; --amber:#d9a441; --red:#f0603a;
+  --radius:14px; --maxw:1080px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Inter,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:48px 28px 120px}
+a{color:var(--blue);text-decoration:none}
+
+/* 顶部：badge + 标题 + 副标题 + chips */
+.eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.badge{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
+  padding:4px 10px;font-size:13px;font-weight:700;letter-spacing:.5px;color:var(--muted)}
+.tag{font-size:13px;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 40%,transparent);
+  border-radius:999px;padding:3px 12px}
+h1{font-size:34px;margin:.1em 0 .15em;letter-spacing:-.5px}
+.subtitle{font-size:18px;color:var(--muted);margin:0 0 16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.chip{background:var(--surface);border:1px solid var(--border);border-radius:999px;
+  padding:4px 12px;font-size:13px;color:var(--muted)}
+
+/* 一句话核心洞察：渐变高亮框 */
+.thesis{background:linear-gradient(120deg,#12241f,#0f1e2e);border:1px solid #234;
+  border-left:4px solid var(--green);border-radius:12px;padding:18px 22px;margin:28px 0 8px;font-size:17px}
+.thesis b{color:var(--green)}
+
+/* 分节标题 */
+h2{font-size:24px;margin:52px 0 6px;padding-top:18px;border-top:1px solid var(--border)}
+h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
+.lead{color:var(--muted);margin:0 0 20px}
+
+/* 卡片 / 机制块 */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin:16px 0}
+.card h3{margin:0 0 6px;font-size:18px}
+.card .why{color:var(--muted);font-size:15px}
+
+/* “问题”叙事块（讲具体故事） */
+.story{background:var(--surface);border:1px dashed var(--border);border-radius:12px;padding:18px 22px;color:var(--muted)}
+.story b{color:var(--text)}
+
+/* Mermaid 图容器 */
+.diagram{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;
+  padding:20px;margin:16px 0;overflow:auto;text-align:center}
+.diagram .cap{color:var(--faint);font-size:13px;margin-top:10px}
+.flow2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
+.flow2 .diagram{margin:0;display:flex;flex-direction:column}
+.flow2 .diagram h3{margin:0 0 6px;font-size:16px}
+.flow2 .diagram .dlead{color:var(--muted);font-size:13px;margin:0 0 12px;text-align:left}
+.flow2 .diagram .mermaid{flex:1;display:flex;align-items:center;justify-content:center;min-width:0}
+@media(max-width:820px){.flow2{grid-template-columns:1fr}}
+
+/* 分步演示 stepper（Hero 机制用） */
+.stepper{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:0;overflow:hidden;margin:18px 0}
+.stepper .stage{padding:26px;min-height:200px;display:flex;align-items:center;justify-content:center}
+.stepper .frame{display:none;width:100%}
+.stepper .frame.on{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.stepper .caption{background:color-mix(in srgb,var(--blue) 14%,transparent);
+  border-top:1px solid var(--border);padding:14px 22px;font-size:15px}
+.stepper .caption b{color:var(--blue)}
+.ctrl{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid var(--border)}
+.ctrl button{background:var(--surface);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:6px 14px;cursor:pointer;font-size:14px}
+.ctrl button:hover{border-color:var(--blue)}
+.dots{display:flex;gap:6px}.dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+.dot.on{background:var(--blue)}
+.count{color:var(--muted);font-size:13px}
+/* stepper 里的盒子（画“进程/上下文”这类概念用） */
+.box{border:1.5px solid var(--border);border-radius:10px;padding:16px;background:var(--bg)}
+.box.blue{border-color:var(--blue)} .box.purple{border-color:var(--purple)} .box.dim{opacity:.4}
+.box .t{font-weight:700;margin-bottom:8px} .box code{color:var(--muted);font-size:13px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* 对比块（产品逻辑，非技术表格） */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+.compare .side{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.compare .side.cc{border-top:3px solid var(--blue)}
+.compare .side.hm{border-top:3px solid var(--purple)}
+.compare .side h4{margin:0 0 8px;font-size:15px;color:var(--muted)}
+.verdict{background:var(--surface-2);border:1px solid var(--border);border-left:4px solid var(--amber);
+  border-radius:10px;padding:14px 20px;margin-top:12px}
+.verdict b{color:var(--amber)}
+
+/* 悬而未决 */
+.open li{color:var(--muted);margin:6px 0}
+.foot{margin-top:60px;color:var(--faint);font-size:13px;border-top:1px solid var(--border);padding-top:16px}
+
+/* 维度小标题 + 单组对比（综合篇用） */
+.matrix-row{margin:22px 0}
+.matrix-row h3{font-size:16px;margin:0 0 10px;color:var(--text)}
+.matrix-row h3 .n{color:var(--faint);font-weight:400;margin-right:8px}
+
+/* 多维对照矩阵：左列维度名 + CC/Hermes 两列答案（多行对比时比堆叠 .compare 更好扫读） */
+.matrix{display:grid;grid-template-columns:minmax(112px,1fr) 1.9fr 1.9fr;
+  gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:16px 0}
+.matrix>div{background:var(--surface);padding:11px 15px;font-size:14px;line-height:1.55}
+.matrix .mh{background:var(--surface-2);font-weight:700;font-size:13px;color:var(--muted)}
+.matrix .mh.cc{color:var(--blue)} .matrix .mh.hm{color:var(--purple)}
+.matrix .dim{background:var(--surface-2);font-weight:600;color:var(--text)}
+@media(max-width:760px){.matrix{grid-template-columns:1fr 1.4fr 1.4fr;font-size:12.5px}}
+</style>
+<style class="bespoke">
+/* ============ 第 01 章专属排版（scoped 于 .ch01；build.py 收进合订本 head，不污染共享系统、不泄漏别章）============ */
+.ch01{--col:100%}
+
+/* Hero 硬指标行 —— 小字 mono 感，替代装饰性 chips */
+.ch01 .metrics{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12.5px;letter-spacing:.02em;color:var(--muted);margin:4px 0 26px;line-height:1.7}
+.ch01 .metrics b{color:var(--text);font-weight:600}
+
+/* 大字引文式 lede —— 不进盒子，让核心判断压场 */
+.ch01 .lede{font-size:21px;line-height:1.62;color:var(--text);max-width:100%;margin:22px 0 6px;font-weight:400}
+.ch01 .lede .hl{font-weight:700;color:#e8c06a;box-shadow:inset 0 -.46em 0 rgba(217,164,65,.16)}
+.ch01 .lede .cc{color:var(--blue);font-weight:600}
+.ch01 .lede .hm{color:var(--purple);font-weight:600}
+.ch01 .lede-note{max-width:100%;font-size:13.5px;line-height:1.66;color:var(--faint);margin:10px 0 0}
+
+/* 编辑式分节标题 —— 小字 kicker + 论断式大标题（去掉横线机械感） */
+.ch01 .sec{margin:60px 0 8px;max-width:var(--col)}
+.ch01 .sec .k{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:9px}
+.ch01 .sec h2{font-size:24px;line-height:1.28;letter-spacing:-.3px;margin:0;font-weight:730;border:0;padding:0}
+
+/* 叙事裸文 —— 直接呼吸在背景上 */
+.ch01 p.body{max-width:var(--col);font-size:16.5px;line-height:1.8;color:var(--muted);margin:16px 0}
+.ch01 p.body b{color:var(--text);font-weight:600}
+.ch01 p.body .cc{color:var(--blue);font-weight:600}
+.ch01 p.body .hm{color:var(--purple);font-weight:600}
+
+/* 深潜真实制品（stepper 第 4 帧的 nudge 原文） */
+.ch01 .artifact{width:100%;max-width:640px}
+.ch01 .art-label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:10px}
+.ch01 .artifact pre{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--amber);
+  border-radius:8px;padding:16px 18px;margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12.5px;line-height:1.62;color:var(--text);white-space:pre-wrap;overflow-x:auto}
+.ch01 .art-note{font-size:12px;color:var(--faint);margin:10px 0 0}
+.ch01 .art-narr{font-size:14px;line-height:1.7;color:var(--muted);margin:12px 0 0}
+
+/* CC 对照 —— 左色规引文式（border-left 蓝 + 无整框） */
+.ch01 .quote-cc{max-width:var(--col);margin:26px 0 6px;padding:6px 0 6px 20px;border-left:3px solid var(--blue);
+  font-size:15.5px;line-height:1.78;color:var(--muted)}
+.ch01 .quote-cc .lead-in{display:block;color:var(--blue);font-weight:700;font-size:14px;letter-spacing:.02em;margin-bottom:7px}
+.ch01 .quote-cc b{color:var(--text);font-weight:600}
+
+/* 「为何不同」裸文（维度名行内粗体引导） */
+.ch01 .why-diff{max-width:var(--col);margin:20px 0}
+.ch01 .why-diff p{font-size:15.5px;line-height:1.78;color:var(--muted);margin:16px 0}
+.ch01 .why-diff p .d{color:var(--text);font-weight:700}
+.ch01 .why-diff p b{color:var(--text);font-weight:600}
+
+/* 矩阵格内的真实制品引文 */
+.ch01 .matrix .q{display:block;margin-top:8px;padding-left:10px;border-left:2px solid var(--border);
+  color:var(--faint);font-size:12.5px;line-height:1.5}
+
+/* 开篇两框：thesis 判词框（复用设计系统 .thesis）与 story 叙事框，内部分段（PM 2026-07-06） */
+.ch01 .thesis p{margin:0 0 12px;line-height:1.75}
+.ch01 .thesis p:last-child{margin-bottom:0}
+.ch01 .thesis .hl{font-weight:700;color:#e8c06a;box-shadow:inset 0 -.46em 0 rgba(217,164,65,.16)}
+.ch01 .thesis .cc{color:var(--blue);font-weight:600}
+.ch01 .thesis .hm{color:var(--purple);font-weight:600}
+.ch01 .story p{margin:0 0 14px;line-height:1.78}
+.ch01 .story p:last-child{margin-bottom:0}
+
+/* ========== §03 三层防线全景图（重档 #1） ========== */
+.ch01 .map{margin:20px 0 6px}
+.ch01 .map-band{display:grid;grid-template-columns:132px 1fr 1fr;gap:1px;
+  background:var(--border);border:1px solid var(--border);margin-bottom:14px;border-radius:12px;overflow:visible}
+.ch01 .map-band>div:first-child{border-radius:11px 0 0 11px}
+.ch01 .map-band>div:last-child{border-radius:0 11px 11px 0}
+@media(max-width:820px){.ch01 .map-band>div:first-child{border-radius:11px 11px 0 0}.ch01 .map-band>div:last-child{border-radius:0 0 11px 11px}}
+/* 词条悬停解释（PM 2026-07-06：高度概括的词条必须可解码） */
+.ch01 .pchip{position:relative;cursor:help}
+.ch01 .lazy-cc,.ch01 .lazy-hm{position:relative;cursor:help}
+.ch01 .pchip[data-tip]:hover::after,.ch01 .lazy-cc[data-tip]:hover::after,.ch01 .lazy-hm[data-tip]:hover::after{
+  content:attr(data-tip);position:absolute;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%);
+  background:var(--surface-2);border:1px solid var(--border);color:var(--text);
+  font-size:12.5px;line-height:1.6;font-weight:400;padding:10px 13px;border-radius:9px;
+  width:max-content;max-width:320px;white-space:normal;z-index:30;text-align:left;
+  box-shadow:0 8px 24px rgba(0,0,0,.55);pointer-events:none}
+.ch01 .map-band>div{background:var(--surface);padding:14px 16px}
+.ch01 .map-mech{grid-template-columns:132px 1fr}
+.ch01 .band-label{background:var(--surface-2);display:flex;flex-direction:column;justify-content:center}
+.ch01 .band-label .ln{font-size:14px;font-weight:700;color:var(--text)}
+.ch01 .band-label .ls{font-size:12px;color:var(--faint);margin-top:3px;line-height:1.4}
+.ch01 .band-same{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ch01 .same-tag{font-size:11px;letter-spacing:.06em;color:var(--faint);border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;white-space:nowrap}
+.ch01 .band-cc{border-top:2px solid var(--blue)}
+.ch01 .band-hm{border-top:2px solid var(--purple)}
+.ch01 .col-tag{font-size:12px;font-weight:700;margin-bottom:11px;letter-spacing:.02em}
+.ch01 .band-cc .col-tag{color:var(--blue)}
+.ch01 .band-hm .col-tag{color:var(--purple)}
+.ch01 .sub{margin-top:12px}
+.ch01 .sub:first-of-type{margin-top:0}
+.ch01 .sub-h{font-size:11.5px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ch01 .trig{font-size:11px;font-weight:700;color:var(--amber);
+  border:1px solid color-mix(in srgb,var(--amber) 45%,transparent);border-radius:999px;padding:1px 9px;
+  background:color-mix(in srgb,var(--amber) 12%,transparent)}
+.ch01 .trig-n{font-size:11px;font-weight:600;color:var(--muted);
+  border:1px solid var(--border);border-radius:999px;padding:1px 9px;background:transparent}
+.ch01 .pchips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ch01 .pchip{font-size:12px;color:var(--text);background:var(--bg);border:1px solid var(--border);
+  border-radius:7px;padding:3px 9px;line-height:1.4;white-space:nowrap}
+.ch01 .band-cc .pchip{border-color:color-mix(in srgb,var(--blue) 30%,var(--border))}
+.ch01 .band-hm .pchip{border-color:color-mix(in srgb,var(--purple) 30%,var(--border))}
+.ch01 .lazy-cc{font-size:12.5px;color:var(--faint);border:1px dashed var(--faint);
+  border-radius:7px;padding:4px 11px;display:inline-block;background:transparent}
+.ch01 .lazy-hm{font-size:12.5px;color:#fff;font-weight:600;border:1px solid var(--purple);
+  border-radius:7px;padding:4px 11px;display:inline-block;
+  background:color-mix(in srgb,var(--purple) 55%,transparent)}
+.ch01 .map-foot{font-size:12.5px;color:var(--muted);margin:12px 0 0;line-height:1.6}
+.ch01 .map-foot b{color:var(--text);font-weight:600}
+.ch01 .map-cap{color:var(--faint);font-size:12px;margin:8px 0 0}
+@media(max-width:820px){.ch01 .map-band,.ch01 .map-mech{grid-template-columns:1fr}}
+
+/* ========== §04 2×2 真实制品矩阵 ========== */
+.ch01 .art2{display:grid;grid-template-columns:92px 1fr 1fr;gap:1px;background:var(--border);
+  border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:20px 0 6px}
+.ch01 .art2>div{background:var(--surface);padding:14px 16px}
+.ch01 .art2 .corner{background:var(--surface-2)}
+.ch01 .art2 .colh{background:var(--surface-2);font-size:13px;font-weight:700}
+.ch01 .art2 .colh.cc{color:var(--blue)} .ch01 .art2 .colh.hm{color:var(--purple)}
+.ch01 .art2 .rowh{background:var(--surface-2);font-size:12.5px;font-weight:700;color:var(--text);
+  display:flex;flex-direction:column;justify-content:center;line-height:1.4}
+.ch01 .art2 .rowh span{font-size:11px;color:var(--faint);font-weight:400;margin-top:4px}
+.ch01 .art2 pre{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:11px 13px;margin:8px 0 0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;line-height:1.6;
+  color:var(--text);white-space:pre-wrap;overflow-x:auto}
+.ch01 .art2 .al{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.ch01 .art2 .al.cc{color:var(--blue)} .ch01 .art2 .al.hm{color:var(--purple)}
+.ch01 .art2 .an{font-size:11.5px;color:var(--faint);margin:9px 0 0;line-height:1.5}
+.ch01 .art2 .cond pre{border-left:3px solid var(--amber)}
+@media(max-width:820px){.ch01 .art2{grid-template-columns:1fr}.ch01 .art2 .corner{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="ch01">
+
+  <div class="eyebrow"><span class="badge">轴一 · 控制侧</span><span class="tag">Loop 之内</span></div>
+  <h1>核心 Agent Loop</h1>
+  <p class="subtitle">模型每次只活一次调用；所谓连干六十轮，是壳一次次把它重新唤醒。</p>
+  <p class="metrics">模型一次调用只活一轮 &nbsp;·&nbsp; 续命重试几乎清一色<b>上限 3</b> &nbsp;·&nbsp; CC 高压纪律全在<b>条件层</b> &nbsp;·&nbsp; 按<b>模型</b>加压是 Hermes 独有轴（名单 8 家）</p>
+
+  <div class="thesis">
+    <p>「连续工作」不是模型的能力，是壳用<span class="hl">三层防线</span>撑起的一种幻觉：<b>机械层</b>一次次把模型重新唤醒，<b>纪律层</b>用写给模型的话拦住它偷懒，<b>强制层</b>用代码兜住它出错或想停。</p>
+    <p>最大的分歧藏在上面两层——<span class="cc">Claude Code</span> 默认赌模型自觉，<span class="hm">Hermes</span> 用壳去补模型的不足。<b>一个默认赌模型，一个补模型。</b></p>
+  </div>
+  <p class="lede-note">本章只讲「循环为什么转下去」；上下文怎么拼、压缩怎么做见 02 章，输出块怎么处置、每类错误怎么办见 03 章。</p>
+
+  <div class="sec"><span class="k">The illusion</span><h2>模型说完即死，『连续工作』从何而来</h2></div>
+  <div class="story">
+    <p>一个大模型的本质是一问一答：给它一段文字，它吐出一段文字，然后这次调用就结束了——它没有后台进程，也没有留在原地等下一步的能力。可我们看到的 agent 却能连着干六十轮：读代码、改文件、跑测试、看到报错再改。<b>这不是模型进化出了持久力，是壳制造出来的一种幻觉。</b></p>
+    <p>机关很朴素。模型这一轮想调什么工具，壳就替它把工具真的跑一遍，把结果拼回那段对话历史，然后带着整段加长的历史<b>再发起一次全新的调用</b>。模型所谓的「记忆」，其实就是每一轮被重新喂进去的那份历史——两家做法一模一样：上一轮的历史、模型这轮说的话、工具的执行结果，三段接龙成下一次调用的输入。</p>
+    <p>于是「能一直工作」可以拆成三个互不相同的问题：壳凭什么再调用一次（<b>机械层</b>）？模型凭什么不偷懒、不提前收工（<b>纪律层</b>）？模型想停下、或者要崩的时候，壳怎么办（强制层）？这三个问题的答案，就是本章要拆的三层防线。</p>
+  </div>
+  <p class="body">两个补充。其一，物理上「agent 在工作」，是壳在一段段地把一个生成器往前摇——正因如此，中断、压缩、恢复才能干净地插在两段调用之间。其二，会话越滚越长，迟早撑爆模型的上下文窗口；让长会话不爆窗口靠的是上下文压缩——那是维持循环能转下去的地基，细节留给 02 章。</p>
+
+  <div class="sec"><span class="k">Layer 1</span><h2>第一层·机械续命：继续还是收工，只看一个开关</h2></div>
+  <p class="body">先看最底层的机械。两家的判断同构到近乎重合：模型这一轮只要调用了任何一个工具，壳就判定「话还没说完」，再发起一轮；一个工具都没调、只吐了一段纯文字，壳才认为它真的说完了，走收尾。<b>工具调用的有无，就是「继续还是停」的唯一开关</b>——Claude Code 的注释直接把它称作 the sole loop-exit signal。</p>
+  <p class="body"><span class="hm">Hermes</span> 在每一圈重发之前还多设了四道闸：这一回合的调用数没到上限、跨回合的迭代预算还有余额、没有收到用户中断、预算耗尽时是否还留着一次收尾调用——任何一道不满足，循环当场跳出。但主干上的那个开关，和 <span class="cc">Claude Code</span> 是同一个。</p>
+
+  <div class="flow2">
+    <div class="diagram">
+      <h3 style="color:var(--blue)">Claude Code</h3>
+      <p class="dlead">开关只有一个：这轮有没有冒出 tool_use 块。有→继续；无→收工。壳默认不判断「活干完没」。</p>
+      <pre class="mermaid">
+flowchart TD
+    A[用户输入 + 对话历史] --> B[组装上下文]
+    B --> C[调模型 · 流式输出]
+    C --> D{这轮有<br/>tool_use 块?}
+    D -->|有| E[执行工具<br/>权限门 + 校验]
+    E --> F[结果拼回历史]
+    F --> B
+    D -->|无| G[停止钩子检查]
+    G --> H([结束 · 交还用户])
+    classDef decision stroke:#d9a441,stroke-width:1.5px;
+    classDef terminal stroke:#3fb950,stroke-width:1.5px;
+    class D decision;
+    class H terminal;
+      </pre>
+      <div class="cap">唯一开关＝「模型没点工具」，这是仅有的正常终止<br/>（过载切备用模型、413 压缩重跑等边缘分支见 §05）</div>
+    </div>
+
+    <div class="diagram">
+      <h3 style="color:var(--purple)">Hermes</h3>
+      <p class="dlead">同一个开关，但重发前先过四道闸；且「没工具」也未必能停，还要过验证门。</p>
+      <pre class="mermaid">
+flowchart TD
+    A[用户消息] --> B[组装上下文 + 预算检查]
+    B --> C[清洗/修复 + 调模型]
+    C --> D{这轮有<br/>工具调用?}
+    D -->|有| E[执行工具<br/>结果回喂]
+    E --> B
+    D -->|无·纯文字| V{改了代码却<br/>没有测试证据?}
+    V -->|是| W[注入「先去验证」<br/>synthetic turn]
+    W --> B
+    V -->|否| H([结束 · 交还用户])
+    classDef decision stroke:#d9a441,stroke-width:1.5px;
+    classDef terminal stroke:#3fb950,stroke-width:1.5px;
+    classDef emphasis stroke:#d9a441,stroke-width:3px,fill:#33291a,color:#f0d9a0;
+    class D decision;
+    class H terminal;
+    class V,W emphasis;
+      </pre>
+      <div class="cap">同一开关＋四道闸；「没点工具」还得过 verify-before-done 门<br/>（工具名修复、空输出恢复、API 重试等见 §05）</div>
+    </div>
+  </div>
+
+  <div class="sec"><span class="k">The map</span><h2>三层防线全景：两家把力气押在不同的层</h2></div>
+  <p class="body">把三层防线摊平成一张图，最该看清的不是每条写了什么，而是<b>两家把力气押在了哪一层</b>。机械层几乎重合；分歧全在纪律层和强制层。</p>
+
+  <div class="map">
+    <div class="map-band map-mech">
+      <div class="band-label"><span class="ln">第一层 · 机械</span><span class="ls">壳的重发循环</span></div>
+      <div class="band-same">
+        <span class="same-tag">CC · Hermes 同构</span>
+        <span class="pchip" data-tip="壳里有个不会自己退出的循环：模型每答一轮，壳就把结果拼好再问一次——从外面看就像它一直在干活">永动重发循环</span>
+        <span class="pchip" data-tip="模型这轮调了工具→壳判定「话没说完」再问一轮；一个工具都没调→壳才认为它说完了，准备收工">工具有无＝唯一开关</span>
+        <span class="pchip" data-tip="模型本身没有记忆；每次调用，壳都把之前的完整对话从头到尾重新喂给它一遍">每轮重喂整段历史</span>
+      </div>
+    </div>
+
+    <div class="map-band">
+      <div class="band-label"><span class="ln">第二层 · 纪律</span><span class="ls">写给模型的话</span></div>
+      <div class="band-cc">
+        <div class="col-tag">Claude Code</div>
+        <div class="sub">
+          <div class="sub-h">常驻 · 所有会话</div>
+          <div class="pchips"><span class="pchip" data-tip="系统提示教模型：一个做法失败了，先读错误、查假设、做针对性修复——别盲目重试，也别一次失败就放弃可行的路">失败先诊断</span><span class="pchip" data-tip="本地可逆的动作（改文件、跑测试）放手做；难撤销、影响共享系统的动作（推代码、发消息）默认先问用户">危险先确认</span><span class="pchip" data-tip="待办清单搁置太久，壳往对话里塞一句「考虑更新任务进度」的温柔提醒——可忽略、不强制">待办软提醒</span></div>
+        </div>
+        <div class="sub">
+          <div class="sub-h">条件加压 <span class="trig-n">人不在场时</span></div>
+          <div class="pchips"><span class="pchip" data-tip="自主模式下壳周期性发「心跳」唤醒模型，并提前告诉它：这就是让你在两次回合之间保持存活的信号——醒了就干活，别困惑">tick 保活</span><span class="pchip" data-tip="自主模式的指令：「凭最佳判断行动，别等确认；两个方案纠结就选一个往前走，随时可纠偏」">偏向行动</span><span class="pchip" data-tip="教模型按「用户终端在不在前台」调整胆量：人走开就大胆自主决策、提交、推进；人在看就多商量">终端焦点调档</span></div>
+        </div>
+        <div class="sub">
+          <div class="sub-h">条件加压 <span class="trig-n">用户开功能时</span></div>
+          <div class="pchips"><span class="pchip" data-tip="用户设了 token 消耗目标后，提示词写明：「目标是硬性下限不是建议；你早停，系统会自动把你续上」">token 硬下限</span><span class="pchip" data-tip="灰度中的功能：非平凡改动必须先由独立的验证代理裁决通过，模型才准向用户报「完成」——自查不算数">收尾验证契约</span></div>
+        </div>
+      </div>
+      <div class="band-hm">
+        <div class="col-tag">Hermes</div>
+        <div class="sub">
+          <div class="sub-h">常驻 · 所有会话</div>
+          <div class="pchips"><span class="pchip" data-tip="系统提示：「交付物必须是有真实工具输出撑腰的可用产物，不是对产物的描述」——防模型只动嘴不动手">把活干完</span><span class="pchip" data-tip="不许写完一个空壳、一份计划、或跑一条命令就停手；真跑不通就如实说阻塞，绝不编假数据假结果冒充">别交桩</span></div>
+        </div>
+        <div class="sub">
+          <div class="sub-h">条件加压 <span class="trig">模型上弱名单时 · 独有轴</span></div>
+          <div class="pchips"><span class="pchip" data-tip="给八家开源/第三方模型的铁律：「说了『我去跑测试』就必须在同一条回复里立刻调工具；不许用未来时的承诺结束回合」">弱模型工具强制</span><span class="pchip" data-tip="给 OpenAI/Grok 系再加的细则：工具结果空就换姿势重试别早停；任务完成且验证过才准停">GPT 执行铁律</span><span class="pchip" data-tip="给 Gemini 系的一句：「自主工作到彻底解决——别给个计划就停，执行它」">Google 别停</span></div>
+        </div>
+        <div class="sub">
+          <div class="sub-h">条件加压 <span class="trig-n">场景姿态时</span></div>
+          <div class="pchips"><span class="pchip" data-tip="判定在代码工作区干活时注入：跑完测试/lint/build 确认通过再宣布完成；但同一文件修三次修不好就停下问人">编码岗纪律</span><span class="pchip" data-tip="被调度器派生的后台 worker 的停/续规矩：长任务每小时心跳一次否则被回收；真有歧义就挂起等人裁决，别猜">无人值守协议</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="map-band">
+      <div class="band-label"><span class="ln">第三层 · 强制</span><span class="ls">壳的代码兜底</span></div>
+      <div class="band-cc">
+        <div class="col-tag">Claude Code</div>
+        <div class="sub">
+          <div class="sub-h">防死 · 不让它崩</div>
+          <div class="pchips"><span class="pchip" data-tip="工具执行抛错不中断循环：把错误包成一条结果喂回模型，让它自己看到报错、改方法、继续干">错误回喂</span><span class="pchip" data-tip="主模型因需求过高不可用时，自动切到备用模型、把整轮请求原样重发——模型感觉不到失败发生过">切备用</span><span class="pchip" data-tip="对话历史太长被 API 拒绝时，先压缩历史再原地重试，不让会话撞墙即死">压缩重跑</span><span class="pchip" data-tip="回答被输出长度上限掐断时，注入「接着写、别道歉别复述」，分多轮把话续完（上限 3 次）">截断续写</span><span class="pchip" data-tip="真要崩溃退出前，先给已发出但没拿到结果的工具调用补上占位结果——保住历史结构完整，下次还能重来">补悬空结果</span></div>
+        </div>
+        <div class="sub">
+          <div class="sub-h">防懒 · 不让它偷停</div>
+          <div class="pchips"><span class="lazy-cc" data-tip="默认不检查任务是否真的完成；停止钩子（用户配置）与 token 预算续跑（用户声明）是仅有的两个非默认口子">默认 0 道（2 个 opt-in）</span></div>
+        </div>
+      </div>
+      <div class="band-hm">
+        <div class="col-tag">Hermes</div>
+        <div class="sub">
+          <div class="sub-h">防死 · 不让它崩</div>
+          <div class="pchips"><span class="pchip" data-tip="同左：工具异常变成一条错误消息喂回模型，让它看到报错再改，不中断循环">错误回喂</span><span class="pchip" data-tip="API 连续失败时自动换下一个服务商继续跑；配合指数退避重试，模型几乎感知不到底层的挣扎">故障转移</span><span class="pchip" data-tip="上下文逼近阈值时自动压缩历史后重发，不让长会话撑爆窗口而死">压缩重跑</span><span class="pchip" data-tip="回答被长度掐断→注入「从断点继续、别重复」，最多续 3 次拼成完整答案">截断续写</span><span class="pchip" data-tip="每轮重发前先给对话历史「洗澡」：修复坏参数、角色乱序、孤儿工具结果——防下一轮请求因历史畸形被打回">清洗修复</span><span class="pchip" data-tip="模型执行完工具却交白卷（弱模型常见病），壳注入「请处理上面的工具结果并继续任务」逼它续">空输出 nudge</span><span class="pchip" data-tip="模型只顾思考没说正文时，把它的思考原样接回历史，让它下一轮接着把话说出来（上限 2 次）">thinking prefill</span><span class="pchip" data-tip="模型喊错工具名，壳先模糊匹配自动改对；修不出再喂回「该工具不存在、可用的有…」让它自纠（3 次）">拼错名修复</span><span class="pchip" data-tip="工具参数损坏时原地重试最多 3 次，再不行把错误喂回让模型重来">坏 JSON 重试</span><span class="pchip" data-tip="网络中途掐断响应流时，用已送达的片段兜底、或注入「从断点继续」把话续完">流断续写</span></div>
+        </div>
+        <div class="sub">
+          <div class="sub-h">防懒 · 不让它偷停</div>
+          <div class="pchips"><span class="lazy-hm" data-tip="改了代码却没有测试通过的新证据，就不许宣布完成——壳注入「先去验证」把模型推回循环（见下方逐帧拆解）">编码入口默认 1 道验证门</span><span class="pchip" data-tip="模型回一句「好的，我这就去做」却没动手时，壳注入「现在就执行工具调用」逼它继续（上限 2 次）">中间态 ack 逼继续</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="map-foot">读法：机械层两家同构；纪律层两家都分层发放——按场景/功能加压是<b>共识</b>（CC 的自主模式与功能开关、Hermes 的编码岗与无人值守），真正只有 Hermes 有的是「按模型」这根轴（唯一黄标处）——因为 CC 只面对一个模型；强制层防死是共识（Hermes 兜得更低），<b>防懒才是分歧</b>——CC 默认 0 道、Hermes 编码入口默认 1 道验证门。每一层的续命都自带刹车（重试 3 次、nudge 2 次、预算 90 轮…）→ 见「反面」一节。</p>
+    <p class="map-cap">「三层」是我们为讲清楚而搭的分析框架，不是两家代码里的名词。<b style="color:var(--muted)">鼠标悬停任一词条，可见一句话解释。</b></p>
+  </div>
+
+  <div class="sec"><span class="k">Layer 2 · Deep dive</span><h2>第二层·提示词纪律：都看人下菜，只是看的不是同一个『人』</h2></div>
+  <p class="body">模型会偷懒。它会交出一份计划就想收工，会说一句「我这就去做」然后停手——这些是壳设计者反复见到的失败模式。两家的对策都是往系统提示里写「别罢工」守则，但关键在于：<b>没有一家对所有场合用同一份守则</b>。</p>
+  <p class="body"><span class="cc">Claude Code</span> 的默认守则其实相当温和——失败别急着放弃、危险动作先确认（更硬的「如实汇报别谎报完成」只进了内部构建）。真正的高压话术全部锁在条件层：人不在场时才有「偏向行动别问」「终端在后台就大胆自主」；用户亲手开了功能才有「token 目标是硬下限」。<span class="hm">Hermes</span> 的常驻守则是一句朴素的「把活干完、别交桩」；更狠的「必须立刻调工具、别用一句承诺结束回合」只喂给一份<b>弱模型名单</b>（gpt、codex、gemini、gemma、grok、glm、qwen、deepseek 八家），而 Claude 这类强模型反倒不注入。</p>
+
+  <div class="art2">
+    <div class="corner"></div>
+    <div class="colh cc">Claude Code</div>
+    <div class="colh hm">Hermes</div>
+
+    <div class="rowh">常驻<span>所有会话都注入</span></div>
+    <div>
+      <div class="al cc">失败别放弃</div>
+      <pre>If an approach fails, diagnose why before switching tactics—read the error, check your assumptions, try a focused fix.</pre>
+      <p class="an">触发：默认常驻。基调温和——先诊断、别乱重试，也别一次失败就放弃一条可行的路。</p>
+    </div>
+    <div>
+      <div class="al hm">把活干完</div>
+      <pre>the deliverable is a working artifact backed by real tool output — not a description of one. Do not stop after writing a stub, a plan, or a single command. NEVER substitute plausible-looking fabricated output ... for results you couldn't actually produce.</pre>
+      <p class="an">触发：默认常驻，对所有模型家族都注入——既防早停，也防造假。</p>
+    </div>
+
+    <div class="rowh">条件<span>加压时才注入</span></div>
+    <div class="cond">
+      <div class="al cc">偏向行动 · 硬下限</div>
+      <pre>Act on your best judgment rather than asking for confirmation. If you're unsure between two reasonable approaches, pick one and go.
+
+The target is a hard minimum, not a suggestion. If you stop early, the system will automatically continue you.</pre>
+      <p class="an">触发变量＝人在不在场：自主／后台模式、或上下文带 token 目标时才注入。</p>
+    </div>
+    <div class="cond">
+      <div class="al hm">工具使用强制</div>
+      <pre>You MUST immediately make the corresponding tool call in the same response. Never end your turn with a promise of future action — execute it now.</pre>
+      <p class="an">触发变量＝模型强不强：模型名命中弱模型名单才注入，Claude 这类强模型不加。</p>
+    </div>
+  </div>
+
+  <p class="body">四格摆在一起，差别不在「加不加压」——两家都按场景和功能分层加压（CC 有自主模式，Hermes 有编码岗守则和无人值守协议）——而在 Hermes 比 CC <b>多出一根加压轴</b>。Claude Code 只面对一个自家托管的模型，「模型行不行」根本不是变量，它的条件层主要跟着「人在不在看」走：终端前台还是后台、交互还是自主。Hermes 要跑一整群第三方模型，「模型行不行」就成了它独有的第一变量——纪律按模型名单发放，弱的多压、强的少压。</p>
+  <p class="body">连催促待办的方式也照这条线分。<span class="cc">Claude Code</span> 的壳会在待办搁置太久时周期性塞一句软提醒（旧版待办工具还在每次回执后附一句「请继续推进」）；<span class="hm">Hermes</span> 刻意不让待办挂任何提示——引导只写在工具说明里，把主动催促的额度留给记忆蒸馏和技能自造（见轴二）。</p>
+  <p class="lede-note">诚实边界：Claude Code 生态里最锋利的那段话术——「回合结束前，检查你最后一段是不是一句没兑现的承诺」——并<b>不在 CLI 代码库里</b>。它是 Agent SDK／多智能体运行时另外叠加的一层，详见文末悬而未决。</p>
+
+  <div class="sec"><span class="k">Layer 3 · Deep dive</span><h2>第三层·壳的强制：防死是共识，防懒是分歧</h2></div>
+  <p class="body">前两层管「该不该继续」，第三层管「拦不拦得住意外」。模型随时可能「死」：工具抛错、吐出空响应、话说到一半被截断、API 调用失败。两家的壳都不让它真的死——把错误包成一条工具结果回喂给模型，让它自己看到报错再改，然后重试、切备用模型、压缩后重跑。<span class="hm">Hermes</span> 兜得更低：连空输出、只思考不说话、工具名拼错、参数 JSON 损坏、流被网络掐断，都各有一条专门的恢复路径——弱模型的种种毛病，壳都得替它治。</p>
+  <p class="body">每一类错误具体怎么处置，是 03 章的事。这里只需记住一件事：<b>在两家眼里，错误都不是终点，是下一轮的输入</b>。</p>
+  <p class="body">分歧出现在「防懒」。模型想收工——不调工具、交出一段纯文字答案——<span class="cc">Claude Code</span> 默认放行，一道完成度检查都没有；<span class="hm">Hermes</span> 默认设一道验证门。这道门最能说明「可靠性焊进壳、而不是托付给权重」，值得逐帧拆开看：模型说「我修好了」，只是一个待核实的<b>声明</b>，不是结论。</p>
+
+  <div class="stepper">
+    <script type="application/json" class="captions">[
+      "<b>步骤 1</b> · 模型交出一段纯文字「我修好了」，没有任何工具调用。壳暂定它为最终答案——但先扣住不放。",
+      "<b>步骤 2</b> · 壳先问：这一轮改的是真代码，还是只动了 README／markdown？文档改动直接豁免。",
+      "<b>步骤 3</b> · 是真代码。壳去查验证台账：编辑之后有没有「测试／lint／build 跑绿」的新证据？—— 台账是空的。",
+      "<b>步骤 4</b> · 没证据。壳合成一条系统消息（原文如右／如下），逼模型回去运行检测到的测试命令、读失败、修复、再汇总。",
+      "<b>步骤 5</b> · 把模型的「我做完了」和这条 nudge 一起追加进历史（都标记 synthetic，用户看不到），然后 continue——而不是 break。循环被重新打开。",
+      "<b>步骤 6</b> · 模型被迫再跑一圈、这次真的去调测试。只有证据转绿、或 nudge 预算（2）用尽，text 答案才能 break、真正交还用户。"
+    ]</script>
+    <div class="stage">
+      <div class="frame on">
+        <div class="cols">
+          <div class="box purple"><div class="t">模型输出</div><code>「我已修复登录 bug ✓」<br>—— 纯文字，无工具调用</code></div>
+          <div class="box dim"><div class="t">壳的第一反应</div><code>暂定为最终答案？先别急着交给用户</code></div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box purple"><div class="t">壳提问 ①</div><code>这一轮到底改没改「真代码」？</code></div>
+          <div class="box dim"><div class="t">过滤器</div><code>README / .md / LICENSE<br>→ 判定为文档，豁免</code></div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box purple"><div class="t">壳提问 ②</div><code>查验证台账：编辑之后<br>有没有「测试/lint/build 跑绿」的新证据？</code></div>
+          <div class="box dim"><div class="t">台账结果</div><code>—— 空 ——<br>没有任何通过记录</code></div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="artifact">
+          <div class="art-label">壳注入的 nudge · 模型可见 / 用户不可见</div>
+          <pre>[System: You edited code in this turn, but the workspace does not
+have fresh passing verification evidence yet.
+
+Verification status: unverified
+
+Changed paths:
+- `src/auth/login.py`
+
+Run the relevant verification command now (`pytest`, ...), read any
+failure, repair the code, and summarize what passed. If verification
+is not possible, explain the concrete blocker instead of claiming
+the work is fully verified.]</pre>
+          <p class="art-note">模板原文 · 路径与命令为运行时填充（verification_stop.py）</p>
+          <p class="art-narr">这条系统消息用户看不到（synthetic 标记），只对模型可见——它把模型的「我做完了」原地驳回，逼它回去真的跑一次验证。</p>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box dim"><div class="t">拼回历史</div><code>模型的「我做完了」+ 这条 nudge<br>都追加进去（对用户隐藏）</code></div>
+          <div class="box blue"><div class="t">关键动作</div><code>continue —— 而不是 break<br>循环被重新打开</code></div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box dim"><div class="t">模型被迫再跑一圈</div><code>这次真的去调用测试工具</code></div>
+          <div class="box blue"><div class="t">放行条件</div><code>证据转绿 ✓ 或 nudge 预算(2)用尽<br>→ 才允许 text 答案 break，交还用户</code></div>
+        </div>
+      </div>
+    </div>
+    <div class="caption"></div>
+    <div class="ctrl">
+      <div class="dots"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="count"></span>
+        <button class="prev">‹ 上一步</button>
+        <button class="next">下一步 ›</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-cc">
+    <span class="lead-in">对照 · Claude Code 的「无工具即停止」</span>
+    Claude Code 默认不带这道验证门。循环里<b>没有内置代码判断任务是否完成</b>，它只认那个二元开关：这轮有没有工具调用。有→再来一轮，无→收工。但「默认 0 道」不等于「结构上做不到」——它留了两个 opt-in 的口子：用户配置的停止钩子返回一条阻断理由时，壳会把理由塞回历史、continue 而非收工，结构上和 Hermes 的验证门同族；token 预算模式下没跑到目标的九成，壳会注入一句「Stopped at X% — keep working」续跑。更值得注意的是，Claude Code 内部灰度中已经有一条<b>验证代理契约</b>：非平凡改动必须由独立的对抗性验证代理裁决才能报完成——这说明两家在这个点上正在收敛，只是它今天还锁在特性门后，不是默认。
+  </div>
+
+  <div class="sec"><span class="k">The brakes</span><h2>反面：每个续命机制都自带刹车</h2></div>
+  <p class="body">无限续命等于无限烧钱。真正的产品智慧不是「一直续」，而是<b>分清两种失败</b>：可恢复的失败（空输出、网络断、工具名拼错）值得猛续，确定性的失败（安全拒答、鉴权错误、压缩也救不回）就该干净地停——重试一个确定性失败，只会把它原样复现一遍。下面这张表把两家的每个刹车并在一起看。</p>
+
+  <div class="matrix">
+    <div class="mh">维度</div>
+    <div class="mh cc">Claude Code</div>
+    <div class="mh hm">Hermes</div>
+
+    <div class="dim">轮数天花板</div>
+    <div>交互模式默认<b>无上限</b>——设计上就让它跑到活干完；轮数上限仅装在自动化路径（--max-turns 只在 --print 模式生效，后台 fork 封顶 200 轮）。</div>
+    <div>迭代预算<b>父 90／子 50</b>、按 agent 计；耗尽后不是硬切，而是剥掉所有工具、做一次收尾总结调用。</div>
+
+    <div class="dim">恢复类重试上限</div>
+    <div>截断续写 3 次；反应式压缩每轮只试 1 次（试过就锁住，救不回就抛出去）。</div>
+    <div>空输出 3、坏 JSON 3、拼错名 3、nudge 2、prefill 2——<b>清一色个位数</b>。</div>
+
+    <div class="dim">熔断</div>
+    <div>压缩连续失败 <b>3 次即停</b>，本会话不再尝试。
+      <span class="q">不熔断会「每轮对 API 发起注定失败的压缩请求」，无限空转烧钱。</span></div>
+    <div>429 限流写入一个所有会话共享的冷却文件（默认 300s）；工具打转监测<b>默认只警告</b>，硬停是 opt-in。</div>
+
+    <div class="dim">确定性失败不续</div>
+    <div>API 错误被<b>刻意</b>排除在停止钩子之外——踩过「错误→阻断→重试→又错误」烧掉上千次调用的死亡螺旋。</div>
+    <div>安全拒答（content_filter）<b>绝不重试</b>，如实呈现给用户；顶多换一个备用模型试一次。</div>
+
+    <div class="dim">人的总闸</div>
+    <div>用户中断随时凌驾一切续命；权限门卡住<b>每一个</b>动作，不在允许模式内就弹确认。</div>
+    <div>每圈顶先查中断；退避等待期间也<b>每 0.2s 查一次</b>，保证长退避里也能被打断。</div>
+
+    <div class="dim">防空转</div>
+    <div>token 预算下续跑几轮后、连续两轮增量 &lt;500 就判收益递减、主动早停；心跳模式没活必须睡，不许回「还在等」白烧一轮。</div>
+    <div>编排调用（execute_code）与压缩重试等系统内务<b>不吃预算</b>（退还），不让杂务烧掉有限的续命额度。</div>
+  </div>
+
+  <div class="sec"><span class="k">The verdict</span><h2>谁在防它罢工：一个赌模型自觉，一个用壳补模型</h2></div>
+  <div class="why-diff">
+    <p><span class="d">三层防线上的投入分布</span>：机械层同构；纪律层<b>都看人下菜，但看的变量不同</b>——一个看场景（人在不在场），一个看场景加模型（还看名单）；强制层防死是共识、防懒是分歧（Claude Code 默认 0 门、Hermes 默认 1 门）。归因还是那条信任线：<span class="cc">Claude Code</span> 押注一个可控的托管模型——模型够强，纪律就能温和，防懒就能交给模型自觉；<span class="hm">Hermes</span> 面对的是一群良莠不齐的第三方模型——纪律得按名单发放，防懒只能焊进壳里。</p>
+    <p><span class="d">一个反直觉的落点</span>：做模型的那家，反而<b>更不信任</b>模型说的「我做完了」。越清楚权重的脾气，越不敢把「完成」的判断权交出去。</p>
+    <p><span class="d">往下一章看</span>：Claude Code 加压的那个变量——「人在不在场」——不是本章的终点。这根线在轴二「Loop 之外」会长成一整条<b>脊椎</b>：壳怎么随人的在场与否，动态调整它对模型的信任与放手。</p>
+  </div>
+
+  <div class="sec"><span class="k">Loose ends</span><h2>悬而未决：九条别被主线吞掉的边界</h2></div>
+  <ul class="open">
+    <li><b>[CC]</b> 生态里最强的「别罢工」话术（回合结束前检查最后一段是否是未兑现的承诺、只有任务完成或卡在用户输入才准结束）<b>不在 CLI 源码里</b>——它是 Agent SDK／多智能体运行时的叠加层。CC 的纪律像一颗洋葱：核心 CLI 温和、外层运行时逐层加压；本章只对 CLI 仓库负责。</li>
+    <li><b>[CC]</b> token 预算的「还剩多少」倒计时有一部分在<b>服务端渲染器</b>里算——「改壳 vs 改模型」二分之外，其实还有第三个位置：服务端提示层。</li>
+    <li><b>[CC]</b> 系统提示里有一句给模型的心理托底：系统会自动压缩历史，「你和用户的对话不受上下文窗口限制」——防的是模型因怕爆窗口而草草收敛。</li>
+    <li><b>[CC]</b> 验证代理契约（非平凡改动须独立验证代理裁决）还在灰度特性门后——CC 正朝 Hermes 的验证门方向收敛，但今天还不是默认。</li>
+    <li><b>[CC]</b> 工具能在模型还没说完话时就开始执行（边流式边执行），是延迟优化不是模型行为；子 agent 复用同一套循环引擎递归调用。</li>
+    <li><b>[HM]</b> 工具打转熔断<b>默认只「警告」不「硬停」</b>——Hermes 的默认姿态其实偏「让它试」，硬熔断留给用户 opt-in，别把它想成处处铁腕。</li>
+    <li><b>[HM]</b> 迭代预算按 agent 计：父 90＋每个子 50，系统总迭代可远超 90；预算耗尽不是硬切，而是剥掉工具讨一次收尾总结。</li>
+    <li><b>[HM]</b> 验证门 surface-aware：纯文档改动豁免；Telegram／Discord 等聊天入口默认关——「可靠性纪律」本身是<b>按产品场景发放</b>的。</li>
+    <li><b>[HM]</b> 用户中途插话不必等回合结束：Hermes 有带外消息通道，把插话贴在最近一条工具结果尾部，并教模型「把它当与原始请求同等权威的指令」。这条「人怎么在跑动中转向一个 loop」的线在轴二 05 章展开。</li>
+  </ul>
+
+  <nav style="max-width:1080px;margin:40px auto 0;padding:16px 28px;border-top:1px solid #2a3342;text-align:center;font-size:13px;color:#8b98a9">导读：<a href="SYN-inside-story.html" style="color:var(--blue)">综合①·一个 Loop 是怎么设计的</a> · <b>01 控制侧</b> · <a href="02-inside-input.html" style="color:var(--blue)">02 输入侧</a> · <a href="03-inside-output.html" style="color:var(--blue)">03 输出行动侧</a></nav>
+
+  <div class="foot">
+    代码溯源（不在正文展示，仅存档）：<br>
+    <b>Claude Code</b> — <code>src/query.ts:307 永动主循环</code> · <code>:241 queryLoop</code> · <code>:832-835 唯一开关信号</code> · <code>:1062 终止分叉</code> · <code>:1716 下轮历史拼装</code> · <code>:219-238 入口生成器（模型只被调一次）</code> · <code>:893-950 过载切备用模型重跑</code> · <code>:1085-1166 413压缩重跑</code> · <code>:453-535 抢先压缩再续</code> · <code>:1188-1252 抬token/多轮续写（上限3）</code> · <code>:1267-1306 停止钩子回塞continue</code> · <code>:1518-1520 工具后钩子可阻断递归</code> · <code>:1308-1341 token预算续跑</code> · <code>:1258-1265 API错误排除停止钩子</code> · <code>:984/1025 崩溃前补悬空工具结果</code> · <code>:1681-1702 长任务中途摘要</code> · <code>toolExecution.ts:469-488 工具错误回喂</code> · <code>:914-925 权限门/拒后别重试</code> · <code>autoCompact.ts:257-265 压缩熔断3次</code> · <code>tokenBudget.ts:59-62 收益递减早停(<500)</code> · <code>main.tsx --max-turns/--max-budget-usd（仅--print）</code> · <code>AgentTool/forkSubagent.ts:65 fork封顶200</code> · <code>prompts.ts:233 失败先诊断</code> · <code>:240/211 如实汇报</code> · <code>:258 危险动作先确认</code> · <code>:892-898 偏向行动</code> · <code>:909-913 终端焦点调档</code> · <code>:864-866 tick保活</code> · <code>:548 token硬下限</code> · <code>:394 收尾验证契约</code> · <code>:874/886 没活必须睡</code> · <code>:193 不受窗口限制安抚</code> · <code>TodoWriteTool.ts:105 回执催促</code> · <code>:72-86 收尾无验证提醒</code> · <code>messages.ts:3688 周期软提醒</code><br>
+    <b>Hermes</b> — <code>agent/conversation_loop.py:518 run_conversation</code> · <code>:633 while主循环</code> · <code>:638-643 中断查</code> · <code>:645-658 四道闸/收尾宽限</code> · <code>:4216 工具调用分叉</code> · <code>:4582-4584 无工具break</code> · <code>:751-780/890-946 消息清洗修复</code> · <code>:1012 内层重试+退避</code> · <code>:1475-1489 退避期每0.2s查中断</code> · <code>:4224-4296 工具名修复(3)</code> · <code>:4300-4391 坏JSON重试(3)</code> · <code>:4485-4507 工具打转熔断(默认warn)</code> · <code>:4649-4714 空输出nudge</code> · <code>:4716-4748 thinking prefill(2)</code> · <code>:4750-4856 空响应重试(3)+故障转移</code> · <code>:4595-4621 流断续写</code> · <code>:4869-4895 中间态ack(2)</code> · <code>:4924-4969 verify-before-done门</code> · <code>:5022-5027 text收尾</code> · <code>:1537-1637 安全拒答确定性停</code> · <code>:4529-4574 上下文压缩</code> · <code>verification_stop.py:245/302-310 nudge模板原文</code> · <code>iteration_budget.py:17/32-43 父90子50</code> · <code>:45-49 execute_code退款</code> · <code>turn_finalizer.py:52-70 收尾总结调用</code> · <code>reasoning_timeouts.py:62-110 推理模型stale地板（分模型档位）</code> · <code>nous_rate_guard.py:139-160 429冷却300s</code> · <code>system_prompt.py:113/470-493 系统提示一次装配、逐轮重放</code> · <code>prompt_builder.py:316 把活干完</code> · <code>:281/298 工具使用强制(弱模型名单)</code> · <code>:380 GPT执行铁律</code> · <code>:442/459-460 Google别停</code> · <code>coding_context.py:245-255 编码岗纪律（编码姿态触发）</code> · <code>prompt_builder.py:185/204-215 无人值守kanban协议（调度器派生场景触发）</code> · <code>prompt_builder.py:591-611 带外消息通道</code> · <code>tools/todo_tool.py:113 待办压缩后重灌</code>
+  </div>
+
+</div>
+</div>
+
+<script>
+/* ============ 复用脚本（组件化 stepper，与 build.py 的 SHARED_JS 同一段逻辑；mermaid fontSize 15px）============ */
+/* 离线守卫：CDN 掉线时 mermaid 未定义，不加守卫会抛 ReferenceError 掐死整段脚本 → stepper 全死。 */
+var MERMAID_OK = (typeof mermaid !== 'undefined');
+if(MERMAID_OK){
+  mermaid.initialize({startOnLoad:true,theme:"dark",
+    flowchart:{nodeSpacing:30,rankSpacing:38,padding:10,useMaxWidth:true},
+    themeVariables:{
+    background:"#1e2531",primaryColor:"#161b26",primaryBorderColor:"#2a3342",
+    primaryTextColor:"#e6edf3",lineColor:"#8b98a9",fontSize:"15px"}});
+}
+
+/* 组件化 stepper：每个 .stepper 自带状态，互不干扰。
+   约定：.stepper 内嵌一段 type=application/json、class=captions 的 JSON 数组（条数=帧数），按钮用 class prev/next。
+   注意：脚本注释里绝不能写字面量的 script 闭合标签（会掐断本段脚本）。 */
+document.querySelectorAll('.stepper').forEach(function(st){
+  var frames=[].slice.call(st.querySelectorAll('.frame'));
+  var caps=[]; var cj=st.querySelector('.captions'); if(cj){try{caps=JSON.parse(cj.textContent);}catch(e){}}
+  var cap=st.querySelector('.caption'), cnt=st.querySelector('.count'), dots=st.querySelector('.dots');
+  var cur=0;
+  if(dots){frames.forEach(function(_,i){var d=document.createElement('span');d.className='dot'+(i?'':' on');dots.appendChild(d);});}
+  function render(){
+    frames.forEach(function(f,i){f.classList.toggle('on',i===cur);});
+    if(cap&&caps[cur]!=null)cap.innerHTML=caps[cur];
+    if(cnt)cnt.textContent=(cur+1)+' / '+frames.length;
+    if(dots)[].slice.call(dots.querySelectorAll('.dot')).forEach(function(d,i){d.classList.toggle('on',i===cur);});
+  }
+  var p=st.querySelector('.prev'), n=st.querySelector('.next');
+  if(p)p.onclick=function(){cur=Math.max(0,cur-1);render();};
+  if(n)n.onclick=function(){cur=Math.min(frames.length-1,cur+1);render();};
+  render();
+});
+</script>
+</body>
+</html>

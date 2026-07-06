@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>轴二 · Loop 之外 · Loop 与其他 Agent</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+/* ============ 设计系统（所有 findings 页面复用这套 <style> 与 <script>）============ */
+:root{
+  --bg:#0d1017; --surface:#161b26; --surface-2:#1e2531; --border:#2a3342;
+  --text:#e6edf3; --muted:#8b98a9; --faint:#5a6675;
+  --blue:#4b8bf5; --green:#3fb950; --purple:#a371f7; --amber:#d9a441; --red:#f0603a;
+  --radius:14px; --maxw:1080px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Inter,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:48px 28px 120px}
+a{color:var(--blue);text-decoration:none}
+
+/* 顶部：badge + 标题 + 副标题 + chips */
+.eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.badge{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
+  padding:4px 10px;font-size:13px;font-weight:700;letter-spacing:.5px;color:var(--muted)}
+.tag{font-size:13px;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 40%,transparent);
+  border-radius:999px;padding:3px 12px}
+h1{font-size:34px;margin:.1em 0 .15em;letter-spacing:-.5px}
+.subtitle{font-size:18px;color:var(--muted);margin:0 0 16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.chip{background:var(--surface);border:1px solid var(--border);border-radius:999px;
+  padding:4px 12px;font-size:13px;color:var(--muted)}
+
+/* 一句话核心洞察：渐变高亮框 */
+.thesis{background:linear-gradient(120deg,#12241f,#0f1e2e);border:1px solid #234;
+  border-left:4px solid var(--green);border-radius:12px;padding:18px 22px;margin:28px 0 8px;font-size:17px}
+.thesis b{color:var(--green)}
+
+/* 分节标题 */
+h2{font-size:24px;margin:52px 0 6px;padding-top:18px;border-top:1px solid var(--border)}
+h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
+.lead{color:var(--muted);margin:0 0 20px}
+
+/* 卡片 / 机制块 */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin:16px 0}
+.card h3{margin:0 0 6px;font-size:18px}
+.card .why{color:var(--muted);font-size:15px}
+
+/* “问题”叙事块（讲具体故事） */
+.story{background:var(--surface);border:1px dashed var(--border);border-radius:12px;padding:18px 22px;color:var(--muted)}
+.story b{color:var(--text)}
+
+/* Mermaid 图容器 */
+.diagram{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;
+  padding:20px;margin:16px 0;overflow:auto;text-align:center}
+.diagram .cap{color:var(--faint);font-size:13px;margin-top:10px}
+.flow2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
+.flow2 .diagram{margin:0;display:flex;flex-direction:column}
+.flow2 .diagram h3{margin:0 0 6px;font-size:16px}
+.flow2 .diagram .dlead{color:var(--muted);font-size:13px;margin:0 0 12px;text-align:left}
+.flow2 .diagram .mermaid{flex:1;display:flex;align-items:center;justify-content:center;min-width:0}
+@media(max-width:820px){.flow2{grid-template-columns:1fr}}
+
+/* 分步演示 stepper（Hero 机制用） */
+.stepper{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:0;overflow:hidden;margin:18px 0}
+.stepper .stage{padding:26px;min-height:200px;display:flex;align-items:center;justify-content:center}
+.stepper .frame{display:none;width:100%}
+.stepper .frame.on{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.stepper .caption{background:color-mix(in srgb,var(--blue) 14%,transparent);
+  border-top:1px solid var(--border);padding:14px 22px;font-size:15px}
+.stepper .caption b{color:var(--blue)}
+.ctrl{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid var(--border)}
+.ctrl button{background:var(--surface);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:6px 14px;cursor:pointer;font-size:14px}
+.ctrl button:hover{border-color:var(--blue)}
+.dots{display:flex;gap:6px}.dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+.dot.on{background:var(--blue)}
+.count{color:var(--muted);font-size:13px}
+/* stepper 里的盒子（画“进程/上下文”这类概念用） */
+.box{border:1.5px solid var(--border);border-radius:10px;padding:16px;background:var(--bg)}
+.box.blue{border-color:var(--blue)} .box.purple{border-color:var(--purple)} .box.dim{opacity:.4}
+.box .t{font-weight:700;margin-bottom:8px} .box code{color:var(--muted);font-size:13px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* 对比块（产品逻辑，非技术表格） */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+.compare .side{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.compare .side.cc{border-top:3px solid var(--blue)}
+.compare .side.hm{border-top:3px solid var(--purple)}
+.compare .side h4{margin:0 0 8px;font-size:15px;color:var(--muted)}
+.verdict{background:var(--surface-2);border:1px solid var(--border);border-left:4px solid var(--amber);
+  border-radius:10px;padding:14px 20px;margin-top:12px}
+.verdict b{color:var(--amber)}
+
+/* 悬而未决 */
+.open li{color:var(--muted);margin:6px 0}
+.foot{margin-top:60px;color:var(--faint);font-size:13px;border-top:1px solid var(--border);padding-top:16px}
+
+/* 维度小标题 + 单组对比（综合篇用） */
+.matrix-row{margin:22px 0}
+.matrix-row h3{font-size:16px;margin:0 0 10px;color:var(--text)}
+.matrix-row h3 .n{color:var(--faint);font-weight:400;margin-right:8px}
+
+/* 多维对照矩阵：左列维度名 + CC/Hermes 两列答案（多行对比时比堆叠 .compare 更好扫读） */
+.matrix{display:grid;grid-template-columns:minmax(112px,1fr) 1.9fr 1.9fr;
+  gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:16px 0}
+.matrix>div{background:var(--surface);padding:11px 15px;font-size:14px;line-height:1.55}
+.matrix .mh{background:var(--surface-2);font-weight:700;font-size:13px;color:var(--muted)}
+.matrix .mh.cc{color:var(--blue)} .matrix .mh.hm{color:var(--purple)}
+.matrix .dim{background:var(--surface-2);font-weight:600;color:var(--text)}
+@media(max-width:760px){.matrix{grid-template-columns:1fr 1.4fr 1.4fr;font-size:12.5px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow"><span class="badge">第 7 篇 · 轴二 · Loop 之外</span><span class="tag">多智能体拓扑</span></div>
+  <h1>Loop 与其他 Agent</h1>
+  <p class="subtitle">分身之间，靠喊话还是靠看板？</p>
+  <div class="chips">
+    <span class="chip">CC 三种分身：subagent / fork / 团队</span>
+    <span class="chip">全新隔离子代理趋同 · CC 另有 fork（Hermes 无）</span>
+    <span class="chip">团队层：消息同事团队 vs 共享状态看板流水线</span>
+    <span class="chip">两家都能盯单个分身</span>
+    <span class="chip">托管产品的 live-team 更完整</span>
+  </div>
+
+  <div class="thesis">
+    先分清一件常被混为一谈的事：<b>光是 Claude Code 自己，就有三种机制不同的分身</b>——<b>① 全新子代理（subagent）</b>：leader 写一段<b>自包含简报</b>、派一个<b>零共享上下文</b>的隔离分身，它跑完回一条结论；<b>② fork</b>：不给角色时触发，分身<b>继承 leader 的完整上下文与系统提示、共享提示缓存</b>（所以给它的是"做什么"的指令、而非重述背景）——这是"接着我的记忆去干"，和①正相反；<b>③ 团队（teammates）</b>：一队<b>具名</b>队友围着共享看板、用<b>邮箱互相发消息</b>、人当队长双向协作。三者作用与机制都不同。<br>
+    把两家摆开：在<b>「全新隔离子代理」这一支上两家趋同</b>——CC 的 subagent ≈ Hermes 的 delegation（都是 fresh 会话、隔离、只回结论；leader 可用消息续跑它，但分身之间不通信）；但 <b>CC 还多一条 Hermes 没有的 fork</b>（继承上下文、复用缓存），Hermes 的委派被明确设计为"只有 fresh 会话、无父历史"。<b>真正戏剧化的分野在「多角色团队」的协调媒介</b>：Claude Code 让代理<b>互相发消息</b>（邮箱 + 共享看板 + 具名队友，人以队长身份在同一张消息网里），这套 live-team 产品面做得<b>更完整、更产品化</b>；Hermes 则让<b>独立实例靠共享数据库状态协调</b>（看板/蜂群：依赖图、黑板评论、原子认领，彼此<b>不发消息</b>），且要<b>显式进入</b>才用。一句话：<b>「消息驱动的同事团队」 vs 「共享状态驱动的看板流水线」</b>。
+  </div>
+
+  <h2><span class="num">01</span>问题：拆开之后，这些分身怎么协调</h2>
+  <p class="lead">用产品语言讲：多智能体不只是「怎么把活拆开并行」，更是「拆开之后，它们靠什么协调、汇聚、不互相踩脚」。</p>
+  <div class="story">
+    你把一个大活交给 agent——跨 12 个文件重构，或者一次调研 5 种方案。一个代理的上下文和时间扛不下，于是它拆成好几个分身。两个问题立刻冒出来：(1) 这些分身<b>怎么不互相踩脚</b>？(2) 它们<b>靠什么互相协调</b>——是像一支团队那样<b>互相发消息</b>，还是像流水线工人那样<b>各自读写一块共享白板</b>？<br><br>
+    这第二个问题，就是两家多智能体设计真正分岔的地方——它决定了整套东西长成「一支你带的同事团队」还是「一条你摆好的看板流水线」。
+  </div>
+
+  <h2><span class="num">02</span>核心机制：委派层大致趋同（CC 多一条 fork），团队层才分岔</h2>
+  <p class="lead">左蓝 Claude Code，右紫 Hermes。<b>「全新隔离子代理」这一支两家趋同</b>（fresh 会话、隔离、只回结论）；<b>CC 另有一条 Hermes 没有的 fork</b>（继承上下文、复用缓存）。
+  <b>真正戏剧化的分野在「多角色团队」的协调媒介</b>：一边靠代理<b>互相发消息</b>，另一边靠<b>共享数据库状态</b>。</p>
+
+  <div class="flow2">
+    <div class="diagram">
+      <h3 style="color:var(--blue)">Claude Code：subagent / fork ＋ 团队（消息协作）</h3>
+      <p class="dlead">委派有两条：全新隔离子代理，或继承上下文的 fork；再往上是会互相发消息、你当队长的同事团队。</p>
+      <pre class="mermaid">
+flowchart TD
+    A[大任务] --> M1[委派 · subagent<br/>自包含简报 · 零共享上下文]
+    A --> M1b[委派 · fork<br/>继承 leader 全上下文 · 复用缓存]
+    A --> M2[团队 · teammates]
+    M1 --> P2[fresh 隔离 · 只回结论<br/>leader 可续跑 · 分身间不通信]
+    M1b --> P2
+    M2 --> Q2[具名队友 ＋ 邮箱互发消息 ＋ 共享看板<br/>双向 · 人当队长 · 可分屏旁观]
+      </pre>
+      <div class="cap">委派两变体（subagent＝全新、fork＝继承上下文）；团队＝互相喊话的同事（更产品化）</div>
+    </div>
+
+    <div class="diagram">
+      <h3 style="color:var(--purple)">Hermes：委派（仅 fresh）＋ 看板/蜂群（共享状态）</h3>
+      <p class="dlead">委派只有 fresh 会话一种（无 fork 对应物）；团队层靠共享数据库状态协调独立实例，而非互相对话。</p>
+      <pre class="mermaid">
+flowchart TD
+    A[大任务] --> M1[委派 · delegation<br/>只有 fresh 会话 · 无父历史]
+    A --> M2[看板/蜂群 · 需显式进入]
+    M1 --> P1[隔离 · 只回结论<br/>≈ CC 的 subagent · 但没有 fork]
+    M2 --> Q1[每个角色＝独立实例]
+    Q1 --> Q2[靠共享数据库状态协调<br/>依赖图 · 黑板评论 · 原子认领 · 不发消息]
+      </pre>
+      <div class="cap">委派≈CC subagent（趋同，但无 fork）；团队＝共享白板上的工人，不互相喊话</div>
+    </div>
+  </div>
+  <p class="lead" style="margin-top:16px"><b>委派层</b>：全新隔离子代理两家趋同，但 <b>CC 多一条继承上下文的 fork（Hermes 无）</b>；<b>团队层</b>才是戏剧化分野——<b>CC 用消息（同事团队），Hermes 用共享状态（看板流水线）</b>，且两家都能盯/打断单个分身。</p>
+
+  <h2><span class="num">03</span>Hero 机制 · Claude Code 的「团队层」：一支互相发消息的同事团队</h2>
+  <p class="lead">这里拆的是 CC 的<b>团队层</b>——不是上面那两条即派即收的委派（subagent / fork），而是把分身编成一队会互相喊话、你当队长的同事。看这一整套「团队协作」的脚手架如何逐层长出来——它们没有一样是委派本身需要的，全是为了让分身能互相沟通、被你带着协作。</p>
+  <div class="stepper" id="stepper">
+    <div class="stage">
+      <!-- 6 帧，与 CAPTIONS 6 条一一对应 -->
+      <div class="frame on">
+        <div class="cols">
+          <div class="box blue"><div class="t">交给它一个大项目</div><code>它不自己硬扛<br>当上「协调者/队长」</code></div>
+          <div class="box purple"><div class="t">先立起两样东西</div><code>一支团队<br>一份全队共享的任务清单</code></div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box blue"><div class="t">往团队里拉入队友</div><code>研究员 · 实现者 · 验证者<br>有名字 · 有角色</code></div>
+          <div class="box purple"><div class="t">各自认领</div><code>从共享清单上领任务</code></div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box blue"><div class="t">他们不是各干各的</div><code>一个「文件邮箱」<br>互相点名 · 求助 · 汇报</code></div>
+          <div class="box purple"><div class="t">共享看板人人可见</div><code>谁在干什么 · 还剩什么 · 什么被卡住</code></div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box blue"><div class="t">你留在同一张消息网里</div><code>队友执行敏感动作时<br>权限确认桥接给你拍板</code></div>
+          <div class="box purple"><div class="t">你握着刹车</div><code>随时叫停一个跑偏的工人</code></div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box blue"><div class="t">你还能实时旁观</div><code>每个队友＝一个终端分屏面板<br>你盯着它们干活</code></div>
+          <div class="box purple"><div class="t">甚至直接介入</div><code>往某个队友注入一句你敲的话</code></div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box blue"><div class="t">这一整套脚手架</div><code>具名队友 · 邮箱 · 看板<br>权限桥接 · 刹车 · 分屏旁观</code></div>
+          <div class="box purple"><div class="t">指向同一个产品隐喻</div><code>把分身变成「一支你带的、会互相发消息的同事团队」<br>这就是 Claude Code 押的注</code></div>
+        </div>
+      </div>
+    </div>
+    <div class="caption" id="cap"></div>
+    <div class="ctrl">
+      <div class="dots" id="dots"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="count" id="count">1 / 6</span>
+        <button onclick="step(-1)">‹ 上一步</button>
+        <button onclick="step(1)">下一步 ›</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h3 style="color:var(--purple)">对照：Hermes 面对同一个大项目 —— 「一条看板流水线」</h3>
+    <p class="why">Hermes 的默认做法是——模型自己把活 fan-out 成几个分身并行跑、只把结论收回来；这些委派分身之间<b>刻意不互相对话</b>（不是一支会喊话的团队）。真要多角色协作，就<b>显式进入</b>看板 / 蜂群这条重路径：一张任务图，每个角色是一个完全独立的 Hermes 实例，它们不发消息给彼此，而是<b>各自读写一块共享数据库白板</b>（依赖图、黑板评论、原子认领）来协调——像流水线工人从看板上领活、交活。这里也<b>不是黑盒</b>：你能通过 TUI 的 /agents 面板旁观、暂停、打断单个分身。差别不在「能不能监督」，而在协调的隐喻——CC 是<b>互相喊话的同事</b>，Hermes 是<b>共享白板上的工人</b>；而且 CC 把「同事团队」这层做成了更完整、更产品化的一等体验，Hermes 的看板流水线则要你主动走进去才用。</p>
+  </div>
+
+  <h2><span class="num">04</span>对比：七组对照看清分歧</h2>
+  <p class="lead">底座、协调隐喻、团队产品面、能否盯单个分身、人的拍板点、隔离强度、成本痕迹……同一个「多智能体」的目标，落成了「同事团队」与「看板流水线」两种形态。</p>
+
+  <div class="matrix">
+    <div class="mh"></div>
+    <div class="mh cc">Claude Code</div>
+    <div class="mh hm">Hermes</div>
+
+    <div class="dim">委派层 · 全新隔离子代理</div>
+    <div>subagent——自包含简报、<b>零共享上下文</b>、只回结论（leader 可续跑；分身间不通信）。</div>
+    <div>delegation——同样 fresh 会话、隔离、只回结论。<b>这一支两家趋同</b>。</div>
+
+    <div class="dim">委派层 · fork（继承上下文）</div>
+    <div><b>有</b>——不给角色即 fork：<b>继承 leader 全上下文 + 复用提示缓存</b>，给它指令而非重述背景。</div>
+    <div><b>无对应物</b>——委派被明确设计为"只有 fresh 会话、无父历史"。</div>
+
+    <div class="dim">团队层 · 多角色协调媒介（核心分野）</div>
+    <div><b>互相发消息的同事</b>——按名字点对点 / 广播的邮箱 + 收件箱轮询，再加一块共享看板。</div>
+    <div><b>共享白板上的工人</b>——独立实例彼此不发消息；看板/蜂群靠数据库状态、依赖图、黑板评论、原子认领协调。</div>
+
+    <div class="dim">「多代理团队」产品面</div>
+    <div><b>更完整、更产品化</b>——协调者 / 具名队友 / 角色 / 权限桥接 / 刹车，默认对内开、对外灰度放量。</div>
+    <div>有完整的看板 / 蜂群 / 角色花名册，但<b>要显式走进这条路径</b>，不是普通聊天的默认形态。</div>
+
+    <div class="dim">能否盯 / 打断单个分身</div>
+    <div><b>能</b>——tmux / iTerm 分屏旁观，可往队友注入消息。</div>
+    <div><b>也能</b>——TUI 的 /agents 面板可旁观、暂停、打断单个分身（两家在这点上一致）。</div>
+
+    <div class="dim">人的否决 / 拍板点</div>
+    <div>敏感工具 / 权限确认<b>桥接给人</b>拍板 ＋ 可叫停跑偏工人（计划审批则在 leader 侧自动通过，非必经人工）。</div>
+    <div>委派分身被剥夺「找用户确认」的能力、结论自报须父代理核验；看板/蜂群另设 human-blocker 卡点。</div>
+
+    <div class="dim">隔离强度</div>
+    <div>多档可选——独立 git 工作副本 / 远程沙箱 / 独立目录 / 同进程。</div>
+    <div>独立会话＋受限工具，但默认<b>共享同一容器工作目录</b>（除非注册隔离 override）；看板蜂群里每角色是完全独立实例（最强）。</div>
+
+    <div class="dim">成本敏感的痕迹</div>
+    <div>fork 刻意让子请求前缀字节相同，以共享整支「舰队」的提示缓存（托管产品对 token 成本敏感）。</div>
+    <div>委派按父代理剩余上下文余量，给多段结论做字数预算裁剪。</div>
+  </div>
+
+  <div class="verdict">
+    <b>为何不同（分野在团队层）：</b>先把委派层看清。<b>「全新隔离子代理」这一支两家趋同</b>——CC 的 subagent ≈ Hermes 的 delegation：fresh 会话、隔离、只回结论（leader 可用消息续跑单个分身，但分身之间不通信）；两家也都能旁观/暂停/打断单个分身。但<b>CC 在委派层还多一条 Hermes 没有的 fork</b>——不给角色时，分身继承 leader 的完整上下文与提示缓存，是"接着我的记忆去干"；Hermes 的委派被明确设计为只有 fresh 会话、无父历史。所以委派层并非完全趋同，只是"全新隔离"那一支趋同。<b>真正戏剧化的分野在团队层的协调媒介</b>：Claude Code 把分身编成一支<b>互相发消息的同事团队</b>——具名队友、按名字点对点/广播的邮箱、共享看板、协调者，人以队长身份接进同一张消息网；这套 live-team 产品面它做得<b>明显更完整、更产品化</b>（默认对内开、对外灰度放量）。Hermes 的团队层则走<b>看板/蜂群</b>——每个角色是独立实例，靠<b>共享数据库状态</b>（依赖图、黑板、原子认领）协调而非互相喊话，且要<b>显式走进去</b>才用。<b>一个合理的解读</b>（非代码可证的定论）：这跟第 04 篇的重心一脉相承——CC 是人持续在环的交互式工具，「一支你带的、会喊话的同事团队」是它的自然产品形态；Hermes 既要能无人值守（自托管），就更偏「模型自主拆活 + 一条摆好就能自己跑、靠共享状态协调的流水线」。<b>反直觉的收尾：</b>你以为把「代理蜂群」搞得最花哨的会是那个开源研究实验室——实际把「一支互相协作的 AI 同事团队」做得最完整、最产品化的，是那个<b>托管产品</b>；因为「一支你带的同事团队」正是持续在环的交互式工具最自然的隐喻。
+  </div>
+
+  <h2><span class="num">05</span>悬而未决 · 边界说明</h2>
+  <ul class="open">
+    <li><b>[CC 有三种分身，别混]</b> Claude Code 的多智能体<b>不止「团队」一种</b>，且委派本身分两条：<b>subagent</b>（自包含简报、零共享上下文的全新分身）与 <b>fork</b>（继承 leader 全上下文、复用缓存——和 subagent 正相反）；再加上双向协作的<b>团队</b>。本篇把「消息驱动的同事团队」这个特征限定在团队层；「零共享上下文」只对 subagent 成立、不适用于 fork。（早期稿曾把 fork 误并进 subagent，已更正。）</li>
+    <li><b>[委派非纯单向]</b> 即便普通 subagent，leader 也能用消息把它<b>续跑</b>（分身带完整上下文恢复、再回一条结果），coordinator 模式更把"续跑已完成/失败的 worker"当核心工作流。准确的说法是<b>「分身之间不互相发消息」</b>，而非"分身完全单向一次性"。</li>
+    <li><b>[两家都能监督]</b> 别读成「CC 能盯、Hermes 是黑盒」——两家都能旁观、暂停、打断单个分身（CC 靠分屏面板，Hermes 靠 TUI 的 /agents 面板）。分野在协调隐喻，不在能不能监督。</li>
+    <li><b>[不是「默认关闭」]</b> Hermes 的看板/蜂群不是被开关关掉的功能，其派发默认是开的；准确说法是「要显式走看板/蜂群这条路径才进入」，不是普通聊天的默认形态。</li>
+    <li><b>[CC 计划审批自动通过]</b> 桥接给人的是<b>敏感工具/权限确认</b>与<b>叫停</b>；「计划模式审批」在 leader 侧是自动通过的，并非每次必经人工。别把它读成「什么都要人批」。</li>
+    <li><b>[peer 未闭环]</b> CC 的「跨会话/跨机器 peer 通信」在当前代码树里提示词与地址已在、但若干实现文件缺失，未能闭环证明可用——本篇按<b>存疑</b>处理，不作为既成能力。</li>
+    <li><b>[隔离没那么强]</b> Hermes 委派分身默认<b>共享同一容器工作目录</b>（除非注册隔离 override），不是每个都独立沙箱；真正的强隔离在看板蜂群（每角色独立实例）。</li>
+    <li><b>[归因是解读]</b> 把差异归到「第 04 篇的在场重心」是一个<b>合理解读</b>，非代码可证的铁律——代码只能证明两套协调机制的形态差异。</li>
+    <li><b>[呼应轴一]</b> 「委派分身结论自报、父代理须自行核验」呼应轴一——Hermes 对<b>任何</b>模型（含自家）的「我做完了」都不全信。</li>
+    <li><b>[计划清单不在此篇]</b> 单个 agent 给<b>自己</b>列的「计划 / 待办清单」不是多智能体——它是一个 loop 内部的过程纪律，归<b>轴一·控制侧（第 01 篇 §04 第④维）</b>：那里对比了 CC「任务清单＋壳主动催」与 Hermes「待办工具刻意不挂钩子」。</li>
+    <li><b>[移动标靶 · 不评优劣]</b> CC 团队多在特性门后灰度放量，是移动标靶（本篇是 CC main / Hermes @daf4f1a7a 切片）；两种协调隐喻不评孰优，取决于你要「一支会喊话的同事团队」还是「一条靠共享状态协调的流水线」。</li>
+  </ul>
+
+  <nav style="max-width:1080px;margin:40px auto 0;padding:16px 28px;border-top:1px solid #2a3342;text-align:center;font-size:13px;color:#8b98a9">导读：<a href="04-outside-time-trigger.html">04 时间与触发</a> · <a href="05-outside-programmability.html">05 可编程性</a> · <span style="color:var(--faint)">06 环境（待）· 综合②（待）</span> · <b>07 多智能体拓扑</b></nav>
+
+  <div class="foot">
+    代码溯源（不在正文展示，仅存档）：<br>
+    <b>Claude Code</b> — <code>src/tools/AgentTool/prompt.ts:202</code> · <code>src/tools/AgentTool/forkSubagent.ts:32</code>（子代理委派 / fork 共享缓存前缀）· <code>src/tools/AgentTool/prompt.ts:245</code> · <code>src/tools/AgentTool/AgentTool.tsx:70</code>（并行 fan-out / 后台）· <code>src/coordinator/coordinatorMode.ts:111</code>（协调者模式）· <code>src/tools/TeamCreateTool/prompt.ts:37</code> · <code>src/utils/agentSwarmsEnabled.ts:24</code>（团队 / 队友 · 灰度开关）· <code>src/utils/teammateMailbox.ts:1</code> · <code>src/hooks/useInboxPoller.ts:1</code>（跨代理邮箱 / 收件箱轮询）· <code>src/utils/peerAddress.ts:1</code> · <code>src/utils/concurrentSessions.ts:112</code>（跨会话 / 跨机器 peer · 当前树实现未闭环 · 存疑）· <code>src/tools/TaskCreateTool/prompt.ts:5</code>（共享任务看板）· <code>src/utils/swarm/leaderPermissionBridge.ts:1</code> · <code>src/coordinator/coordinatorMode.ts:234</code>（审批 / 权限桥接 / 叫停）· <code>src/tools/AgentTool/AgentTool.tsx:99</code> · <code>src/tasks/RemoteAgentTask/RemoteAgentTask.tsx:22</code>（隔离档位 · worktree / 远程）· <code>src/utils/swarm/backends/registry.ts:1</code> · <code>src/utils/swarm/teammateLayoutManager.ts:1</code>（分屏面板可视化）<br>
+    <b>Hermes</b> — <code>tools/delegate_tool.py:1</code> · <code>tools/delegate_tool.py:3181</code>（子代理委派 · 独立会话+受限工具+剥夺危险能力；默认共享容器工作目录）· <code>tools/delegate_tool.py:2552</code> · <code>tools/delegate_tool.py:1640</code>（并行 fan-out + 结论预算裁剪）· <code>tools/async_delegation.py:1</code> · <code>tools/async_delegation.py:154</code>（后台异步委派 · 结果回流）· <code>tools/delegate_tool.py:140</code> · <code>tools/delegate_tool.py:484</code>（嵌套编排者 + 深度预算）· <code>hermes_cli/kanban_swarm.py:1</code> · <code>hermes_cli/kanban.py:135</code> · <code>hermes_cli/profiles.py:1</code>（看板 / 蜂群 / 角色花名册 · 需显式进入的重路径）· <code>tui_gateway/server.py:7854</code>（TUI /agents 面板：旁观/暂停/打断单个分身）· <code>batch_runner.py:1</code>（离线批量并行）
+  </div>
+</div>
+
+<script>
+/* ============ 复用脚本 ============ */
+mermaid.initialize({startOnLoad:true,theme:"dark",
+  flowchart:{nodeSpacing:30,rankSpacing:38,padding:10,useMaxWidth:true},
+  themeVariables:{
+  background:"#1e2531",primaryColor:"#161b26",primaryBorderColor:"#2a3342",
+  primaryTextColor:"#e6edf3",lineColor:"#8b98a9",fontSize:"13.5px"}});
+
+/* stepper：每个 finding 只需改 CAPTIONS 数量与 .frame 数量一致 */
+const CAPTIONS = [
+  "<b>步骤 1</b> · 你把一个大项目交给 Claude。它不自己硬扛，而是当上「协调者/队长」，先建一支团队和一份全队共享的任务清单。",
+  "<b>步骤 2</b> · 往团队里拉入几个有名字、有角色的队友（研究员、实现者、验证者），各自从清单上认领任务。",
+  "<b>步骤 3</b> · 他们不是各干各的——通过一个「文件邮箱」互相点名发消息、求助、汇报；那份共享看板让谁都看得见谁在干什么、还剩什么、什么被卡住。",
+  "<b>步骤 4</b> · 你留在同一张消息网里：队友执行敏感动作时，权限确认会桥接给你拍板；你也随时能叫停一个跑偏的工人（注意：计划模式的审批是在队长侧自动通过的，不必你每次点头）。",
+  "<b>步骤 5</b> · 你还能实时旁观：每个队友被摆成一个终端分屏面板，你盯着它们干活，甚至直接往某个队友注入一句你敲的话。",
+  "<b>步骤 6</b> · 这一整套——具名队友、邮箱、看板、权限桥接、刹车、分屏旁观——没有一样是「模型自主并行」本身需要的；它们全指向同一个产品隐喻：把分身变成「一支你带的、会互相发消息的同事团队」。这就是 Claude Code 押的注。"
+];
+let cur=0; const frames=()=>document.querySelectorAll('#stepper .frame');
+function render(){
+  frames().forEach((f,i)=>f.classList.toggle('on',i===cur));
+  document.getElementById('cap').innerHTML=CAPTIONS[cur];
+  document.getElementById('count').textContent=(cur+1)+" / "+frames().length;
+  document.querySelectorAll('#dots .dot').forEach((d,i)=>d.classList.toggle('on',i===cur));
+}
+function step(d){cur=Math.max(0,Math.min(frames().length-1,cur+d));render();}
+(function init(){
+  const dots=document.getElementById('dots');
+  frames().forEach((_,i)=>{const s=document.createElement('span');s.className='dot'+(i?'':' on');dots.appendChild(s);});
+  render();
+})();
+</script>
+</body>
+</html>

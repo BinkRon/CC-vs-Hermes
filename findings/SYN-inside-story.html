@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>综合① · 轴一 · 一个 Loop 是怎么设计的</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+/* ============ 设计系统（所有 findings 页面复用这套 <style> 与 <script>）============ */
+:root{
+  --bg:#0d1017; --surface:#161b26; --surface-2:#1e2531; --border:#2a3342;
+  --text:#e6edf3; --muted:#8b98a9; --faint:#5a6675;
+  --blue:#4b8bf5; --green:#3fb950; --purple:#a371f7; --amber:#d9a441; --red:#f0603a;
+  --radius:14px; --maxw:1080px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Inter,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:48px 28px 120px}
+a{color:var(--blue);text-decoration:none}
+
+/* 顶部：badge + 标题 + 副标题 + chips */
+.eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.badge{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
+  padding:4px 10px;font-size:13px;font-weight:700;letter-spacing:.5px;color:var(--muted)}
+.tag{font-size:13px;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 40%,transparent);
+  border-radius:999px;padding:3px 12px}
+h1{font-size:34px;margin:.1em 0 .15em;letter-spacing:-.5px}
+.subtitle{font-size:18px;color:var(--muted);margin:0 0 16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.chip{background:var(--surface);border:1px solid var(--border);border-radius:999px;
+  padding:4px 12px;font-size:13px;color:var(--muted)}
+
+/* 一句话核心洞察：渐变高亮框 */
+.thesis{background:linear-gradient(120deg,#12241f,#0f1e2e);border:1px solid #234;
+  border-left:4px solid var(--green);border-radius:12px;padding:18px 22px;margin:28px 0 8px;font-size:17px}
+.thesis b{color:var(--green)}
+
+/* 分节标题 */
+h2{font-size:24px;margin:52px 0 6px;padding-top:18px;border-top:1px solid var(--border)}
+h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
+.lead{color:var(--muted);margin:0 0 20px}
+
+/* 卡片 / 机制块 */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin:16px 0}
+.card h3{margin:0 0 6px;font-size:18px}
+.card .why{color:var(--muted);font-size:15px}
+
+/* “问题”叙事块（讲具体故事） */
+.story{background:var(--surface);border:1px dashed var(--border);border-radius:12px;padding:18px 22px;color:var(--muted)}
+.story b{color:var(--text)}
+
+/* Mermaid 图容器 */
+.diagram{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;
+  padding:20px;margin:16px 0;overflow:auto;text-align:center}
+.diagram .cap{color:var(--faint);font-size:13px;margin-top:10px}
+/* 流程图规范：一律用「纵向」flowchart TD。两图对比用「两列」左右并排，
+   宽度对齐正文（不通栏破版）。两列等高、图垂直居中；将来真放不下再考虑横滑组件。 */
+.flow2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
+.flow2 .diagram{margin:0;display:flex;flex-direction:column}
+.flow2 .diagram h3{margin:0 0 6px;font-size:16px}
+.flow2 .diagram .dlead{color:var(--muted);font-size:13px;margin:0 0 12px;text-align:left}
+.flow2 .diagram .mermaid{flex:1;display:flex;align-items:center;justify-content:center;min-width:0}
+@media(max-width:820px){.flow2{grid-template-columns:1fr}}
+
+/* 分步演示 stepper（Hero 机制用） */
+.stepper{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:0;overflow:hidden;margin:18px 0}
+.stepper .stage{padding:26px;min-height:200px;display:flex;align-items:center;justify-content:center}
+.stepper .frame{display:none;width:100%}
+.stepper .frame.on{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.stepper .caption{background:color-mix(in srgb,var(--blue) 14%,transparent);
+  border-top:1px solid var(--border);padding:14px 22px;font-size:15px}
+.stepper .caption b{color:var(--blue)}
+.ctrl{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid var(--border)}
+.ctrl button{background:var(--surface);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:6px 14px;cursor:pointer;font-size:14px}
+.ctrl button:hover{border-color:var(--blue)}
+.dots{display:flex;gap:6px}.dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+.dot.on{background:var(--blue)}
+.count{color:var(--muted);font-size:13px}
+/* stepper 里的盒子（画“进程/上下文”这类概念用） */
+.box{border:1.5px solid var(--border);border-radius:10px;padding:16px;background:var(--bg)}
+.box.blue{border-color:var(--blue)} .box.purple{border-color:var(--purple)} .box.dim{opacity:.4}
+.box .t{font-weight:700;margin-bottom:8px} .box code{color:var(--muted);font-size:13px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* 对比块（产品逻辑，非技术表格） */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+.compare .side{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.compare .side.cc{border-top:3px solid var(--blue)}
+.compare .side.hm{border-top:3px solid var(--purple)}
+.compare .side h4{margin:0 0 8px;font-size:15px;color:var(--muted)}
+.verdict{background:var(--surface-2);border:1px solid var(--border);border-left:4px solid var(--amber);
+  border-radius:10px;padding:14px 20px;margin-top:12px}
+.verdict b{color:var(--amber)}
+
+/* 悬而未决 */
+.open li{color:var(--muted);margin:6px 0}
+.foot{margin-top:60px;color:var(--faint);font-size:13px;border-top:1px solid var(--border);padding-top:16px}
+
+/* 本页新增：三行对照矩阵（复用卡片/compare 视觉语言，不改配色变量） */
+.matrix-row{margin:22px 0}
+.matrix-row h3{font-size:16px;margin:0 0 10px;color:var(--text)}
+.matrix-row h3 .n{color:var(--faint);font-weight:400;margin-right:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow"><span class="badge">综合① · 轴一</span><span class="tag">一个 Loop 是怎么设计的</span></div>
+  <h1>一个 Loop 是怎么设计的</h1>
+  <p class="subtitle">三侧看完，两家的 Loop 其实只由一个变量决定——你有多信任模型。</p>
+  <div class="chips">
+    <span class="chip">信任决定壳的厚度</span>
+    <span class="chip">单杠杆 vs 双杠杆</span>
+    <span class="chip">改模型 vs 改壳</span>
+    <span class="chip">模型作者反而更不信任</span>
+  </div>
+
+  <div class="thesis">控制侧、输入侧、输出侧看似三件事，其实是<b>同一个选择的三次显形</b>——这个 harness 有多信任模型，就决定了壳做多薄。Claude Code 押注"一个可控、持续变强的托管模型"，于是三侧都选择<b>信任模型、把壳做薄</b>；Hermes 面对"自训 + 第三方、良莠不齐的开源模型群"，于是三侧都选择<b>不全信、用壳（有时连同训练）加厚兜底</b>。</div>
+
+  <h2><span class="num">01</span>两句话，两种哲学</h2>
+  <div class="compare">
+    <div class="side cc">
+      <h4>Claude Code</h4>
+      <p><b>信任模型，壳做薄。</b>能交给模型判断的就交给它（何时停、怎么总结、怎么表达意图），壳只做管道——执行、翻译、守资源。好处：能力天花板随模型升级<b>自动</b>抬高。代价：模型犯浑（跑偏、做错）时，薄壳基本不纠正——护栏只挡「烧钱 / 闯祸」，不挡「做得对不对」。</p>
+    </div>
+    <div class="side hm">
+      <h4>Hermes Agent</h4>
+      <p><b>谁都不全信，模型和壳一起加固。</b>既然自己能训模型，就把一部分可靠性<b>训进权重</b>；又因为要跑参差不齐的开源/第三方模型，还得在<b>壳里加一层防线</b>。两根杠杆一起用。代价：壳复杂、要持续维护。</p>
+    </div>
+  </div>
+
+  <h2><span class="num">02</span>同一个哲学，在三侧的三次显形</h2>
+  <p class="lead">控制、输入、输出行动——三个不同的技术问题，暴露出 Hermes 的<b>两根杠杆</b>：控制侧、输出侧是<b>信任驱动的"改壳"</b>（越不敢信模型，壳越厚）；输入侧是<b>所有权驱动的"改模型"</b>（拥有模型，才能把能力训进权重）。Claude Code 只有前一根、还基本不用。</p>
+
+  <div class="matrix-row">
+    <h3><span class="n">2.1</span>控制侧 · 何时算做完</h3>
+    <div class="compare">
+      <div class="side cc"><h4>Claude Code</h4><p>默认模型说了算——这轮没点工具＝完成。壳<b>默认</b>不判断"活干完没"（停止钩子、token 预算续跑是两个 opt-in 覆盖口，默认不用）。</p></div>
+      <div class="side hm"><h4>Hermes Agent</h4><p>壳设一道 verify-before-done 门：模型改了代码没测试证据就被推回循环，<b>无权单方面宣布做完</b>。（此门 <b>surface-aware</b>：编码/程序化入口默认开、聊天平台默认关，且只对代码改动触发。）</p></div>
+    </div>
+    <div class="verdict"><b>判词——信任问题，动的是<u>壳</u>杠杆：</b>CC <b>默认</b>信任模型的自述→壳默认不设门（但留了停止钩子/预算续跑两个 opt-in 口）；Hermes <b>默认</b>不信任任何模型（含自家）的"我做完了"→在编码入口加验证门（聊天入口默认关）。（改壳）</div>
+  </div>
+
+  <div class="matrix-row">
+    <h3><span class="n">2.2</span>输入侧 · 上下文满了谁来压</h3>
+    <div class="compare">
+      <div class="side cc"><h4>Claude Code</h4><p>把压缩的智能<b>外包给通用模型</b>（壳只给一段提示词让它自己写摘要）。</p></div>
+      <div class="side hm"><h4>Hermes Agent</h4><p>把压缩形态<b>既训进模型、又写进壳</b>（同源管线造训练数据，模型见过被压的历史）。</p></div>
+    </div>
+    <div class="verdict"><b>判词——这一侧不是"信不信"，是"谁拥有模型"，动的是<u>模型</u>杠杆：</b>CC 不拥有模型，只能给通用模型写提示、临场发挥（改壳）；Hermes 拥有模型，用同源管线造"压缩过"的训练数据、让模型见过被摘要的历史（意图把这形态训进权重——"已训进线上权重"非本仓库可证，但这条改模型的路只有模型作者走得通）。<b>这正是 Hermes 多出的第二根杠杆。</b></div>
+  </div>
+
+  <div class="matrix-row">
+    <h3><span class="n">2.3</span>输出行动侧 · 怎么解析意图、结果怎么回</h3>
+    <div class="compare">
+      <div class="side cc"><h4>Claude Code</h4><p>读模型<b>原生结构化格式</b>，壳几乎不设防。</p></div>
+      <div class="side hm"><h4>Hermes Agent</h4><p>运行时同样读结构化，但壳<b>额外加一层可靠性纠偏</b>（工具名修复 / 空名防"鹦鹉学舌" / 剥掉正文里的假工具调用），以兜住弱模型。</p></div>
+    </div>
+    <div class="verdict"><b>判词——信任问题，动的是<u>壳</u>杠杆：</b>CC 信任那一个托管模型的格式→壳不设防；Hermes 不敢假设第三方弱模型可靠→壳加纠偏层。（改壳）</div>
+  </div>
+
+  <h2><span class="num">03</span>反直觉：做模型的人，壳反而做得更厚</h2>
+  <div class="card">
+    <p>直觉会以为：Nous 自己训模型，应该<b>最信任它、壳做得最薄</b>。实际恰恰相反——它的壳更厚。关键是<b>看清它不信任的到底是谁</b>：</p>
+    <ul class="open">
+      <li>对<b>任何模型（含自家）</b>的"我做完了"自述——不信，所以有 verify 门（<b>这一层对自家模型也设防</b>；不过它 surface-aware——编码入口默认开、聊天平台默认关）。</li>
+      <li>对<b>第三方开源弱模型</b>的格式可靠性——不敢假设，所以有纠偏层（<b>这一层主要不为自家模型</b>）。</li>
+    </ul>
+    <p>根源是处境不同：Anthropic 只发<b>一个</b>自己完全掌控、持续变强的模型，Claude Code 可以放心押它；Nous 活在<b>开源世界</b>——模型不止一个、质量参差、还要自托管——它<b>无法假设</b>可靠，于是两头下注：能训进权重的就训进去（<b>改模型</b>），兜不住的用壳挡（<b>改壳</b>）。</p>
+  </div>
+  <div class="verdict"><b>"改模型 vs 改壳"的答案：</b>Claude Code＝<b>单杠杆</b>（信任那一个托管模型）；Hermes＝<b>双杠杆</b>（拥有模型→能改模型；面对异质生态→又必须改壳）。</div>
+
+  <h2><span class="num">04</span>对产品经理意味着什么</h2>
+  <div class="card">
+    <ul class="open">
+      <li><b>若你基于一个强托管模型做 agent：</b>学 Claude Code——壳做薄、把判断权交给模型，天花板随模型涨；但要接受"模型犯浑时壳兜不住"。</li>
+      <li><b>若你要跑多种/开源/自托管模型：</b>学 Hermes——壳必须厚；如果你能训模型，尽量把可靠性训进去；代价是壳复杂、要持续维护。</li>
+      <li><b>一句话记住：</b>壳的厚度不是能力问题，是<b>信任问题</b>。你越不能假设模型可靠，壳就越得厚。</li>
+    </ul>
+  </div>
+
+  <h2><span class="num">05</span>信任刻度盘：一个选择，三次显形</h2>
+  <div class="stepper" id="stepper">
+    <div class="stage">
+      <div class="frame on">
+        <div class="cols">
+          <div class="box blue"><div class="t">Claude Code · 控制侧</div>默认模型说了算，没点工具＝完成（有 opt-in 覆盖口）</div>
+          <div class="box purple"><div class="t">Hermes · 控制侧</div>编码入口默认设 verify 门（聊天默认关）</div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box blue"><div class="t">Claude Code · 输入侧</div>压缩外包给通用模型</div>
+          <div class="box purple"><div class="t">Hermes · 输入侧</div>压缩训进模型＋写进壳</div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box blue"><div class="t">Claude Code · 输出行动侧</div>读原生格式，壳不设防</div>
+          <div class="box purple"><div class="t">Hermes · 输出行动侧</div>读结构化＋壳加纠偏层</div>
+        </div>
+      </div>
+      <div class="frame">
+        <div class="cols">
+          <div class="box blue"><div class="t">Claude Code · 合起来</div>信任模型 → 壳薄 → 单杠杆</div>
+          <div class="box purple"><div class="t">Hermes · 合起来</div>谁都不全信 → 壳厚 → 双杠杆</div>
+        </div>
+      </div>
+    </div>
+    <div class="caption" id="cap"><b>第1步 · 控制侧</b> · 把「何时收工」的决定权，一个交出去、一个收回来。</div>
+    <div class="ctrl">
+      <div class="dots" id="dots"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="count" id="count">1 / 3</span>
+        <button onclick="step(-1)">‹ 上一步</button>
+        <button onclick="step(1)">下一步 ›</button>
+      </div>
+    </div>
+  </div>
+
+  <nav style="max-width:1080px;margin:40px auto 0;padding:16px 28px;border-top:1px solid #2a3342;text-align:center;font-size:13px;color:#8b98a9">导读：<b>综合①·一个 Loop 是怎么设计的</b> · <a href="01-inside-control-loop.html" style="color:var(--blue)">01 控制侧</a> · <a href="02-inside-input.html" style="color:var(--blue)">02 输入侧</a> · <a href="03-inside-output.html" style="color:var(--blue)">03 输出行动侧</a></nav>
+
+  <div class="foot">综合① · 轴一：一个 Loop 是怎么设计的 —— 由控制侧 / 输入侧 / 输出行动侧三份 findings 综合而成。</div>
+</div>
+
+<script>
+/* ============ 复用脚本 ============ */
+mermaid.initialize({startOnLoad:true,theme:"dark",
+  flowchart:{nodeSpacing:30,rankSpacing:38,padding:10,useMaxWidth:true},
+  themeVariables:{
+  background:"#1e2531",primaryColor:"#161b26",primaryBorderColor:"#2a3342",
+  primaryTextColor:"#e6edf3",lineColor:"#8b98a9",fontSize:"13.5px"}});
+
+/* stepper：每个 finding 只需改 CAPTIONS 数量与 .frame 数量一致 */
+const CAPTIONS = [
+  "<b>第1步 · 控制侧</b> · 默认把「何时收工」的决定权，一个交出去、一个收回来（CC 另有停止钩子/预算续跑两个 opt-in 覆盖口；Hermes 的门在聊天入口默认关）。",
+  "<b>第2步 · 输入侧</b> · 上下文满了怎么压：一个外包给模型临场发挥，一个把压缩形态写进训练数据、又写进壳。",
+  "<b>第3步 · 输出行动侧</b> · 都读结构化格式，但一个不设防、一个额外加一层纠偏兜住弱模型。",
+  "<b>第4步 · 合起来看</b> · CC 只有一根杠杆（信任模型、壳做薄）；Hermes 有两根——信任问题上改壳、所有权上改模型。"
+];
+let cur=0; const frames=()=>document.querySelectorAll('#stepper .frame');
+function render(){
+  frames().forEach((f,i)=>f.classList.toggle('on',i===cur));
+  document.getElementById('cap').innerHTML=CAPTIONS[cur];
+  document.getElementById('count').textContent=(cur+1)+" / "+frames().length;
+  document.querySelectorAll('#dots .dot').forEach((d,i)=>d.classList.toggle('on',i===cur));
+}
+function step(d){cur=Math.max(0,Math.min(frames().length-1,cur+d));render();}
+(function init(){
+  const dots=document.getElementById('dots');
+  frames().forEach((_,i)=>{const s=document.createElement('span');s.className='dot'+(i?'':' on');dots.appendChild(s);});
+  render();
+})();
+</script>
+</body>
+</html>
