@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
 <title>综合① · 轴一 · 一个 Loop 是怎么设计的</title>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
 <style>
-/* ============ 设计系统（所有 findings 页面复用这套 <style> 与 <script>）============ */
+/* ============ 设计系统（单章自包含拷贝；合订本由 build.py 从 _design-system.html 单一真相注入）============ */
 :root{
   --bg:#0d1017; --surface:#161b26; --surface-2:#1e2531; --border:#2a3342;
   --text:#e6edf3; --muted:#8b98a9; --faint:#5a6675;
@@ -18,8 +19,6 @@
 body{margin:0;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
 .wrap{max-width:var(--maxw);margin:0 auto;padding:48px 28px 120px}
 a{color:var(--blue);text-decoration:none}
-
-/* 顶部：badge + 标题 + 副标题 + chips */
 .eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:10px}
 .badge{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
   padding:4px 10px;font-size:13px;font-weight:700;letter-spacing:.5px;color:var(--muted)}
@@ -30,40 +29,26 @@ h1{font-size:34px;margin:.1em 0 .15em;letter-spacing:-.5px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
 .chip{background:var(--surface);border:1px solid var(--border);border-radius:999px;
   padding:4px 12px;font-size:13px;color:var(--muted)}
-
-/* 一句话核心洞察：渐变高亮框 */
 .thesis{background:linear-gradient(120deg,#12241f,#0f1e2e);border:1px solid #234;
   border-left:4px solid var(--green);border-radius:12px;padding:18px 22px;margin:28px 0 8px;font-size:17px}
 .thesis b{color:var(--green)}
-
-/* 分节标题 */
 h2{font-size:24px;margin:52px 0 6px;padding-top:18px;border-top:1px solid var(--border)}
 h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 .lead{color:var(--muted);margin:0 0 20px}
-
-/* 卡片 / 机制块 */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin:16px 0}
 .card h3{margin:0 0 6px;font-size:18px}
 .card .why{color:var(--muted);font-size:15px}
-
-/* “问题”叙事块（讲具体故事） */
 .story{background:var(--surface);border:1px dashed var(--border);border-radius:12px;padding:18px 22px;color:var(--muted)}
 .story b{color:var(--text)}
-
-/* Mermaid 图容器 */
 .diagram{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;
   padding:20px;margin:16px 0;overflow:auto;text-align:center}
 .diagram .cap{color:var(--faint);font-size:13px;margin-top:10px}
-/* 流程图规范：一律用「纵向」flowchart TD。两图对比用「两列」左右并排，
-   宽度对齐正文（不通栏破版）。两列等高、图垂直居中；将来真放不下再考虑横滑组件。 */
 .flow2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:stretch}
 .flow2 .diagram{margin:0;display:flex;flex-direction:column}
 .flow2 .diagram h3{margin:0 0 6px;font-size:16px}
 .flow2 .diagram .dlead{color:var(--muted);font-size:13px;margin:0 0 12px;text-align:left}
 .flow2 .diagram .mermaid{flex:1;display:flex;align-items:center;justify-content:center;min-width:0}
 @media(max-width:820px){.flow2{grid-template-columns:1fr}}
-
-/* 分步演示 stepper（Hero 机制用） */
 .stepper{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:0;overflow:hidden;margin:18px 0}
 .stepper .stage{padding:26px;min-height:200px;display:flex;align-items:center;justify-content:center}
 .stepper .frame{display:none;width:100%}
@@ -79,13 +64,16 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 .dots{display:flex;gap:6px}.dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
 .dot.on{background:var(--blue)}
 .count{color:var(--muted);font-size:13px}
-/* stepper 里的盒子（画“进程/上下文”这类概念用） */
+.entry-note{display:inline-flex;align-items:baseline;gap:7px;cursor:pointer;font-size:12.5px;
+  color:var(--muted);line-height:1.5;transition:color .15s}
+.entry-note:hover{color:var(--green)}
+.entry-note:hover .cp{text-decoration:underline;text-underline-offset:3px}
+.entry-note .tie{color:var(--faint);font-size:13px}
+.entry-note .go{color:var(--green)}
 .box{border:1.5px solid var(--border);border-radius:10px;padding:16px;background:var(--bg)}
 .box.blue{border-color:var(--blue)} .box.purple{border-color:var(--purple)} .box.dim{opacity:.4}
 .box .t{font-weight:700;margin-bottom:8px} .box code{color:var(--muted);font-size:13px}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-
-/* 对比块（产品逻辑，非技术表格） */
 .compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
 .compare .side{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
 .compare .side.cc{border-top:3px solid var(--blue)}
@@ -94,166 +82,537 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 .verdict{background:var(--surface-2);border:1px solid var(--border);border-left:4px solid var(--amber);
   border-radius:10px;padding:14px 20px;margin-top:12px}
 .verdict b{color:var(--amber)}
-
-/* 悬而未决 */
 .open li{color:var(--muted);margin:6px 0}
 .foot{margin-top:60px;color:var(--faint);font-size:13px;border-top:1px solid var(--border);padding-top:16px}
-
-/* 本页新增：三行对照矩阵（复用卡片/compare 视觉语言，不改配色变量） */
 .matrix-row{margin:22px 0}
 .matrix-row h3{font-size:16px;margin:0 0 10px;color:var(--text)}
 .matrix-row h3 .n{color:var(--faint);font-weight:400;margin-right:8px}
+.matrix{display:grid;grid-template-columns:minmax(112px,1fr) 1.9fr 1.9fr;
+  gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:16px 0}
+.matrix>div{background:var(--surface);padding:11px 15px;font-size:14px;line-height:1.55}
+.matrix .mh{background:var(--surface-2);font-weight:700;font-size:13px;color:var(--muted)}
+.matrix .mh.cc{color:var(--blue)} .matrix .mh.hm{color:var(--purple)}
+.matrix .dim{background:var(--surface-2);font-weight:600;color:var(--text)}
+@media(max-width:760px){.matrix{grid-template-columns:1fr 1.4fr 1.4fr;font-size:12.5px}}
+</style>
+<style class="bespoke">
+/* ============ 综合①专属排版（scoped 于 .syn1；build.py 收进合订本 head，不污染共享系统、不泄漏别章）============ */
+.syn1{--col:100%}
+
+/* Hero 硬指标行 */
+.syn1 .metrics{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12.5px;letter-spacing:.02em;color:var(--muted);margin:4px 0 26px;line-height:1.7}
+.syn1 .metrics b{color:var(--text);font-weight:600}
+
+/* 编辑式分节标题 */
+.syn1 .sec{margin:60px 0 8px;max-width:var(--col)}
+.syn1 .sec .k{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:9px}
+.syn1 .sec h2{font-size:24px;line-height:1.28;letter-spacing:-.3px;margin:0;font-weight:730;border:0;padding:0}
+
+/* 叙事裸文 */
+.syn1 p.body{max-width:var(--col);font-size:16.5px;line-height:1.8;color:var(--muted);margin:16px 0}
+.syn1 p.body b{color:var(--text);font-weight:600}
+.syn1 p.body .cc{color:var(--blue);font-weight:600}
+.syn1 p.body .hm{color:var(--purple);font-weight:600}
+
+/* 开篇两框内部分段 */
+.syn1 .thesis p{margin:0 0 12px;line-height:1.75}
+.syn1 .thesis p:last-child{margin-bottom:0}
+.syn1 .thesis .hl{font-weight:700;color:#e8c06a;box-shadow:inset 0 -.46em 0 rgba(217,164,65,.16)}
+.syn1 .thesis .cc{color:var(--blue);font-weight:600}
+.syn1 .thesis .hm{color:var(--purple);font-weight:600}
+.syn1 .story p{margin:0 0 14px;line-height:1.78}
+.syn1 .story p:last-child{margin-bottom:0}
+
+/* 图注 */
+.syn1 .map-cap{color:var(--faint);font-size:12.5px;margin:8px 0 0;line-height:1.6}
+.syn1 .map-cap b{color:var(--text);font-weight:600}
+
+/* ========== 重档 A · 回合时间线（stepper 内的轨道 + 站点卡片）========== */
+.syn1 .tl{position:relative;display:grid;grid-template-columns:repeat(8,1fr);width:100%;padding-top:4px;padding-bottom:34px}
+.syn1 .tl::before{content:'';position:absolute;top:14px;left:5.5%;right:5.5%;height:2px;background:var(--border)}
+/* 回边：⑧ 判定 → ② 拼请求包（拓扑诚实：回合是个环，PM 草图裁定补入） */
+.syn1 .tl::after{content:'‹ 有工具调用：带着更长的历史回到 ② 再转一圈（没有 → 收工，交还用户）';
+  position:absolute;left:13%;right:7%;bottom:4px;border-top:1.5px dashed color-mix(in srgb,var(--faint) 75%,transparent);
+  padding-top:5px;font-size:11px;color:var(--faint);text-align:center;line-height:1.4}
+.syn1 .tl-st{position:relative;text-align:center;padding:4px 2px 2px}
+.syn1 .tl-st .nd{width:12px;height:12px;border-radius:50%;background:var(--surface);border:2.5px solid var(--faint);
+  margin:0 auto 8px;position:relative;z-index:2}
+.syn1 .tl-st.on .nd{background:var(--text);border-color:var(--text);
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--text) 18%,transparent)}
+/* ③ 压缩阀是条件站（快爆窗才动、不是每圈都过）→ 虚线节点 */
+.syn1 .tl-st:nth-child(3) .nd{border-style:dashed}
+.syn1 .tl-st:nth-child(3).on .nd{border-style:solid}
+.syn1 .tl-st .lb{font-size:11.5px;color:var(--faint);line-height:1.35;white-space:nowrap}
+.syn1 .tl-st.on .lb{color:var(--text);font-weight:700}
+.syn1 .tl-st .ticks{display:flex;gap:3px;justify-content:center;margin-top:6px;min-height:8px}
+.syn1 .tick{width:7px;height:7px;border-radius:2px;display:inline-block}
+.syn1 .tick.sh{background:var(--amber)}
+.syn1 .tick.md{background:var(--green)}
+.syn1 .tick.ex{background:transparent;border:1.5px dashed var(--faint)}
+@media(max-width:820px){.syn1 .tl-st .lb{white-space:normal;font-size:10.5px}}
+
+.syn1 .st-card{margin-top:20px;background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:16px 20px;text-align:left;width:100%}
+.syn1 .st-card .h{font-weight:700;font-size:15.5px;margin-bottom:6px}
+.syn1 .st-card .h .ref{font-weight:400;font-size:12px;color:var(--faint);margin-left:10px}
+.syn1 .st-card .d{font-size:14px;color:var(--muted);line-height:1.72}
+.syn1 .st-card .d b{color:var(--text);font-weight:600}
+.syn1 .st-card .d .cc{color:var(--blue);font-weight:600}
+.syn1 .st-card .d .hm{color:var(--purple);font-weight:600}
+.syn1 .st-card .row{margin-top:11px;font-size:13px;line-height:1.7}
+.syn1 .st-card .k{color:var(--faint);font-weight:700;font-size:11px;letter-spacing:.1em;margin-right:9px}
+.syn1 .seam{display:block;font-size:12.5px;line-height:1.65;color:var(--muted);margin:7px 0 0;
+  padding:7px 13px;border-left:3px solid var(--faint);border-radius:0 9px 9px 0;
+  background:color-mix(in srgb,var(--surface-2) 72%,transparent)}
+.syn1 .seam .sn{font-weight:700}
+.syn1 .seam .cc{color:var(--blue);font-weight:600}
+.syn1 .seam .hm{color:var(--purple);font-weight:600}
+.syn1 .seam.sh{border-left-color:var(--amber)} .syn1 .seam.sh .sn{color:var(--amber)}
+.syn1 .seam.md{border-left-color:var(--green)} .syn1 .seam.md .sn{color:var(--green)}
+.syn1 .seam.ex{border-left-style:dashed} .syn1 .seam.ex .sn{color:var(--text)}
+.syn1 .band .rowi .cc{color:var(--blue);font-weight:600}
+.syn1 .band .rowi .hm{color:var(--purple);font-weight:600}
+.syn1 .noseam{font-size:12.5px;color:var(--faint)}
+
+/* ========== 重档 B · 分叉缝汇流图 ========== */
+.syn1 .conf{margin:22px 0 8px;display:flex;flex-direction:column;gap:14px}
+.syn1 .conf .crow{display:grid;grid-template-columns:1fr 218px;gap:14px;align-items:stretch}
+.syn1 .conf .bands{display:flex;flex-direction:column;gap:14px;justify-content:center}
+.syn1 .band{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
+.syn1 .band .bh{padding:8px 18px;font-size:12px;font-weight:700;letter-spacing:.06em;background:var(--surface-2)}
+.syn1 .band.sh .bh{color:var(--amber)}
+.syn1 .band.md .bh{color:var(--green)}
+.syn1 .band.ex .bh{color:var(--muted)}
+.syn1 .band .bh .bn{color:var(--faint);font-weight:400;margin-left:8px;letter-spacing:0}
+.syn1 .band .rowi{padding:11px 18px;border-top:1px solid var(--border);font-size:13.5px;line-height:1.62}
+.syn1 .band .rowi b{color:var(--text);font-weight:600}
+.syn1 .band .rowi .src{font-size:11px;color:var(--faint);border:1px solid var(--border);border-radius:999px;
+  padding:1px 8px;margin-left:8px;white-space:nowrap}
+.syn1 .band .rowi .dd{display:block;font-size:12.5px;color:var(--faint);margin-top:3px}
+.syn1 .lever{border-radius:12px;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  padding:18px 16px;text-align:center;gap:6px}
+.syn1 .lever .ar{font-size:15px;color:var(--faint)}
+.syn1 .lever .lt{font-weight:700;font-size:15.5px}
+.syn1 .lever .lc{font-size:12px;color:var(--faint)}
+.syn1 .lever .ln{font-size:12.5px;color:var(--muted);line-height:1.55}
+.syn1 .lever.sh{border:1.5px solid color-mix(in srgb,var(--amber) 55%,transparent);
+  background:color-mix(in srgb,var(--amber) 7%,transparent)}
+.syn1 .lever.sh .lt{color:var(--amber)}
+.syn1 .lever.md{border:1.5px solid color-mix(in srgb,var(--green) 55%,transparent);
+  background:color-mix(in srgb,var(--green) 7%,transparent)}
+.syn1 .lever.md .lt{color:var(--green)}
+.syn1 .lever.ex{border:1.5px dashed var(--faint);background:transparent}
+.syn1 .lever.ex .lt{color:var(--muted)}
+@media(max-width:820px){.syn1 .conf .crow{grid-template-columns:1fr}}
+
+/* punch callout（轻 · 左色规） */
+.syn1 .punch{max-width:var(--col);margin:24px 0;padding:12px 0 12px 20px;border-left:3px solid var(--amber);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--amber) 7%,transparent),transparent 70%);
+  font-size:17px;line-height:1.7;color:var(--text)}
+.syn1 .punch b{color:var(--amber)}
+
+/* compare 列表内条目 */
+.syn1 .compare .side ul{margin:8px 0 0;padding-left:18px}
+.syn1 .compare .side li{font-size:13.5px;color:var(--muted);margin:5px 0;line-height:1.6}
+.syn1 .compare .side li b{color:var(--text);font-weight:600}
 </style>
 </head>
 <body>
 <div class="wrap">
+<div class="syn1">
 
-  <div class="eyebrow"><span class="badge">综合① · 轴一</span><span class="tag">一个 Loop 是怎么设计的</span></div>
+  <div class="eyebrow"><span class="badge">综合① · 轴一</span><span class="tag">Loop 之内</span></div>
   <h1>一个 Loop 是怎么设计的</h1>
-  <p class="subtitle">三侧看完，两家的 Loop 其实只由一个变量决定——你有多信任模型。</p>
-  <div class="chips">
-    <span class="chip">信任决定壳的厚度</span>
-    <span class="chip">单杠杆 vs 双杠杆</span>
-    <span class="chip">改模型 vs 改壳</span>
-    <span class="chip">模型作者反而更不信任</span>
+  <p class="subtitle">三侧拆完拼回来：一个回合的一生，与所有分叉的最终去向。</p>
+  <p class="metrics">一个回合 ＝ <b>8 站</b> &nbsp;·&nbsp; 三章分叉共 <b>8 处</b>：6 →改壳 / 1 →改模型 / 1 →例外 &nbsp;·&nbsp; 本章<b>只编织不开采</b>（每站每处分叉回指 01/02/03）</p>
+
+  <div class="thesis">
+    <p>读完三侧，最该带走的不是「两家有多不同」，而是两家的 Loop <span class="hl">八成是同一门手艺</span>——机械循环同构、装配骨架同一张、协议地板互相通用。真正的分叉只有 <b>8 处</b>，而且几乎全部通向两个变量：<b>敢多信这个模型</b>（信任，决定壳的厚度）；<b>拥不拥有这个模型</b>（所有权，决定有没有第二根杠杆）。</p>
+    <p><span class="cc">Claude Code</span> 押注一个自家托管的强模型——通向两杠杆的 7 处分叉上，它的答案全是「不铺、不分、不训」，单杠杆且轻用；<span class="hm">Hermes</span> 面对一群参差的开源模型、又自己训模型——改壳、改模型两根杠杆一起拉。外加一处诚实的例外：有一处分叉谁的杠杆都不归，它只是「产品和底座长得不一样」。</p>
   </div>
 
-  <div class="thesis">控制侧、输入侧、输出侧看似三件事，其实是<b>同一个选择的三次显形</b>——这个 harness 有多信任模型，就决定了壳做多薄。Claude Code 押注"一个可控、持续变强的托管模型"，于是三侧都选择<b>信任模型、把壳做薄</b>；Hermes 面对"自训 + 第三方、良莠不齐的开源模型群"，于是三侧都选择<b>不全信、用壳（有时连同训练）加厚兜底</b>。</div>
+  <div class="story" style="margin-top:16px">
+    <p>前三章像三张解剖图：01 拆「循环为什么转得下去」，02 拆「每轮那个请求包怎么拼」，03 拆「吐出来的生料怎么加工」。每张图都对，但解剖图有个天生的缺陷——看完三张，你还是没见过这台机器<b>跑起来</b>的样子。</p>
+    <p>所以这一章干两件事：先把一个回合从头到尾走一遍（8 站，每站标清「这里两家一样」还是「这里分了叉」）；再把全部分叉收拢到一张图上，看它们到底汇向哪里。本章不新增任何机制——每一站、每处分叉，都回指三章里已过门的结论。</p>
+  </div>
 
-  <h2><span class="num">01</span>两句话，两种哲学</h2>
+  <!-- ================= §01 上半 · 回合时间线 ================= -->
+  <div class="sec">
+    <span class="k">The round</span>
+    <h2>一个回合的一生：三张解剖图，拼回一条时间线</h2>
+  </div>
+  <p class="body">三章各沿一侧下刀，这一节换个方向：顺着<b>时间</b>走。从你敲下一句话开始，到 agent 把回答交还给你，一个回合恰好路过三章的全部领地。下面逐站走一圈，每站标出它属于哪章、两家在这一站是共用手艺还是分了叉。</p>
+  <p class="body">先看灰色再看颜色：8 站里有 3 站（唤醒、调模型、生料回来）<b>一处分叉都没有</b>——这就是「八成共享」的直观版；分叉挂在少数几站上，琥珀色的通向「改壳」，绿色的那颗全轴只有一颗、通向「改模型」，虚线的那颗谁都不通向。</p>
+
+  <div class="stepper">
+    <script type="application/json" class="captions">[
+      "<b>第 1 站 · 唤醒</b> · 模型说完即死——是壳带着整段历史把它再次叫醒。「连续工作」从这一站起就是壳造的幻觉（01 章）。",
+      "<b>第 2 站 · 拼请求包</b> · 静态前缀冻在最前吃缓存、动态信号塞进消息窗口。这一站挂着 3 处分叉——全章最拥挤的一站（02 章）。",
+      "<b>第 3 站 · 压缩阀</b> · 快爆窗才动的「先删后摘」阶梯。全轴唯一的绿色分叉在这里：所有权那根第二杠杆（02 章）。",
+      "<b>第 4 站 · 调模型</b> · 计算侧唯一的正面舞台：一纸黑盒契约 vs 一群模型＋部分自家权重。两个变量都从这一站发源（框架·计算侧）。",
+      "<b>第 5 站 · 生料回来</b> · 一次响应不是一句话，是一叠异构块——想的、说的、要动手的混排在一起（03 章）。",
+      "<b>第 6 站 · 行动线</b> · 把「要动手」的块变成真落地的操作：权限门 → 执行 → 结果翻回。两处改壳分叉挂在这里（03 章）。",
+      "<b>第 7 站 · 历史线</b> · 把这一整轮重塑成 API 肯收的历史——这道地板反而是 CC 最厚的工程（03 章）。",
+      "<b>第 8 站 · 判定</b> · 有没有点工具？有 → 带着更长的历史回到第 2 站；没有 → CC 直接收工，Hermes 还要过验证门（01 章）。"
+    ]</script>
+    <div class="stage">
+
+      <div class="frame on">
+        <div style="width:100%">
+          <div class="tl">
+            <div class="tl-st on"><div class="nd"></div><div class="lb">① 唤醒</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">② 拼请求包</div><div class="ticks"><span class="tick sh"></span><span class="tick sh"></span><span class="tick ex"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">③ 压缩阀</div><div class="ticks"><span class="tick md"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">④ 调模型</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑤ 生料回来</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑥ 行动线</div><div class="ticks"><span class="tick sh"></span><span class="tick sh"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑦ 历史线</div><div class="ticks"><span class="tick sh"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑧ 判定</div><div class="ticks"><span class="tick sh"></span></div></div>
+          </div>
+          <div class="st-card">
+            <div class="h">唤醒：上一轮的「它」已经不存在了<span class="ref">回指 · 01 控制侧</span></div>
+            <div class="d">模型没有后台进程、不记得任何事——上一轮说完，它就「死」了。壳把上一轮历史、模型刚说的话、工具跑出的结果三段接龙成新输入，<b>再发起一次全新调用</b>。所谓 agent 连干六十轮，是壳一次次重新唤醒它。</div>
+            <div class="row"><span class="k">这一站</span><span class="noseam">无分叉 —— 机械层两家同构：工具调用的有无，是「继续还是停」的唯一开关。（Hermes 重发前多几道闸、续命兜底也兜得更低——属刹车与程度差，计入共识不计分叉，详见 01 章。）</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div style="width:100%">
+          <div class="tl">
+            <div class="tl-st"><div class="nd"></div><div class="lb">① 唤醒</div><div class="ticks"></div></div>
+            <div class="tl-st on"><div class="nd"></div><div class="lb">② 拼请求包</div><div class="ticks"><span class="tick sh"></span><span class="tick sh"></span><span class="tick ex"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">③ 压缩阀</div><div class="ticks"><span class="tick md"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">④ 调模型</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑤ 生料回来</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑥ 行动线</div><div class="ticks"><span class="tick sh"></span><span class="tick sh"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑦ 历史线</div><div class="ticks"><span class="tick sh"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑧ 判定</div><div class="ticks"><span class="tick sh"></span></div></div>
+          </div>
+          <div class="st-card">
+            <div class="h">拼请求包：八成逐字复用，为的是别惊动缓存<span class="ref">回指 · 02 输入侧</span></div>
+            <div class="d">几乎不变的（身份守则、工具目录）钉死在最前面当冻结前缀吃缓存；每轮变的（文件变化、记忆召回、待办状态……）全塞进消息窗口、变了才补。装配骨架与缓存经济学两家<b>同一张</b>。</div>
+            <div class="row"><span class="k">分叉 ×3</span>
+              <span class="seam sh"><span class="sn">静态层看模型下菜</span> —— <span class="hm">Hermes</span> 按弱模型名单（8 家）发工具强制令、给 Google/GPT 系各配一段专属守则；<span class="cc">CC</span> 只面对一个模型，前缀真·统一</span>
+              <span class="seam sh"><span class="sn">缓存待遇按 provider 分档</span> —— <span class="hm">Hermes</span> 的显式缓存主要给 Anthropic 系，本地引擎只能蹭逐字节复用；<span class="cc">CC</span> 只有一个 API，待遇天生统一</span>
+              <span class="seam ex"><span class="sn">动态注入约 44 vs 8 种</span> —— <span class="cc">CC</span> 塞产品面信号（IDE／终端／任务，多为条件触发）、<span class="hm">Hermes</span> 塞底座信号（记忆／插件）；产品 vs 底座，不归两杠杆</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div style="width:100%">
+          <div class="tl">
+            <div class="tl-st"><div class="nd"></div><div class="lb">① 唤醒</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">② 拼请求包</div><div class="ticks"><span class="tick sh"></span><span class="tick sh"></span><span class="tick ex"></span></div></div>
+            <div class="tl-st on"><div class="nd"></div><div class="lb">③ 压缩阀</div><div class="ticks"><span class="tick md"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">④ 调模型</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑤ 生料回来</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑥ 行动线</div><div class="ticks"><span class="tick sh"></span><span class="tick sh"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑦ 历史线</div><div class="ticks"><span class="tick sh"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑧ 判定</div><div class="ticks"><span class="tick sh"></span></div></div>
+          </div>
+          <div class="st-card">
+            <div class="h">压缩阀：只在快撑爆窗口时才动手<span class="ref">回指 · 02 输入侧</span></div>
+            <div class="d">阶梯两家几乎同一条：先做不花钱的确定性瘦身（去重、裁旧工具结果、换占位），护住开头锚点和最近现场、只动中段；实在不够才叫一个 LLM 把中段摘成结构化检查点——<b>都是外包给 LLM，运行时这一步两家都是纯改壳</b>。</div>
+            <div class="row"><span class="k">分叉 ×1</span>
+              <span class="seam md"><span class="sn">压缩形态训回权重</span> —— <span class="hm">Hermes</span> 另有一条离线管线把轨迹压成训练数据、教模型「见过被压的历史」，运行时至今认得它的旧标记；<span class="cc">CC</span> 不拥有模型，结构上没有这个选项</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div style="width:100%">
+          <div class="tl">
+            <div class="tl-st"><div class="nd"></div><div class="lb">① 唤醒</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">② 拼请求包</div><div class="ticks"><span class="tick sh"></span><span class="tick sh"></span><span class="tick ex"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">③ 压缩阀</div><div class="ticks"><span class="tick md"></span></div></div>
+            <div class="tl-st on"><div class="nd"></div><div class="lb">④ 调模型</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑤ 生料回来</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑥ 行动线</div><div class="ticks"><span class="tick sh"></span><span class="tick sh"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑦ 历史线</div><div class="ticks"><span class="tick sh"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑧ 判定</div><div class="ticks"><span class="tick sh"></span></div></div>
+          </div>
+          <div class="st-card">
+            <div class="h">调模型：两个变量的发源地<span class="ref">回指 · 框架「计算侧」（不立篇，由本章织入）</span></div>
+            <div class="d">把拼好的包发出去，等一段文字回来——调用本身就是一次无状态的一问一答，两家无异。差别在<b>这一站背后站着谁</b>：对 <span class="cc">Claude Code</span>，是一纸黑盒契约——模型是固定合同，壳只能在合同之外想办法；对 <span class="hm">Hermes</span>，是一群第三方模型加上（部分）自家权重——合同可以自己改写。</div>
+            <div class="row"><span class="k">这一站</span><span class="noseam">不分叉——它是分叉的<b style="color:var(--text)">发源地</b>：「面对一个还是一群」决定了六处改壳分叉，「拥不拥有」决定了那处改模型分叉。</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div style="width:100%">
+          <div class="tl">
+            <div class="tl-st"><div class="nd"></div><div class="lb">① 唤醒</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">② 拼请求包</div><div class="ticks"><span class="tick sh"></span><span class="tick sh"></span><span class="tick ex"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">③ 压缩阀</div><div class="ticks"><span class="tick md"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">④ 调模型</div><div class="ticks"></div></div>
+            <div class="tl-st on"><div class="nd"></div><div class="lb">⑤ 生料回来</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑥ 行动线</div><div class="ticks"><span class="tick sh"></span><span class="tick sh"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑦ 历史线</div><div class="ticks"><span class="tick sh"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑧ 判定</div><div class="ticks"><span class="tick sh"></span></div></div>
+          </div>
+          <div class="st-card">
+            <div class="h">生料回来：一叠异构块，不是一句话<span class="ref">回指 · 03 输出行动侧</span></div>
+            <div class="d">模型一次吐回的，是推理块、正文块、工具调用块的混排——它自己想的、说给你听的、要动手的挤在同一次响应里。壳的第一件事是<b>逐块认领</b>：每一块都有两种命运要交代——这一轮怎么用它（下一站·行动线）、怎么塞回历史（下下站·历史线）。</div>
+            <div class="row"><span class="k">这一站</span><span class="noseam">无分叉——块的分拣与「每块两种命运」两家同构；分歧在后两站的加工线上。</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div style="width:100%">
+          <div class="tl">
+            <div class="tl-st"><div class="nd"></div><div class="lb">① 唤醒</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">② 拼请求包</div><div class="ticks"><span class="tick sh"></span><span class="tick sh"></span><span class="tick ex"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">③ 压缩阀</div><div class="ticks"><span class="tick md"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">④ 调模型</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑤ 生料回来</div><div class="ticks"></div></div>
+            <div class="tl-st on"><div class="nd"></div><div class="lb">⑥ 行动线</div><div class="ticks"><span class="tick sh"></span><span class="tick sh"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑦ 历史线</div><div class="ticks"><span class="tick sh"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑧ 判定</div><div class="ticks"><span class="tick sh"></span></div></div>
+          </div>
+          <div class="st-card">
+            <div class="h">行动线：把「要动手」的块变成真落地的一次操作<span class="ref">回指 · 03 输出行动侧</span></div>
+            <div class="d">挑出要动手的块，按名字找到工具、过权限门、真去改文件跑命令，再把结果翻译成模型看得懂的块送回。协议地板（调用与结果配对补全、只读并发写独占、参数校验失败也回喂让模型自纠）<b>两家几乎一样</b>。</div>
+            <div class="row"><span class="k">分叉 ×2</span>
+              <span class="seam sh"><span class="sn">行动线弱模型语义纠偏</span> —— <span class="hm">Hermes</span> 会拼错改名、空名反鹦鹉、剥正文假调用（三种条件触发）；<span class="cc">CC</span> 一条都没有，只回报错让模型自纠</span>
+              <span class="seam sh"><span class="sn">结果阈值按模型窗口缩放</span> —— <span class="hm">Hermes</span> 给小窗口模型缩到约 16k 地板；<span class="cc">CC</span> 一个大窗口模型，固定阈值</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div style="width:100%">
+          <div class="tl">
+            <div class="tl-st"><div class="nd"></div><div class="lb">① 唤醒</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">② 拼请求包</div><div class="ticks"><span class="tick sh"></span><span class="tick sh"></span><span class="tick ex"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">③ 压缩阀</div><div class="ticks"><span class="tick md"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">④ 调模型</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑤ 生料回来</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑥ 行动线</div><div class="ticks"><span class="tick sh"></span><span class="tick sh"></span></div></div>
+            <div class="tl-st on"><div class="nd"></div><div class="lb">⑦ 历史线</div><div class="ticks"><span class="tick sh"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑧ 判定</div><div class="ticks"><span class="tick sh"></span></div></div>
+          </div>
+          <div class="st-card">
+            <div class="h">历史线：重塑成 API 肯收的历史——CC 最厚的工程在这里<span class="ref">回指 · 03 输出行动侧</span></div>
+            <div class="d">生料不能原样塞回下一轮：剥掉结尾的推理块、把只有推理的孤儿轮并进相邻轮、把散开的块按 id 缝合、给悬空调用补占位结果。这道地板两家共享，而且是 <span class="cc">CC</span> 最厚的一段工程——<b>Hermes 的注释直接点名、沿用 CC 的做法</b>。别被「CC 壳薄」误导：薄的只是上层，地板一点不薄。</div>
+            <div class="row"><span class="k">分叉 ×1</span>
+              <span class="seam sh"><span class="sn">历史线逐 provider 方言归一</span> —— <span class="hm">Hermes</span> 要给几十家推理服务做格式翻译、还要逐字节规范去蹭本地引擎缓存；<span class="cc">CC</span> 只有一个 API，无物可翻</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame">
+        <div style="width:100%">
+          <div class="tl">
+            <div class="tl-st"><div class="nd"></div><div class="lb">① 唤醒</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">② 拼请求包</div><div class="ticks"><span class="tick sh"></span><span class="tick sh"></span><span class="tick ex"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">③ 压缩阀</div><div class="ticks"><span class="tick md"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">④ 调模型</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑤ 生料回来</div><div class="ticks"></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑥ 行动线</div><div class="ticks"><span class="tick sh"></span><span class="tick sh"></span></div></div>
+            <div class="tl-st"><div class="nd"></div><div class="lb">⑦ 历史线</div><div class="ticks"><span class="tick sh"></span></div></div>
+            <div class="tl-st on"><div class="nd"></div><div class="lb">⑧ 判定</div><div class="ticks"><span class="tick sh"></span></div></div>
+          </div>
+          <div class="st-card">
+            <div class="h">判定：再转一圈，还是交还用户<span class="ref">回指 · 01 控制侧</span></div>
+            <div class="d">只看一个开关：这轮有没有点工具。有 → 带着更长的历史<b>回到第 2 站</b>再转一圈；没有 → <span class="cc">CC</span> 默认直接收工（留了停止钩子、预算续跑两个 opt-in 口子），<span class="hm">Hermes</span> 在编码入口还要过一道验证门——改了代码没测试证据，「我做完了」被原地驳回（nudge 预算 2 次）。第 2 站注进去的纪律话术，正是在这一站起效。</div>
+            <div class="row"><span class="k">分叉 ×1</span>
+              <span class="seam sh"><span class="sn">verify-before-done 验证门</span> —— <span class="hm">Hermes</span> 编码入口默认 1 道、连自家模型也拦（聊天入口默认关）；<span class="cc">CC</span> 默认 0 道，留两个 opt-in 口子</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="caption"><b>第 1 站 · 唤醒</b> · 模型说完即死——是壳带着整段历史把它再次叫醒。「连续工作」从这一站起就是壳造的幻觉（01 章）。</div>
+    <div class="ctrl">
+      <div class="dots"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="count">1 / 8</span>
+        <button class="prev">‹ 上一步</button>
+        <button class="next">下一步 ›</button>
+      </div>
+    </div>
+  </div>
+  <p class="map-cap">图例：<b style="color:var(--amber)">■ 琥珀</b>＝改壳分叉（×6）· <b style="color:var(--green)">■ 绿</b>＝改模型分叉（全轴仅 1 处）· <b>◌ 虚线</b>＝例外分叉（产品 vs 底座）。分叉的详细去向见下一节汇流图。与 01 章开头那张循环图分工：那张答「为什么再转一圈」，这条线答「一圈里发生了什么」。</p>
+
+  <!-- ================= §02 下半 · 汇流图 ================= -->
+  <div class="sec">
+    <span class="k">The confluence</span>
+    <h2>8 处分叉的去向：6 处汇进改壳，1 处汇进改模型，1 处溜出去</h2>
+  </div>
+  <p class="body">时间线告诉你分叉「在哪」，这一节回答分叉「通向哪」。把 8 处分叉从站点上摘下来、按根因排队，去向惊人地整齐——但「整齐」里必须保住一个诚实的区分：汇进改壳的六处，三处是因为<b>不信</b>而加厚，三处是因为<b>异质</b>而适配。这不是同一件事。</p>
+
+  <div class="conf">
+    <div class="crow">
+      <div class="bands">
+        <div class="band sh">
+          <div class="bh">不信这个模型 → 壳加厚<span class="bn">「模型行不行」成了变量</span></div>
+          <div class="rowi"><b>verify-before-done 验证门</b><span class="src">01</span><span class="dd"><span class="hm">Hermes</span> 在编码入口默认设 1 道——连自家模型的「我做完了」也拦（nudge 预算 2 次；门按产品场景发放，聊天入口默认关）；<span class="cc">CC</span> 默认 0 道，留停止钩子／预算续跑两个 opt-in 口子</span></div>
+          <div class="rowi"><b>纪律与守则看模型下菜</b><span class="src">01 + 02</span><span class="dd"><span class="hm">Hermes</span> 按弱模型名单（8 家）发工具强制令、给 Google／GPT 系各配一段专属守则——连「静态」前缀都随模型变；<span class="cc">CC</span> 只面对一个模型，前缀真·统一（同一根轴在 01/02 两章各现身一次）</span></div>
+          <div class="rowi"><b>行动线弱模型语义纠偏</b><span class="src">03</span><span class="dd"><span class="hm">Hermes</span> 铺了三种条件触发的纠偏：拼错改名、空名反鹦鹉、剥正文假调用；<span class="cc">CC</span> 一条都没有——只回一条报错，让模型自纠</span></div>
+        </div>
+        <div class="band sh">
+          <div class="bh">一群模型物理上不同 → 壳适配<span class="bn">与信不信任无关</span></div>
+          <div class="rowi"><b>缓存待遇按 provider 分档</b><span class="src">02</span><span class="dd"><span class="hm">Hermes</span> 的显式缓存主要给 Anthropic 系及少数网关，本地引擎只能靠逐字节规范化蹭复用；<span class="cc">CC</span> 只有一个 API，缓存待遇天生统一</span></div>
+          <div class="rowi"><b>历史线逐 provider 方言归一</b><span class="src">03</span><span class="dd"><span class="hm">Hermes</span> 要给几十家推理服务做格式翻译、再按严格 API 剥字段——配强模型也得铺；<span class="cc">CC</span> 只有一个 API，无物可翻</span></div>
+          <div class="rowi"><b>结果阈值按模型窗口缩放</b><span class="src">03</span><span class="dd"><span class="hm">Hermes</span> 的阈值随模型窗口缩放，小窗口开源模型缩到约 16k 地板；<span class="cc">CC</span> 一个大窗口托管模型，固定阈值即可</span></div>
+        </div>
+      </div>
+      <div class="lever sh">
+        <span class="ar">⟵ 汇入</span>
+        <span class="lt">改壳杠杆</span>
+        <span class="lc">6 处分叉</span>
+        <span class="ln">壳的厚度。两家都有这根杠杆，CC 几乎不用：五处是处境不需要，一处（验证门）是信任偏好——正在收敛（见下文）。</span>
+      </div>
+    </div>
+    <div class="crow">
+      <div class="bands">
+        <div class="band md">
+          <div class="bh">拥有模型 → 训进权重<span class="bn">只有模型作者拿得起</span></div>
+          <div class="rowi"><b>压缩形态训回权重</b><span class="src">02</span><span class="dd"><span class="hm">Hermes</span> 用离线管线把跑完的轨迹压成训练数据、教模型「见过被摘要的历史」，运行时至今认得它的旧标记（同源铁证；权重级效果＝意图，非本仓库可证）；<span class="cc">CC</span> 不拥有模型，这个选项结构上不存在</span></div>
+        </div>
+      </div>
+      <div class="lever md">
+        <span class="ar">⟵ 汇入</span>
+        <span class="lt">改模型杠杆</span>
+        <span class="lc">1 处分叉</span>
+        <span class="ln">只此一处，分野却最深。CC 不拥有模型，结构上没有这根杠杆。</span>
+      </div>
+    </div>
+    <div class="crow">
+      <div class="bands">
+        <div class="band ex">
+          <div class="bh">产品 vs 底座<span class="bn">两杠杆之外 · 诚实例外</span></div>
+          <div class="rowi"><b>动态注入约 44 vs 8 种</b><span class="src">02</span><span class="dd"><span class="cc">CC</span> 每轮可注入约 44 种产品面信号——IDE、终端、任务（满配上限，绝大多数条件触发、别读成每轮都塞）；<span class="hm">Hermes</span> 只有 8 种左右底座信号——记忆、插件。这是「产品和库长得不一样」，与信任、所有权都无关</span></div>
+        </div>
+      </div>
+      <div class="lever ex">
+        <span class="ar">⟵ 溜出去</span>
+        <span class="lt">例外出口</span>
+        <span class="lc">1 处分叉</span>
+        <span class="ln">两个变量收编不了一切——这条出口必须画出来，不许藏。</span>
+      </div>
+    </div>
+  </div>
+  <p class="map-cap">0.5 秒该看到的：左边 8 处分叉，右边只有<b>两个实心出口＋一个虚线出口</b>——六处流进第一个、一处流进第二个、一处溜走。每处分叉括注出处章节，数字都是原章过过门的。</p>
+
+  <p class="body">一个 03 章警告过、这里必须重申的掰歪：<b>适配 ≠ 不信任</b>。方言归一、缓存分档、窗口缩放这三处分叉，就算配的全是强模型、只要 provider 杂就得铺——把它们也说成「Hermes 不信模型」，故事更顺，但不真。所以改壳杠杆内部诚实地分成两股。另有一处分叉（纪律看模型下菜）横跨两股——正是一群模型的存在，才让「模型行不行」变成一个需要应对的变量：<b>异质是土壤，不信是长在上面的作物</b>。</p>
+  <p class="body">再看那颗唯一的绿色。六处改壳分叉说到底是「壳厚壳薄」的<b>程度差</b>；训回权重那一处是<b>种类差</b>——<span class="cc">Claude Code</span> 结构上就没有这个选项，它不拥有模型。这就是「第二根杠杆」的确切含义：不是 <span class="hm">Hermes</span> 更勤奋，是它的处境里多了一类可做的事。</p>
+
+  <!-- ================= §03 系统锁定 ================= -->
+  <div class="sec">
+    <span class="k">The lock</span>
+    <h2>两套系统各自咬合，拆件混装谁都装不上</h2>
+  </div>
+  <p class="body">把分叉归了因，还剩最后一层要说透：这些选择不是八个独立的取舍，是<b>两套互相咬合的系统</b>——每家的每个选择，都以它其余的选择为前提。</p>
+
   <div class="compare">
     <div class="side cc">
-      <h4>Claude Code</h4>
-      <p><b>信任模型，壳做薄。</b>能交给模型判断的就交给它（何时停、怎么总结、怎么表达意图），壳只做管道——执行、翻译、守资源。好处：能力天花板随模型升级<b>自动</b>抬高。代价：模型犯浑（跑偏、做错）时，薄壳基本不纠正——护栏只挡「烧钱 / 闯祸」，不挡「做得对不对」。</p>
+      <h4>Claude Code —— 「一个可控托管模型」咬合出的一套</h4>
+      <ul>
+        <li>前缀<b>真·统一</b>——不必分叉，因为只有一个模型；</li>
+        <li>敢用<b>固定阈值</b>——窗口大小是已知数；</li>
+        <li>壳对格式<b>不设防</b>——模型受训可靠，喊错名只回报错让它自纠；</li>
+        <li>防懒<b>交给模型自觉</b>——相信「我做完了」的自述；</li>
+        <li>回报是：判断权交给模型，<b>天花板随模型升级自动抬高</b>。</li>
+      </ul>
     </div>
     <div class="side hm">
-      <h4>Hermes Agent</h4>
-      <p><b>谁都不全信，模型和壳一起加固。</b>既然自己能训模型，就把一部分可靠性<b>训进权重</b>；又因为要跑参差不齐的开源/第三方模型，还得在<b>壳里加一层防线</b>。两根杠杆一起用。代价：壳复杂、要持续维护。</p>
+      <h4>Hermes —— 「一群异质模型＋自有权重」咬合出的一套</h4>
+      <ul>
+        <li>前缀<b>按模型分叉</b>——Google 系、GPT 系各要各的话术；</li>
+        <li>阈值<b>随窗口走</b>——群里有小窗口也有大窗口；</li>
+        <li>壳加<b>纠偏层</b>——不能假设第三方模型把名字喊对；</li>
+        <li>收工设<b>验证门</b>——编码入口不放行任何模型（含自家）的自述；</li>
+        <li>能训进权重的<b>训进去</b>——第二根杠杆只有它拿得起。</li>
+      </ul>
     </div>
   </div>
 
-  <h2><span class="num">02</span>同一个哲学，在三侧的三次显形</h2>
-  <p class="lead">控制、输入、输出行动——三个不同的技术问题，暴露出 Hermes 的<b>两根杠杆</b>：控制侧、输出侧是<b>信任驱动的"改壳"</b>（越不敢信模型，壳越厚）；输入侧是<b>所有权驱动的"改模型"</b>（拥有模型，才能把能力训进权重）。Claude Code 只有前一根、还基本不用。</p>
+  <p class="body">用三个反事实试一下就知道「咬合」有多紧。<b>把 CC 的统一前缀搬进 Hermes？</b>第一天就碎——Google 系要「别停」、GPT 系要「执行铁律」、阿里系连自己叫什么都要壳来纠正。前缀分叉不是设计品味，是模型群的物理现实。<b>把 Hermes 的方言归一层搬进 CC？</b>无物可翻——它只有一个 API，那一层一行都用不上。壳厚不是勤奋，壳薄也不是懒惰，都是处境的倒影。</p>
+  <p class="body">最有意思的是第三个反事实：给 CC 装 Hermes 的验证门？能装——而且正在装。停止钩子的口子一直留着（结构上与验证门同族），内部灰度里已经有「非平凡改动须独立验证代理裁决」的契约。这说明「锁定」分两种：<b>处境锁死的不会收敛</b>（异质、所有权——除非处境本身变了），<b>纯信任偏好的正在收敛</b>（防懒这道门，两家方向一致、只差默认与否）。信任线是活的，处境线是死的。</p>
 
-  <div class="matrix-row">
-    <h3><span class="n">2.1</span>控制侧 · 何时算做完</h3>
-    <div class="compare">
-      <div class="side cc"><h4>Claude Code</h4><p>默认模型说了算——这轮没点工具＝完成。壳<b>默认</b>不判断"活干完没"（停止钩子、token 预算续跑是两个 opt-in 覆盖口，默认不用）。</p></div>
-      <div class="side hm"><h4>Hermes Agent</h4><p>壳设一道 verify-before-done 门：模型改了代码没测试证据就被推回循环，<b>无权单方面宣布做完</b>。（此门 <b>surface-aware</b>：编码/程序化入口默认开、聊天平台默认关，且只对代码改动触发。）</p></div>
-    </div>
-    <div class="verdict"><b>判词——信任问题，动的是<u>壳</u>杠杆：</b>CC <b>默认</b>信任模型的自述→壳默认不设门（但留了停止钩子/预算续跑两个 opt-in 口）；Hermes <b>默认</b>不信任任何模型（含自家）的"我做完了"→在编码入口加验证门（聊天入口默认关）。（改壳）</div>
-  </div>
+  <div class="verdict"><b>判词：</b>别问「谁做得对」，问「你的处境像谁」。这份对比的单位从来不是一张功能对照表，而是两套各自咬合的系统——单拆一件装进对方，多半既装不上、也没必要。</div>
 
-  <div class="matrix-row">
-    <h3><span class="n">2.2</span>输入侧 · 上下文满了谁来压</h3>
-    <div class="compare">
-      <div class="side cc"><h4>Claude Code</h4><p>把压缩的智能<b>外包给通用模型</b>（壳只给一段提示词让它自己写摘要）。</p></div>
-      <div class="side hm"><h4>Hermes Agent</h4><p>把压缩形态<b>既训进模型、又写进壳</b>（同源管线造训练数据，模型见过被压的历史）。</p></div>
-    </div>
-    <div class="verdict"><b>判词——这一侧不是"信不信"，是"谁拥有模型"，动的是<u>模型</u>杠杆：</b>CC 不拥有模型，只能给通用模型写提示、临场发挥（改壳）；Hermes 拥有模型，用同源管线造"压缩过"的训练数据、让模型见过被摘要的历史（意图把这形态训进权重——"已训进线上权重"非本仓库可证，但这条改模型的路只有模型作者走得通）。<b>这正是 Hermes 多出的第二根杠杆。</b></div>
+  <!-- ================= §04 反直觉 payoff ================= -->
+  <div class="sec">
+    <span class="k">The payoff</span>
+    <h2>01 章留下的反直觉，现在可以讲完整了</h2>
   </div>
+  <p class="body">01 章结尾留了一个反直觉：做模型的那家，反而更不信任模型说的「我做完了」。只看控制侧，这像一个悖论；把三章摊平到汇流图上，它拆成<b>两层来源不同的不信任</b>——</p>
+  <p class="body">一层是对「<b>任何模型的自述</b>」的不信，连自家也不例外：在编码入口，验证门对自家模型照拦不误（这道门按产品场景发放——聊天入口默认关，见 01 章；它不信的是「模型自述」这件事本身，不是无差别猜疑）。这一层来自专业——越清楚权重是怎么训出来的，越知道「我做完了」只是一个待核实的声明，不是结论。另一层是对「<b>别人家模型</b>」的经验性不信：纠偏层、名单加压，兜的是没被这样训练过的第三方模型，自家模型反倒不是主要服务对象。这一层来自生态——开源世界里没法假设可靠。</p>
+  <p class="body">所以那句反直觉的完整版不是「做模型的人更悲观」，而是：<b>做模型的人，处境里的变量更多</b>。Anthropic 的处境里这两层都不存在——一个模型、自家调教、持续变强，押注它就好；Nous 的处境里两层都在，于是能训进权重的训进去，训不进去的用壳挡。</p>
+  <div class="punch">越清楚权重的脾气，越不敢把「完成」的判断权交出去。</div>
 
-  <div class="matrix-row">
-    <h3><span class="n">2.3</span>输出行动侧 · 怎么解析意图、结果怎么回</h3>
-    <div class="compare">
-      <div class="side cc"><h4>Claude Code</h4><p>读模型<b>原生结构化格式</b>，壳几乎不设防。</p></div>
-      <div class="side hm"><h4>Hermes Agent</h4><p>运行时同样读结构化，但壳<b>额外加一层可靠性纠偏</b>（工具名修复 / 空名防"鹦鹉学舌" / 剥掉正文里的假工具调用），以兜住弱模型。</p></div>
-    </div>
-    <div class="verdict"><b>判词——信任问题，动的是<u>壳</u>杠杆：</b>CC 信任那一个托管模型的格式→壳不设防；Hermes 不敢假设第三方弱模型可靠→壳加纠偏层。（改壳）</div>
+  <!-- ================= §05 对 PM ================= -->
+  <div class="sec">
+    <span class="k">For PM</span>
+    <h2>你的处境像谁，就抄谁的作业</h2>
   </div>
+  <p class="body"><b>若你基于一个强托管模型做 agent</b>：抄 <span class="cc">Claude Code</span>——壳做薄、判断权交给模型，天花板随模型涨；但要接受模型犯浑时薄壳不兜底，并且记住它的「薄」只薄在上层，协议地板（回传重塑、配对补全）一点不能省。</p>
+  <p class="body"><b>若你要跑多种／开源／自托管模型</b>：抄 <span class="hm">Hermes</span>——那六处改壳分叉就是你的施工清单：三处加厚（验证门、按模型下菜、纠偏层）、三处适配（缓存分档、方言归一、窗口缩放）。至于第七处（训回权重），只在你也训模型时才对你开放。</p>
+  <p class="body">一句话带走：<b>壳的厚度不是能力问题，是信任问题；第二根杠杆不是技术问题，是所有权问题。</b></p>
 
-  <h2><span class="num">03</span>反直觉：做模型的人，壳反而做得更厚</h2>
-  <div class="card">
-    <p>直觉会以为：Nous 自己训模型，应该<b>最信任它、壳做得最薄</b>。实际恰恰相反——它的壳更厚。关键是<b>看清它不信任的到底是谁</b>：</p>
-    <ul class="open">
-      <li>对<b>任何模型（含自家）</b>的"我做完了"自述——不信，所以有 verify 门（<b>这一层对自家模型也设防</b>；不过它 surface-aware——编码入口默认开、聊天平台默认关）。</li>
-      <li>对<b>第三方开源弱模型</b>的格式可靠性——不敢假设，所以有纠偏层（<b>这一层主要不为自家模型</b>）。</li>
-    </ul>
-    <p>根源是处境不同：Anthropic 只发<b>一个</b>自己完全掌控、持续变强的模型，Claude Code 可以放心押它；Nous 活在<b>开源世界</b>——模型不止一个、质量参差、还要自托管——它<b>无法假设</b>可靠，于是两头下注：能训进权重的就训进去（<b>改模型</b>），兜不住的用壳挡（<b>改壳</b>）。</p>
+  <!-- ================= §06 悬而未决 ================= -->
+  <div class="sec">
+    <span class="k">Loose ends</span>
+    <h2>悬而未决：六条别被两个变量收编的边界</h2>
   </div>
-  <div class="verdict"><b>"改模型 vs 改壳"的答案：</b>Claude Code＝<b>单杠杆</b>（信任那一个托管模型）；Hermes＝<b>双杠杆</b>（拥有模型→能改模型；面对异质生态→又必须改壳）。</div>
+  <ul class="open">
+    <li><b style="color:var(--text)">「8 条」不是穷举所有差异，是「结构性分叉」的账：</b>记忆注入的「便签 vs 底稿」（02：CC 当会过期的便签、每轮召回叮嘱验证 vs Hermes 当不该被冲淡的底稿、冻进前缀当权威——02 章将其当切面处理、生命周期归轴二，本章沿用）、催办哲学（01）、图片存档顶替方式（03）、防死兜底的深浅（01）等程度差与切面差异留在原章、未计入分叉账。跨读原章看到「第 9 处不同」时，先问它是种类差还是程度差。</li>
+    <li><b style="color:var(--text)">例外真的只有一条吗？</b>动态注入 44 vs 8 是三章里唯一被明确标为「另一回事」的分叉。两个变量解释力强，但别拿它收编一切——下一处分叉出现时，先问它汇入哪里，别先假设答案。</li>
+    <li><b style="color:var(--text)">「训回权重」的诚实边界沿 02 章：</b>离线管线存在、与运行时同源可证；线上权重是否真在这批数据上训练过，本仓库证不到。第二根杠杆是「拿得起」，不是「已建功」。</li>
+    <li><b style="color:var(--text)">信任线正在收敛：</b>CC 的验证代理契约还锁在灰度特性门后。「防懒 0 道」是今天的默认，不是永远的哲学——本章拍的是快照，不是终局。</li>
+    <li><b style="color:var(--text)">「八成共享」有一部分不是英雄所见略同，是直接沿用</b>——Hermes 回传规范化的注释点名沿用 CC 的做法。共享手艺的来源里有行业收敛，也有互相抄作业。</li>
+    <li><b style="color:var(--text)">时间线是单回合视角：</b>回合与回合之间——谁触发、谁保活、人跑了怎么办——是另一个世界的问题，那是轴二整条线（04–08 章）的主场。</li>
+  </ul>
 
-  <h2><span class="num">04</span>对产品经理意味着什么</h2>
-  <div class="card">
-    <ul class="open">
-      <li><b>若你基于一个强托管模型做 agent：</b>学 Claude Code——壳做薄、把判断权交给模型，天花板随模型涨；但要接受"模型犯浑时壳兜不住"。</li>
-      <li><b>若你要跑多种/开源/自托管模型：</b>学 Hermes——壳必须厚；如果你能训模型，尽量把可靠性训进去；代价是壳复杂、要持续维护。</li>
-      <li><b>一句话记住：</b>壳的厚度不是能力问题，是<b>信任问题</b>。你越不能假设模型可靠，壳就越得厚。</li>
-    </ul>
-  </div>
-
-  <h2><span class="num">05</span>信任刻度盘：一个选择，三次显形</h2>
-  <div class="stepper" id="stepper">
-    <div class="stage">
-      <div class="frame on">
-        <div class="cols">
-          <div class="box blue"><div class="t">Claude Code · 控制侧</div>默认模型说了算，没点工具＝完成（有 opt-in 覆盖口）</div>
-          <div class="box purple"><div class="t">Hermes · 控制侧</div>编码入口默认设 verify 门（聊天默认关）</div>
-        </div>
-      </div>
-      <div class="frame">
-        <div class="cols">
-          <div class="box blue"><div class="t">Claude Code · 输入侧</div>压缩外包给通用模型</div>
-          <div class="box purple"><div class="t">Hermes · 输入侧</div>压缩训进模型＋写进壳</div>
-        </div>
-      </div>
-      <div class="frame">
-        <div class="cols">
-          <div class="box blue"><div class="t">Claude Code · 输出行动侧</div>读原生格式，壳不设防</div>
-          <div class="box purple"><div class="t">Hermes · 输出行动侧</div>读结构化＋壳加纠偏层</div>
-        </div>
-      </div>
-      <div class="frame">
-        <div class="cols">
-          <div class="box blue"><div class="t">Claude Code · 合起来</div>信任模型 → 壳薄 → 单杠杆</div>
-          <div class="box purple"><div class="t">Hermes · 合起来</div>谁都不全信 → 壳厚 → 双杠杆</div>
-        </div>
-      </div>
-    </div>
-    <div class="caption" id="cap"><b>第1步 · 控制侧</b> · 把「何时收工」的决定权，一个交出去、一个收回来。</div>
-    <div class="ctrl">
-      <div class="dots" id="dots"></div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span class="count" id="count">1 / 3</span>
-        <button onclick="step(-1)">‹ 上一步</button>
-        <button onclick="step(1)">下一步 ›</button>
-      </div>
-    </div>
-  </div>
+</div>
 
   <nav style="max-width:1080px;margin:40px auto 0;padding:16px 28px;border-top:1px solid #2a3342;text-align:center;font-size:13px;color:#8b98a9">导读：<b>综合①·一个 Loop 是怎么设计的</b> · <a href="01-inside-control-loop.html" style="color:var(--blue)">01 控制侧</a> · <a href="02-inside-input.html" style="color:var(--blue)">02 输入侧</a> · <a href="03-inside-output.html" style="color:var(--blue)">03 输出行动侧</a></nav>
 
-  <div class="foot">综合① · 轴一：一个 Loop 是怎么设计的 —— 由控制侧 / 输入侧 / 输出行动侧三份 findings 综合而成。</div>
+  <div class="foot">
+    综合① · 轴一：一个 Loop 是怎么设计的 —— 由 01 控制侧 / 02 输入侧 / 03 输出行动侧三章综合而成。<br>
+    代码溯源：本章只编织不开采、不新增代码级断言；各机制的 file:line 见其原章页脚（时间线 8 站与 8 处分叉均一一回指）。关键锚点重列三处 —— <code>verification_stop.py:302-310 验证门 nudge 原文</code> · <code>trajectory_compressor.py:108-110/616-631 压缩训练管线</code> · <code>agent_runtime_helpers.py:1007-1097 回传规范化注释点名沿用 CC</code>。
+  </div>
 </div>
-
 <script>
-/* ============ 复用脚本 ============ */
-mermaid.initialize({startOnLoad:true,theme:"dark",
-  flowchart:{nodeSpacing:30,rankSpacing:38,padding:10,useMaxWidth:true},
-  themeVariables:{
-  background:"#1e2531",primaryColor:"#161b26",primaryBorderColor:"#2a3342",
-  primaryTextColor:"#e6edf3",lineColor:"#8b98a9",fontSize:"13.5px"}});
-
-/* stepper：每个 finding 只需改 CAPTIONS 数量与 .frame 数量一致 */
-const CAPTIONS = [
-  "<b>第1步 · 控制侧</b> · 默认把「何时收工」的决定权，一个交出去、一个收回来（CC 另有停止钩子/预算续跑两个 opt-in 覆盖口；Hermes 的门在聊天入口默认关）。",
-  "<b>第2步 · 输入侧</b> · 上下文满了怎么压：一个外包给模型临场发挥，一个把压缩形态写进训练数据、又写进壳。",
-  "<b>第3步 · 输出行动侧</b> · 都读结构化格式，但一个不设防、一个额外加一层纠偏兜住弱模型。",
-  "<b>第4步 · 合起来看</b> · CC 只有一根杠杆（信任模型、壳做薄）；Hermes 有两根——信任问题上改壳、所有权上改模型。"
-];
-let cur=0; const frames=()=>document.querySelectorAll('#stepper .frame');
-function render(){
-  frames().forEach((f,i)=>f.classList.toggle('on',i===cur));
-  document.getElementById('cap').innerHTML=CAPTIONS[cur];
-  document.getElementById('count').textContent=(cur+1)+" / "+frames().length;
-  document.querySelectorAll('#dots .dot').forEach((d,i)=>d.classList.toggle('on',i===cur));
+/* ============ 复用脚本（组件化 stepper；与 build.py 的 SHARED_JS 同一段逻辑）============ */
+/* 离线守卫：CDN 掉线时 mermaid 未定义，不加守卫会抛 ReferenceError 掐死整段脚本 → stepper 全死。 */
+var MERMAID_OK = (typeof mermaid !== 'undefined');
+if(MERMAID_OK){
+  mermaid.initialize({startOnLoad:true,theme:"dark",
+    flowchart:{nodeSpacing:30,rankSpacing:38,padding:10,useMaxWidth:true},
+    themeVariables:{
+    background:"#1e2531",primaryColor:"#161b26",primaryBorderColor:"#2a3342",
+    primaryTextColor:"#e6edf3",lineColor:"#8b98a9",fontSize:"13.5px"}});
 }
-function step(d){cur=Math.max(0,Math.min(frames().length-1,cur+d));render();}
-(function init(){
-  const dots=document.getElementById('dots');
-  frames().forEach((_,i)=>{const s=document.createElement('span');s.className='dot'+(i?'':' on');dots.appendChild(s);});
+document.querySelectorAll('.stepper').forEach(function(st){
+  var frames=[].slice.call(st.querySelectorAll('.frame'));
+  var caps=[]; var cj=st.querySelector('.captions'); if(cj){try{caps=JSON.parse(cj.textContent);}catch(e){}}
+  var cap=st.querySelector('.caption'), cnt=st.querySelector('.count'), dots=st.querySelector('.dots');
+  var cur=0;
+  if(dots){frames.forEach(function(_,i){var d=document.createElement('span');d.className='dot'+(i?'':' on');dots.appendChild(d);});}
+  function render(){
+    frames.forEach(function(f,i){f.classList.toggle('on',i===cur);});
+    if(cap&&caps[cur]!=null)cap.innerHTML=caps[cur];
+    if(cnt)cnt.textContent=(cur+1)+' / '+frames.length;
+    if(dots)[].slice.call(dots.querySelectorAll('.dot')).forEach(function(d,i){d.classList.toggle('on',i===cur);});
+  }
+  var p=st.querySelector('.prev'), n=st.querySelector('.next');
+  if(p)p.onclick=function(){cur=Math.max(0,cur-1);render();};
+  if(n)n.onclick=function(){cur=Math.min(frames.length-1,cur+1);render();};
   render();
-})();
+});
 </script>
 </body>
 </html>
