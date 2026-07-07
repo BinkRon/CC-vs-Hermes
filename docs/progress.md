@@ -13,16 +13,18 @@
 
 ## 🔴 在做
 
-### CH-A2R-05 · 用户章关系重构（rendering · 第 1 棒 · 2026-07-07）
-- **指针**：backlog `CH-A2R-05`｜脉络＝五拍（让渡→定义四维→两条路手段→懂≠顺闸→定位 verdict，全案见 backlog 行）｜PM 裁定提前开干不等 pilot
-- **素材源**：原 `05-outside-programmability.html`（显式通道/治理墙/深度光谱，有意大砍）＋ `05b-outside-user-adaptation.html`（记忆/建档/闸，主体保留重组）＋ 08 章技能自造制品（决策 C 迁入）
-- **接棒**（第 1 棒 · 2026-07-07）：素材盘点完成（原 05 全章＋05b 草稿＋08 已收窄确认技能自造段已不在 08 成稿）；五拍缺口已定：CC 侧＝防火墙原文/登记表全量栏目/显式通道光谱/边界维核验/技能自造证据，Hermes 侧＝用户档案两册制品/栏目全量/审批闸/技能自造默认状态/显式通道有无防火墙对应物。**两研究员已派（后台取证中）**。下一步＝收 JSON→逐条过防以偏概全自查→写视觉脚本（五问）→派渲染员。阻塞：无
+（空）
 
 ---
 
 ## 🟡 等谁
 
-（空）
+### CH-A2R-05 · 用户章关系重构（gating · 等 PM smoke · 第 2 棒 · 2026-07-07）
+- **指针**：成稿 `findings/05-outside-user.html`（已 commit c7495e1 并 push，**未并合订本**）｜backlog `CH-A2R-05`｜thesis＝五拍（让渡→登记表定义四维→两条路手段→懂≠顺闸→定位 verdict）
+- **已过**：机械两关（node --check OK；headless smoke 0 error/深色/无 stepper·mermaid 实体）＋自审 3 必修已修（声明非命令还 Hermes 独有／💾·/memory 补主语 Hermes／CC「住厂商云」纠正为本地明文+团队同步跨人）。研究 JSON 存 scratchpad `ch-a2r-05/`（cc/hm-research.json，含边界维修正与防火墙对照结论）。
+- **未过（PM smoke 后跑）**：Codex soundness 门＋独立完整性门＋设计门 checklist。
+- **恢复后第一步**：收 PM smoke 意见——**打回**→按意见改再走门；**通过**→跑三道剩余门→修正→`build.py` 并入合订本（CHAPTERS 里替换旧 05/05b 为新章、旧两稿移 `assets/` 备份）→ 置 done 迁档（backlog+progress+archive 三处）。
+- **阻塞**：等 PM smoke。
 
 ---
 
