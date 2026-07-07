@@ -2,3 +2,6 @@
 __pycache__/
 *.py[cod]
 .playwright-mcp/
+
+# 根目录 smoke 截图残渣（playwright 等临时产物；findings/assets 下的图不受影响）
+/*.png
