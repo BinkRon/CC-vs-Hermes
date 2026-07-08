@@ -15,8 +15,7 @@ CHAPTERS = [
     {"file": "SYN-inside-story.html",        "group": "综合",            "label": "综合① 一个 Loop 怎么设计", "id": "ch-syn1"},
     # 轴二各篇完成后在此追加：
     {"file": "04-outside-time-trigger.html", "group": "轴二 · Loop 之外", "label": "04 Loop 与时间", "id": "ch-04"},
-    {"file": "05-outside-programmability.html", "group": "轴二 · Loop 之外", "label": "05 Loop 与用户·上", "id": "ch-05"},
-    {"file": "05b-outside-user-adaptation.html", "group": "轴二 · Loop 之外", "label": "05 Loop 与用户·下", "id": "ch-05b"},
+    {"file": "05-outside-user.html", "group": "轴二 · Loop 之外", "label": "05 Loop 与用户", "id": "ch-05"},
     {"file": "06-outside-environment.html", "group": "轴二 · Loop 之外", "label": "06 Loop 与环境", "id": "ch-06"},
     {"file": "07-outside-multiagent.html", "group": "轴二 · Loop 之外", "label": "07 Loop 与其他 Agent", "id": "ch-07"},
     {"file": "08-outside-self-improvement.html", "group": "轴二 · Loop 之外", "label": "08 Loop 与自己", "id": "ch-08"},

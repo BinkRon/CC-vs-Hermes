@@ -133,7 +133,7 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 .ch05u .dimtag{color:var(--text);font-weight:700}
 
 /* 重档 A：两张空白登记表并排 */
-.ch05u .regforms{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0 6px;align-items:start}
+.ch05u .regforms{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0 6px;align-items:stretch}
 .ch05u .regcol{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
 .ch05u .regcol.cc-col{border-top:3px solid var(--blue)}
 .ch05u .regcol.hm-col{border-top:3px solid var(--purple)}
@@ -146,7 +146,7 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
   box-shadow:0 0 0 1px color-mix(in srgb,var(--amber) 30%,transparent) inset}
 .ch05u .frow.you>.k{color:var(--amber)}
 .ch05u .youtag{color:var(--amber);font-weight:700;font-size:11px;margin-left:4px}
-.ch05u .booklets{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:2px 0 4px}
+.ch05u .booklets{display:grid;grid-template-columns:1fr;gap:12px;margin:2px 0 4px}
 .ch05u .booklet{border:1px solid var(--border);border-radius:10px;padding:12px 14px;background:var(--bg)}
 .ch05u .booklet.you{border-color:color-mix(in srgb,var(--amber) 60%,transparent);
   box-shadow:0 0 0 1px color-mix(in srgb,var(--amber) 30%,transparent) inset}
@@ -180,7 +180,57 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
   width:max-content;max-width:250px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
   padding:8px 11px;font-size:12px;line-height:1.5;color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,.45);white-space:normal;font-weight:400}
 
-@media(max-width:820px){.ch05u .regforms,.ch05u .channels,.ch05u .booklets{grid-template-columns:1fr}}
+/* 重档 A（拍1）· 记忆提取时间轴：双轨横读，左密右疏 */
+.ch05u .tl{margin:18px 0 4px;border:1px solid var(--border);border-radius:14px;overflow-x:auto}
+.ch05u .tl-grid{display:grid;grid-template-columns:74px repeat(4,minmax(150px,1fr));background:var(--border);gap:1px;min-width:760px}
+.ch05u .tl-grid>div{background:var(--surface);padding:11px 12px}
+.ch05u .tl-corner,.ch05u .tl-hd{background:var(--surface-2)}
+.ch05u .tl-hd{font-size:11px;font-weight:700;letter-spacing:.3px;color:var(--faint);text-transform:uppercase;display:flex;align-items:flex-end;line-height:1.35}
+.ch05u .tl-rl{display:flex;align-items:center;font-weight:700;font-size:14px}
+.ch05u .tl-rl.cc{color:var(--blue)} .ch05u .tl-rl.hm{color:var(--purple)}
+.ch05u .tl-cell{min-height:82px}
+.ch05u .ev{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);
+  border-radius:8px;padding:4px 9px;font-size:12.5px;color:var(--text);line-height:1.3;margin:0 5px 5px 0}
+.ch05u .ev .d{width:8px;height:8px;border-radius:50%;flex:none;background:var(--faint)}
+.ch05u .tl-cell.cc .ev .d{background:var(--blue)} .ch05u .tl-cell.hm .ev .d{background:var(--purple)}
+.ch05u .ev.big{border-color:var(--purple);box-shadow:0 0 0 1px color-mix(in srgb,var(--purple) 32%,transparent) inset;font-weight:700}
+.ch05u .ev.ghost{border-style:dashed;color:var(--muted);opacity:.7}
+.ch05u .ev.ghost .d{background:var(--faint)}
+.ch05u .ev.off{border:none;background:none;color:var(--faint);font-style:italic;padding:4px 0}
+.ch05u .tl-cap{display:block;color:var(--faint);font-size:11.5px;line-height:1.45;margin-top:7px}
+.ch05u .tl-foot{background:var(--surface-2);padding:11px 15px;font-size:12.5px;color:var(--muted);line-height:1.55}
+.ch05u .tl-foot b{color:var(--text)}
+
+/* 中档（拍2）· 该记 / 不该记 二分 */
+.ch05u .keepdrop{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0 0}
+.ch05u .kd{border:1px solid var(--border);border-radius:12px;padding:15px 18px;background:var(--surface)}
+.ch05u .kd.keep{border-top:3px solid var(--green)}
+.ch05u .kd.drop{border-top:3px solid var(--faint)}
+.ch05u .kd h5{margin:0 0 8px;font-size:14px;display:flex;align-items:center;gap:7px}
+.ch05u .kd.keep h5{color:var(--green)} .ch05u .kd.drop h5{color:var(--muted)}
+.ch05u .kd ul{margin:0;padding:0;list-style:none}
+.ch05u .kd li{font-size:13px;color:var(--muted);line-height:1.5;padding:6px 0 6px 20px;position:relative;border-top:1px solid var(--border)}
+.ch05u .kd li:first-child{border-top:none}
+.ch05u .kd li::before{position:absolute;left:0;top:6px;font-size:12px}
+.ch05u .kd.keep li::before{content:"✓";color:var(--green)}
+.ch05u .kd.drop li::before{content:"✕";color:var(--faint)}
+.ch05u .kd li.star{color:var(--text)}
+.ch05u .kd li.star::before{content:"★";color:var(--amber)}
+
+/* 轻档（拍3）· 写入侧三道墙 */
+.ch05u .guards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0 0}
+.ch05u .guard{border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:10px;padding:13px 15px;background:var(--surface)}
+.ch05u .guard .gh{font-weight:700;font-size:13px;color:var(--text);margin-bottom:5px}
+.ch05u .guard p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.5}
+.ch05u .guard .iss{color:var(--faint);font-size:11px}
+
+/* 05 节 · 三层 band 分隔矩阵 */
+.ch05u .matrix .band{grid-column:1/-1;background:var(--surface-2);padding:11px 15px;border-top:2px solid var(--faint);
+  font-size:13px;font-weight:700;color:var(--text)}
+.ch05u .matrix .band .bn{color:var(--faint);font-weight:400;margin-right:9px}
+.ch05u .matrix .band .bx{color:var(--muted);font-weight:400;font-size:11.5px;margin-left:8px;letter-spacing:.2px}
+
+@media(max-width:820px){.ch05u .regforms,.ch05u .channels,.ch05u .booklets,.ch05u .keepdrop,.ch05u .guards{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -253,55 +303,118 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 assistant: [saves team feedback memory: integration tests must hit a real database, not mocks ...]</div>
   <p style="margin:12px 0 0;color:var(--muted)">一句话记住这一维：<b>边界分两层</b>，软的走记忆（它学你）、硬的走权限（你来规定）——是四维里唯一横跨「记忆」和「你规定它」两侧的方面，后面两节正好分别拆这两侧。</p>
 
-  <h2><span class="num">02</span>它学你：沉淀成记忆，也沉淀成技能</h2>
-  <p class="lead">上一节的四维「懂用户」，大部分落进<b>记忆</b>——但不全是：「你的口味」这一维，<span class="hm">Hermes</span> 就把它写进<b>技能</b>正文。记忆记「你是谁」，技能记「怎么为你做这类任务」，两者分工。所以「它学你」这条学习线趁你不在时沉淀出<b>两样东西：记忆和技能</b>，主要靠它<b>自动学</b>（把你说过、纠正过的记下来）；少数你也能<b>亲手写</b>（直接编辑记忆文件、或手写一个技能），但那只是补充，主体是它自己学。（<span class="hm">Hermes</span> 那套开机访谈虽是你开口回答，但发起、费心的都是它，仍算「它学」的主动形态。）</p>
+  <h2><span class="num">02</span>它学你：什么时候记、记什么、记了怎么不翻车</h2>
+  <p class="lead">上一节的四维「懂用户」，大部分落进<b>记忆</b>——但不全是：「你的口味」这一维，<span class="hm">Hermes</span> 就写进<b>技能</b>正文。记忆记「你是谁」，技能记「怎么为你做这类任务」。这条学习线主要靠它自动学、趁你不在时在后台沉淀（你也能亲手编辑记忆、手写技能，但那是补充）。</p>
+  <p class="lead" style="margin-top:-8px">而「<b>自动学</b>」这件听起来温柔的事，拆开看是在小心翼翼地做三件难事：什么时候记、记什么、记了怎么不翻车。下面就按这三件事，看两家怎么下注。</p>
 
-  <h3 style="font-size:18px;margin:34px 0 4px">它学你：在四个时刻做功</h3>
-  <p class="lead">它自动学不是玄妙的自我进化，而是在不同时间尺度上、趁你不在的时候在后台维护记忆。四个尺度从最细（边聊边记）到最粗（跨人共享），左蓝 <span class="cc">CC</span>、右紫 <span class="hm">Hermes</span> 并置。</p>
+  <h3 style="font-size:18px;margin:36px 0 4px"><span style="color:var(--faint);font-weight:400;margin-right:9px">2.1</span>记你这件事，它撒在四个时间尺度上、还派不同的角色去做</h3>
+  <p class="lead">你可能以为它就是把你说的话存下来。其实「存」不是一个动作：从你还在说话时顺手记，到答完你之后派个后台分身补记，再到夜里趁机整理、甚至跨人同步——越往右越慢、越少人在场。横看一整行，看的是这家把「记你」摊成了<b>多少个机制、又有多少是默认就转的</b>。</p>
 
-  <div class="diagram">
-    <div class="tscale">
-      <div class="tk">尺度 1 · 会话之内 —— 边聊边记，不等结束</div>
-      <div class="cols">
-        <div class="box blue"><div class="t">CC · 会话笔记</div><code>fork 一个子 agent 写下「你纠正了什么 / 哪些走法别再试」，上下文被压缩时重新注入回来</code></div>
-        <div class="box purple"><div class="t">Hermes · 当场写盘</div><code>记忆立即落盘、持久保存；但为保前缀缓存，系统提示里的快照要下次开会话才刷新</code></div>
+  <div class="tl">
+    <div class="tl-grid">
+      <div class="tl-corner"></div>
+      <div class="tl-hd">会话之内<br>边说边记</div>
+      <div class="tl-hd">一轮结束<br>答完你之后</div>
+      <div class="tl-hd">跨天 / 空闲<br>像睡觉时整理</div>
+      <div class="tl-hd">跨人<br>一人纠正全队受益</div>
+
+      <div class="tl-rl cc"><span class="cc">CC</span></div>
+      <div class="tl-cell cc">
+        <span class="ev"><span class="d"></span>顺手写</span>
+        <span class="ev ghost"><span class="d"></span>会话笔记</span>
+        <span class="tl-cap">只有「顺手写」无条件默认开；「会话笔记」在特性开关后——会话变长时另派分身写、压缩时顶回来</span>
+      </div>
+      <div class="tl-cell cc">
+        <span class="ev ghost"><span class="d"></span>回合末补写</span>
+        <span class="tl-cap">特性开关后：这轮你没顺手写才派个后台分身补，工具被锁死——只能读、只能写记忆</span>
+      </div>
+      <div class="tl-cell cc">
+        <span class="ev ghost"><span class="d"></span>🌙 夜里做梦整理</span>
+        <span class="tl-cap">去重 · 删被推翻的旧事实 · 修剪索引。<b style="color:var(--amber)">特性门控·非出厂默认</b></span>
+      </div>
+      <div class="tl-cell cc">
+        <span class="ev ghost"><span class="d"></span>👥 跨人同步</span>
+        <span class="tl-cap">特性开关后（非默认）：开启后同组织成员共享、一人纠正全队受益。这层能力 Hermes 结构上没有</span>
+      </div>
+
+      <div class="tl-rl hm"><span class="hm">Hermes</span></div>
+      <div class="tl-cell hm">
+        <span class="ev"><span class="d"></span>当场写盘</span>
+        <span class="tl-cap">就一个机制：模型想写就立即落盘持久保存；但本次会话的系统提示不变，下次开会话才刷新</span>
+      </div>
+      <div class="tl-cell hm">
+        <span class="ev big"><span class="d"></span>每 ~10 轮复盘一次</span>
+        <span class="tl-cap">攒够轮数才起一个复盘分身，回看整段对话，<b>记忆 + 技能一次管完</b></span>
+      </div>
+      <div class="tl-cell hm">
+        <span class="ev"><span class="d"></span>空闲策展</span>
+        <span class="tl-cap">约 7 天一次，把长期没用的技能归档——只归档、不删除</span>
+      </div>
+      <div class="tl-cell hm">
+        <span class="ev off">— 不跨人</span>
+        <span class="tl-cap">自托管单机单人，记忆留在你自己机器上</span>
       </div>
     </div>
-    <div class="tscale">
-      <div class="tk">尺度 2 · 一轮结束 —— 答完你之后，后台悄悄提炼</div>
-      <div class="cols">
-        <div class="box blue"><div class="t">CC · 回合末补写子 agent</div><code>这一轮你没顺手写、才由回合末的子 agent 补写，工具被锁死：只能读 + 只写记忆</code></div>
-        <div class="box purple"><div class="t">Hermes · 复盘分身 + 技能自造</div><code>约每 10 轮起一个复盘分身回看整段对话（出厂默认开）；同一复盘还要更新技能库，且被要求「主动」，改现有优先、新建只作兜底</code></div>
-      </div>
+    <div class="tl-foot">
+      <span style="color:var(--faint);font-size:11.5px">图例：实心＝无条件默认开 · <span style="border:1px dashed var(--faint);border-radius:5px;padding:0 6px">虚线</span>＝特性开关后（需开启 / 按灰度，非无条件常态）</span><br>
+      <b style="display:inline-block;margin-top:9px">0.5 秒该看到的差别</b>：<span class="cc">CC</span> 把提取铺成一排机制，但只有「顺手写」无条件默认，其余（会话笔记、回合末补写、夜里整理、跨人同步）都在特性开关后——一套<b>可开可关、可组合的能力</b>；<span class="hm">Hermes</span> 机制少，却<b>出厂就开</b>、转在你每次对话里。一个「能力铺开、按需开启」，一个「少而默认就转」。<br><span style="color:var(--faint);font-size:11.5px">回注（各走一路，细节按下不表）：CC 用小模型从记忆里挑至多 5 条注入、已注入过的会跳过（同为特性开关后）；Hermes 开会话时把两本档案整块冻结进系统提示。</span>
     </div>
-    <div class="tscale">
-      <div class="tk">尺度 3 · 跨天 / 机器空闲 —— 像睡觉时整理白天</div>
-      <div class="cols">
-        <div class="box blue"><div class="t">CC · 夜间做梦</div><code>四阶段巩固：去重 / 删被推翻的 / 修剪索引。注意：特性门控·非默认，不是出厂常态</code></div>
-        <div class="box purple"><div class="t">Hermes · 空闲策展人</div><code>定期把长期没用到的技能归档，只归档、不删除</code></div>
-      </div>
-    </div>
-    <div class="tscale" style="margin-bottom:0">
-      <div class="tk">尺度 4 · 跨人 —— 一个人纠正，别人不必再纠正</div>
-      <div class="cols">
-        <div class="box blue"><div class="t">CC · 团队记忆同步</div><code>同组织成员共享记忆，一人纠正、全队受益</code></div>
-        <div class="box dim"><div class="t">Hermes · 无对应</div><code>自托管单机 · 记忆留在你自己机器上、不跨人</code></div>
-      </div>
-    </div>
-    <div class="cap">四个时间尺度，越往下越慢、越少人在场；只有最粗那层是 CC 独有</div>
   </div>
 
-  <p style="margin:16px 0 0;color:var(--muted)"><span class="hm">Hermes</span> 尺度 2 那句「要主动学」不是修辞，是写进复盘指令的硬要求；而它把「用户偏好该写进技能正文」也讲得很清楚——记忆记「你是谁、现在什么处境」，技能记「为你这个人怎么做这一类任务」，两者分工。</p>
+  <p style="margin:16px 0 0;color:var(--muted)">同一条学习线，两家沉淀出的<b>产物</b>也不止记忆：<span class="hm">Hermes</span> 的复盘被硬性要求「要主动」——每次都该产出至少一次技能更新，什么都不做算错过学习、不是中性结果；而且它把「用户偏好该写进<b>技能正文</b>、不只进记忆」讲得很明白。记忆记「你是谁」，技能记「为你这个人怎么做这一类任务」。</p>
   <div class="artifact"><span class="lbl">复盘被要求「要 ACTIVE」· 原文</span>Be ACTIVE — most sessions produce at least one skill update, even if small. A pass that does nothing is a missed learning opportunity, not a neutral outcome.</div>
   <div class="artifact"><span class="lbl">记忆 vs 技能的分工原话</span>Memory captures 'who the user is and what the current situation and state of your operations are'; skills capture 'how to do this class of task for this user'.</div>
 
-  <h3 style="font-size:18px;margin:34px 0 4px">用户建模：单开一个子系统，还是揉进记忆？</h3>
-  <p class="lead">这是「它学你」这条路上最大的真分野，别抹平。</p>
+  <h3 style="font-size:18px;margin:38px 0 4px"><span style="color:var(--faint);font-weight:400;margin-right:9px">2.2</span>哪句话值得记一辈子？最反直觉的一条是——连你成功的选择也要记</h3>
+  <p class="lead">不是你说的每句都往长期记忆里塞。两家都有一套「该记 / 不该记」的判据——真正拉开认知的，是那条大多数人想不到的：只记你的纠正是不够的，<b>你点头认可的做法也得记</b>，否则它会越用越畏手畏脚。</p>
+  <div class="keepdrop">
+    <div class="kd keep">
+      <h5>✓ 该记（会让它更懂你）</h5>
+      <ul>
+        <li>你是谁、你的规矩、你验证过的偏好</li>
+        <li>你纠正它的走法（「别这么做」）</li>
+        <li class="star">连你<b>成功接受</b>的选择也要记——只记纠正，它会慢慢躲开你其实认可过的做法、变得过度谨慎</li>
+      </ul>
+    </div>
+    <div class="kd drop">
+      <h5>✕ 不该记（记了迟早变噪音）</h5>
+      <ul>
+        <li>能从代码 / 项目现状直接读出来的（架构、文件结构、谁改了什么）</li>
+        <li>一周后就过时的：PR 号、任务进度、「Phase N 做完了」、「修好了 X」</li>
+        <li>连你<b>明说</b>「把这个存下来」，若属上面两类它也会反问：这里面真正意外、非显然的点是什么？</li>
+      </ul>
+    </div>
+  </div>
+  <div class="artifact"><span class="lbl">CC · 为什么「成功也要记」（原文）</span>Record from failure AND success: if you only save corrections, you will avoid past mistakes but drift away from approaches the user has already validated, and may grow overly cautious.</div>
+  <p style="margin:14px 0 0;color:var(--muted)">另一头，<span class="hm">Hermes</span> 给「不该记」下了一条很硬的时间线判据：<b>一周后就会过时的事实，根本不该进记忆</b>——那些该用历史检索去找，不该沉淀成长期记忆。</p>
+  <div class="artifact"><span class="lbl">Hermes · 一周会过时的别进记忆（原文）</span>Do NOT save task progress, session outcomes, completed-work logs, or temporary TODO state... If a fact will be stale in a week, it does not belong in memory.</div>
+
+  <h3 style="font-size:18px;margin:38px 0 4px"><span style="color:var(--faint);font-weight:400;margin-right:9px">2.3</span>记进去这一步本身，会不会被人塞毒、或者卡住你回复</h3>
+  <p class="lead">自动写记忆有两个你想不到的坑：记忆文件可能被人动手脚（供应链、别的进程），成了往它脑子里<b>注入指令</b>的通道；反复整理记忆又可能陷进死循环，把该给你的回复<b>卡住</b>。<span class="hm">Hermes</span> 在写入这一步筑了三道墙，其中两道直接带着 issue 号、是被真实线上事故逼出来的。</p>
+  <div class="guards">
+    <div class="guard">
+      <div class="gh">① 投毒扫描</div>
+      <p>写入 / 加载时逐条扫威胁模式，命中就在系统提示里换成 <code>[BLOCKED]</code> 占位，但保留原文让你能看见并删——不静默吞掉，免得瞒住攻击。</p>
+    </div>
+    <div class="guard">
+      <div class="gh">② 防死循环 <span class="iss">#42405</span></div>
+      <p>字数超预算要先合并再写；同一轮连败 3 次就停手、先把话回给你——记忆的副作用<b>绝不能卡住</b>给你的回复。</p>
+    </div>
+    <div class="guard">
+      <div class="gh">③ 漂移守卫 <span class="iss">#26045</span></div>
+      <p>改写 / 删除前若发现磁盘上的记忆被外部手改过、对不上，先备份再<b>拒绝这次写</b>，防止一次自动整理静默吞掉你手动加的内容。</p>
+    </div>
+  </div>
+  <div class="artifact"><span class="lbl">投毒命中后的占位（原文）</span>[BLOCKED: {filename} entry contained threat pattern(s)... Removed from system prompt; use memory(action=remove) to delete the original.]</div>
+  <p style="margin:14px 0 0;color:var(--muted)"><span class="cc">CC</span> 写入这侧更薄（best-effort，失败就静默、下次再来）——它把防线主要放在<b>使用记忆的时候</b>：记忆天然会过期，用前先核实。至于「记好之后该不该无条件照办」，那是另一道闸，本章后面单说。</p>
+
+  <h3 style="font-size:18px;margin:38px 0 4px"><span style="color:var(--faint);font-weight:400;margin-right:9px">2.4</span>用户建模：单开一个子系统，还是揉进记忆？</h3>
+  <p class="lead">上面这条学习线，落到「你是谁」这一维时，两家分野最大——它决定了下一节「你能改它多深」的起点，别抹平。</p>
   <p style="margin:0 0 4px"><span class="hm">Hermes</span> 把「你是谁」做成一等公民：<b>独立的用户档案</b>（USER.md，跟它记自己教训的那份记忆文件分开、两套预算、系统提示里分两块渲染）＋开机就<b>主动提议建档</b>（你有史以来第一条消息就触发，还带一道「先问你同不同意」的门）＋每轮请求前由外接组件现取现注一份画像。<b style="color:var(--amber)">（但要诚实标注：USER.md 内部，你手写的偏好与它自学的混在同一本、无来源标记。）</b></p>
   <p style="margin:14px 0 0"><span class="cc">CC</span> 没有独立画像文件，也<b>从不主动访谈</b>你——它把「记你偏好」和「记你反馈」当成通用记忆的两类揉进四类记忆里，每一轮再用一个小模型从所有记忆标题里<b>挑不超过 5 条</b>注入当前对话。（你手动造技能的流程里它确会访谈你，但那是你触发、且为造技能，不是为了给你这个人建档。）</p>
 
   <h2><span class="num">03</span>不止让它懂你——你还能直接改它，改多深？</h2>
-  <p class="lead">记忆让它<b>懂</b>你（被动理解你是谁）；但你也能反过来<b>主动规定</b>它——从写一句指令，到设权限、挂钩子，一路到改它的源码。这条线不为「懂」，为的是让它的行为直接<b>顺</b>你，正好接上开篇那个「顺」的期望。关键看两家让你能走<b>多深</b>——而这条光谱的尽头，就是本章反复要问的那句：<b>谁拥有代码</b>。</p>
+  <p class="lead">记忆让它<b>懂</b>你（被动理解你是谁）；但你也能反过来<b>主动规定</b>它——从写一句指令，到教它一个可复用技能、设权限、挂钩子，一路到改它的源码。这条线不为「懂」，为的是让它的行为直接<b>顺</b>你，正好接上开篇那个「顺」的期望。关键看两家让你能走<b>多深</b>——而这条光谱的尽头，就是本章反复要问的那句：<b>谁拥有代码</b>。</p>
 
   <div class="channels">
     <div class="chan cc-col">
@@ -312,6 +425,8 @@ assistant: [saves team feedback memory: integration tests must hit a real databa
           <span class="sc" data-tip="自然语言指令文件，按优先级四层叠加：企业强制层 → 用户全局 → 项目 → 本地私有">CLAUDE.md 四层级</span>
           <span class="arrow">→</span>
           <span class="sc" data-tip="可切换的预置行为模式，替换或追加系统提示：如 Explanatory 边做边讲、Learning 让你手写练习">输出风格</span>
+          <span class="arrow">→</span>
+          <span class="sc" data-tip="你手写一个可复用的技能包（流程 / 知识 / 模板），模型按需加载。技能是双面的：上一节是它自己造技能（学习），这里是你手写技能（定制）">技能（手写）</span>
           <span class="arrow">→</span>
           <span class="sc" data-tip="在生命周期事件触发的确定性 shell 命令，让壳（而非模型）执行固定动作">钩子</span>
           <span class="arrow">→</span>
@@ -337,6 +452,8 @@ assistant: [saves team feedback memory: integration tests must hit a real databa
           <span class="arrow">→</span>
           <span class="sc" data-tip="被扫描注入的项目规则文件（仅顶层 / 兼容 Cursor）">AGENTS.md · .cursorrules</span>
           <span class="arrow">→</span>
+          <span class="sc" data-tip="你手写一个可复用的技能包，存进 ~/.hermes/skills；也可从技能中心安装。技能是双面的：上一节是它自造（学习），这里是你手写（定制）">技能（手写）</span>
+          <span class="arrow">→</span>
           <span class="sc" data-tip="显式开关：审批模式、记忆写入闸、命令白名单…">config.yaml</span>
           <span class="arrow">→</span>
           <span class="sc" data-tip="开源自托管，全部代码都在你自己机器上">改源码</span>
@@ -360,7 +477,7 @@ assistant: [saves team feedback memory: integration tests must hit a real databa
   <div class="compare">
     <div class="side cc">
       <h4><span class="cc">Claude Code</span> · 预防式：把「不信任记忆」焊进出厂设计</h4>
-      <p style="color:var(--muted);font-size:15px;margin:0">系统提示里专门有一段召回纪律：记忆提到某文件就先确认它还在、要据此行动就<b>必须先核实</b>；「记忆说 X 存在」不等于「X 现在存在」。夜间做梦也内建「删掉被现场推翻的旧事实」。它把「记忆天然会过期」当默认前提来设计。</p>
+      <p style="color:var(--muted);font-size:15px;margin:0">系统提示里专门有一段召回纪律：记忆提到某文件就先确认它还在、要据此行动就<b>必须先核实</b>；「记忆说 X 存在」不等于「X 现在存在」。夜间做梦（非默认）也内建「删掉被现场推翻的旧事实」。它把「记忆天然会过期」当默认前提来设计。</p>
       <div class="artifact"><span class="lbl">用前必核实 · 原文</span>A memory that names a specific function, file, or flag is a claim that it existed *when the memory was written* ... "The memory says X exists" is not the same as "X exists now."</div>
     </div>
     <div class="side hm">
@@ -374,13 +491,14 @@ assistant: [saves team feedback memory: integration tests must hit a real databa
 Imperative phrasing gets re-read as a directive in later sessions and can cause repeated work or override the user's current request.</div>
   <p style="margin:16px 0 0;color:var(--muted)">在 <span class="hm">Hermes</span> 那侧，这道闸还露在 UI 上：它学到一条就在聊天里提示「💾 Memory updated」（默认开），你随时可以用 /memory 审查、撤回它学的每一条——<b>学习不是黑箱</b>。<span class="cc">CC</span> 的对应物是记忆本身就是你机器上可读可删的明文文件。</p>
 
-  <h2><span class="num">05</span>逐维对照：同一个「懂用户」，答案落在几处</h2>
-  <p class="lead">横扫每一行，看两家在四个方面加三件事上各自落在哪。</p>
+  <h2><span class="num">05</span>拼起来看：从「学你」的三个层次，照见它眼里的「用户是谁」</h2>
+  <p class="lead">把前面拆开讲的拼回一张表——但别平着读。它其实分<b>三层</b>：记什么（内容）、怎么记（机制）、记了之后归谁·信不信（所有权与信任）。前两层是手段，<b>第三层才通向「它把你当谁」</b>。</p>
   <div class="matrix">
     <div class="mh"></div>
     <div class="mh cc">Claude Code</div>
     <div class="mh hm">Hermes</div>
 
+    <div class="band"><span class="bn">①</span>记什么<span class="bx">内容——你交出去的那部分「你」</span></div>
     <div class="dim">你是谁</div>
     <div>user 类记忆里的一类（角色 / 目标 / 偏好 / 知识水平）。</div>
     <div>单开一本 USER.md 画像。</div>
@@ -397,28 +515,40 @@ Imperative phrasing gets re-read as a directive in later sessions and can cause 
     <div>软边界进 feedback 记忆（建议性、<b>无牙</b>）；硬授权走 settings 权限规则。</div>
     <div>软边界进记忆（建议性、<b>无牙</b>）；硬边界走 approvals 审批系统。</div>
 
-    <div class="dim">谁做功</div>
-    <div>主 agent 即时写 ＋ 回合末子 agent 补写 ＋ 夜间做梦（<b>非默认</b>）。</div>
-    <div>边聊边写 ＋ 每约 10 轮复盘分身（默认开）＋ 技能自造。</div>
+    <div class="band"><span class="bn">②</span>怎么记进来<span class="bx">学习机制——趁你不在时怎么运转</span></div>
+    <div class="dim">什么时候记<br>· 谁来记</div>
+    <div>主 agent 即时写（<b>默认开</b>）＋ 回合末补写 / 会话笔记 / 夜间做梦（<b>均特性门控</b>）。</div>
+    <div>边聊边写 ＋ 每约 10 轮复盘分身（<b>出厂默认开</b>）＋ 技能自造。</div>
 
-    <div class="dim">住哪 · 跟谁走</div>
+    <div class="dim">什么才值得记</div>
+    <div>连你<b>成功接受</b>的做法也记（只记纠正会变得过度谨慎）。</div>
+    <div>一周会过时的<b>不记</b>（PR 号 / 进度交给历史检索）。</div>
+
+    <div class="dim">记得安不安全</div>
+    <div>写入 best-effort、失败静默；防线主要放在<b>使用时</b>（用前核实）。</div>
+    <div>写入侧<b>三道墙</b>：投毒占位 / 防死循环 / 漂移拒写。</div>
+
+    <div class="band"><span class="bn">③</span>记了之后归谁、信不信<span class="bx">所有权与信任——本章 verdict 的落点</span></div>
+    <div class="dim">记忆归谁<br>· 跟谁走</div>
     <div>你机器上的明文文件，但可经团队记忆同步<b>跨人共享</b>（组织维度）。</div>
-    <div>你的单机、单人、两份记忆文件，不跨人。</div>
+    <div>你的单机、单人、两份记忆文件，<b>不跨人</b>。</div>
 
-    <div class="dim">有没有闸</div>
-    <div><b>预防式</b>：用前必核实、做梦删被推翻的旧事实。</div>
+    <div class="dim">懂了就照办吗</div>
+    <div><b>预防式</b>：用前必核实（默认常驻）、做梦删被推翻的（非默认）。</div>
     <div><b>事后式</b>：「不要捕获」黑名单 ＋ 记忆写入审批闸。</div>
   </div>
 
+  <p style="margin:22px 0 0;color:var(--muted)">别停在"谁的表更全"。退一步看，上面第 ③ 层的每处设计，都在悄悄回答一个更根本的问题——<b>在它眼里，「用户」到底是谁？</b>答案就藏在它们「学你」的方式里。</p>
   <div class="thesis">
-    <p style="margin:0 0 10px">这一章问了两件事——它怎么<b>懂</b>你（记忆与技能），你怎么<b>改</b>它（可定制）。两条线的答案指向同一处：你的记忆档案<b>住在哪、跟谁走</b>，你的配置<b>能改到多深、代码归谁</b>。</p>
-    <p style="margin:0"><span class="cc">CC</span>：一份透明的明文档案，能<b>跨团队共享</b>（一人纠正、全队受益，「你」被放进组织的维度里理解），配置止于官方插槽、源码归厂商；<span class="hm">Hermes</span>：住在你自己的单机、单人独享、是你机器上的两份记忆文件，连它的源码都在你手里。顺着这条线，两家的定位分野也就清楚了：<b>多租户生产力工具</b> vs <b>单人自托管陪伴</b>。</p>
+    <p style="margin:0 0 10px"><span class="cc">CC</span>：你是<b>组织里的一个专业角色</b>——它把记忆做成 org 能治理的明文、还建了一套可跨组织成员共享的基础设施（可开启的能力，非默认全队直通），且从不给你单独建个人画像。它优化的是「一群人协作时的生产力」，落点是<b>多租户生产力工具</b>。</p>
+    <p style="margin:0"><span class="hm">Hermes</span>：你是<b>它专属服务的那一个人</b>——开机就主动给你建档、单机单人不跨人，画像只属于你。它优化的是「长期陪一个人」，落点是<b>单人自托管陪伴</b>。<span style="color:var(--muted);font-weight:400">（这只是「与用户」这一维照见的判断；与「自己」「时间」两维合起来，才是完整答案。）</span></p>
   </div>
 
   <h2><span class="num">06</span>悬而未决 · 防夸大红线</h2>
   <ul class="open">
     <li><b>[默认口径要锚定]</b> <span class="cc">CC</span>：auto-memory 默认开（opt-out）、skillImprovement 默认关、skillify 仅内部用户开放；<span class="hm">Hermes</span>：文中「默认开」一律指<b>出厂发行版</b>口径，裸库无配置键时兜底是关。</li>
     <li><b>[CC 夜间做梦非默认]</b> 夜间做梦 / KAIROS 助手日志是<b>特性门控·非默认</b>，是「另一形态」而非出厂常态，别当主线支柱。</li>
+    <li><b>[CC 后台记忆通路多为特性门控]</b> 除「顺手写」（auto-memory，出厂默认开）外，CC 的<b>会话笔记 / 回合末补写 / 每轮召回 ≤5 / 团队记忆同步</b>都在特性开关之后（GrowthBook flag，代码兜底关）——是可开启的能力，非无条件常态。尤其<b>团队记忆同步</b>（tengu_herring_clock）别写成「装上即全队共享」；文中「跨人共享」按<b>能力 / 架构</b>口径读：CC 建了这套 org 可共享的基础设施（＋团队上传专设密钥扫描）、且从不给你单独建个人画像，而 Hermes 单机结构上做不到跨人——这层对比与门控开没开无关，成立。</li>
     <li><b>[边界维措辞]</b> 软边界进记忆，但只是被注入的建议性文本、<b>没有强制拦截力</b>——别写成「记忆能拦住它」。真正能阻断危险动作的是独立的权限 / 审批系统。</li>
     <li><b>[Hermes 不是防火墙]</b> USER.md 内部，你手写的与它自学的是<b>混同</b>的、无来源标记——别把「文件写权限隔离」夸成「Hermes 也有 CC 那种去重防火墙」。它的隔离是按「谁能写哪个文件」划界，不是「同层区分来源、显式压过学习」。</li>
     <li><b>[不评优劣 · 时间切片]</b> 本篇讲「懂用户」与「你改它」的<b>形态</b>，不评孰优——取决于你要的是托管多租户产品，还是自托管的长期单人陪伴。切片：CC main / Hermes @daf4f1a7a。</li>
@@ -428,8 +558,8 @@ Imperative phrasing gets re-read as a directive in later sessions and can cause 
 
   <div class="foot">
     代码溯源（不在正文展示，仅存档）：<br>
-    <b>Claude Code</b> — <code>src/memdir/memoryTypes.ts:14-19</code>（四类记忆命名）· <code>:44-56</code>（user 类）· <code>:57-74</code>（feedback 类 · don't mock 例子 60-66）· <code>:75-89</code>（project 类）· <code>:90-103</code>（reference 类）· <code>:183-195</code>（What NOT to save 排除清单）· <code>:3-7</code>（顶部说明 · 四类不可推导）· <code>:181</code>（两模式共用）· <code>:201/216-222/240-256</code>（召回防漂移三段护栏 · 用前必核实 253）· <code>src/memdir/memdir.ts:350-355</code>（该记你什么清单 · KAIROS 门控 319）· <code>src/services/SessionMemory/prompts.ts:11-41</code>（会话笔记模板）· <code>src/utils/claudemd.ts:4-7</code>（CLAUDE.md 四层级）· <code>src/constants/outputStyles.ts:41-66</code>（输出风格）· <code>src/utils/hooks/hooksConfigManager.ts:26-95</code>（钩子）· <code>PermissionUpdateSchema.ts:27-40</code> · <code>PermissionUpdate.ts:77-94</code> · <code>settings.ts:274-307</code>（权限落盘 settings）· <code>src/memdir/paths.ts:30-54</code>（auto-memory 默认开）· <code>teamMemPaths.ts:74</code>（团队记忆）· <code>autoDream / consolidationPrompt.ts:26-61</code>（夜间做梦四阶段 · 非默认）· <code>findRelevantMemories.ts</code>（每轮挑 ≤5 条）· <code>src/skills/bundled/skillify.ts:22-197</code>（造技能 · 人触发 · ant 门 159-161）· <code>skillImprovement.ts:75-267</code> · <code>useSkillImprovementSurvey.ts:53-98</code>（改进已有技能 · 默认关 · 需人批准）<br>
-    <b>Hermes</b> — <code>tools/memory_tool.py:5-14</code>（两本册子定位）· <code>:55-59/280-285</code>（存盘路径 · 自学只能写这两本）· <code>:130</code> · <code>config.py:2060-2061</code>（预算 2200 / 1375 字符）· <code>memory_tool.py:664-680</code>（分块渲染模板）· <code>system_prompt.py:426-435</code>（volatile 层两块独立开关）· <code>:11-14/168-205</code>（前缀缓存 · 快照下次刷新）· <code>agent/onboarding.py:134-183</code>（开机主动建档 · OFFER do not assume · profile_build 默认 ask）· <code>agent/background_review.py:160-187</code>（记忆 / 挫败信号复盘 · 一等技能信号）· <code>:171-175</code>（Be ACTIVE）· <code>:196-238</code>（技能更新优先级 · 用户偏好写进技能正文）· <code>:250-269</code>（不要捕获黑名单）· <code>turn_context.py:294-301</code>（记忆复盘每 10 轮）· <code>turn_finalizer.py:436-461</code>（技能复盘 · 后台守护线程）· <code>prompt_builder.py:152-167</code>（记忆优先级 · 声明非命令写法）· <code>:1796-1933/34-35</code>（SOUL.md / HERMES.md / AGENTS.md / .cursorrules 显式通道）· <code>config.py:2047-2059</code>（记忆写入审批闸 · 默认关）· <code>:2386-2395</code>（approvals.mode 硬审批）· <code>:2200-2222</code>（技能自造 · write_approval 默认关）· <code>skill_manager_tool.py:6-32</code>（技能存 ~/.hermes/skills）· <code>memory_tool.py:704-757</code>（漂移守卫 · 用户手改混同无来源标记）· <code>config.py:1679-1684</code>（💾 Memory updated 通知默认开）
+    <b>Claude Code</b> — <code>src/memdir/memoryTypes.ts:14-19</code>（四类记忆命名）· <code>:44-56</code>（user 类）· <code>:57-74</code>（feedback 类 · don't mock 例子 60-66 · <b>成功 AND 失败都记 60-62/134-135</b>）· <code>:75-89</code>（project 类）· <code>:90-103</code>（reference 类）· <code>:183-195</code>（What NOT to save 排除清单）· <code>src/services/SessionMemory/sessionMemory.ts:134-181</code>（会话笔记 · 阈值 sessionMemoryUtils.ts:31-36）· <code>src/services/extractMemories/extractMemories.ts:296-337</code>（回合末补写 · 主/后台每回合互斥）· <code>findRelevantMemories.ts:18-24</code>（每轮 Sonnet 挑 ≤5 条）· <code>:3-7</code>（顶部说明 · 四类不可推导）· <code>:181</code>（两模式共用）· <code>:201/216-222/240-256</code>（召回防漂移三段护栏 · 用前必核实 253）· <code>src/memdir/memdir.ts:350-355</code>（该记你什么清单 · KAIROS 门控 319）· <code>src/services/SessionMemory/prompts.ts:11-41</code>（会话笔记模板）· <code>src/utils/claudemd.ts:4-7</code>（CLAUDE.md 四层级）· <code>src/constants/outputStyles.ts:41-66</code>（输出风格）· <code>src/utils/hooks/hooksConfigManager.ts:26-95</code>（钩子）· <code>PermissionUpdateSchema.ts:27-40</code> · <code>PermissionUpdate.ts:77-94</code> · <code>settings.ts:274-307</code>（权限落盘 settings）· <code>src/memdir/paths.ts:30-54</code>（auto-memory 默认开）· <code>teamMemPaths.ts:74</code>（团队记忆）· <code>autoDream / consolidationPrompt.ts:26-61</code>（夜间做梦四阶段 · 非默认）· <code>findRelevantMemories.ts</code>（每轮挑 ≤5 条）· <code>src/skills/loadSkillsDir.ts:97</code>（手写技能加载 · 用户自定义定制口）· <code>src/skills/bundled/skillify.ts:22-197</code>（造技能 · 人触发 · ant 门 159-161）· <code>skillImprovement.ts:75-267</code> · <code>useSkillImprovementSurvey.ts:53-98</code>（改进已有技能 · 默认关 · 需人批准）<br>
+    <b>Hermes</b> — <code>tools/memory_tool.py:5-14</code>（两本册子定位）· <code>:55-59/280-285</code>（存盘路径 · 自学只能写这两本）· <code>:130</code> · <code>config.py:2060-2061</code>（预算 2200 / 1375 字符）· <code>memory_tool.py:664-680</code>（分块渲染模板）· <code>system_prompt.py:426-435</code>（volatile 层两块独立开关）· <code>:11-14/168-205</code>（前缀缓存 · 快照下次刷新）· <code>agent/onboarding.py:134-183</code>（开机主动建档 · OFFER do not assume · profile_build 默认 ask）· <code>agent/background_review.py:160-187</code>（记忆 / 挫败信号复盘 · 一等技能信号）· <code>:171-175</code>（Be ACTIVE）· <code>:196-238</code>（技能更新优先级 · 用户偏好写进技能正文）· <code>:250-269</code>（不要捕获黑名单）· <code>turn_context.py:294-301</code>（记忆复盘每 ~10 轮）· <code>conversation_loop.py:688-692</code>（技能复盘每 ~10 工具迭代）· <code>turn_finalizer.py:436-461</code>（技能复盘 · 后台守护线程）· <code>prompt_builder.py:152-167</code>（记忆优先级 · 声明非命令写法 · <b>一周会过时的别进记忆 155-159</b>）· <code>tools/memory_tool.py:168-241</code>（<b>投毒扫描 · [BLOCKED] 占位</b> · 234-238）· <code>:124-166</code>（<b>防死循环 #42405</b>）· <code>:83-110</code>（漂移守卫 #26045）· <code>agent/curator.py:219-273</code>（空闲策展 · config.py:2236-2253 · 7 天 / consolidate 默认关）· <code>:1796-1933/34-35</code>（SOUL.md / HERMES.md / AGENTS.md / .cursorrules 显式通道）· <code>config.py:2047-2059</code>（记忆写入审批闸 · 默认关）· <code>:2386-2395</code>（approvals.mode 硬审批）· <code>:2200-2222</code>（技能自造 · write_approval 默认关）· <code>skill_manager_tool.py:6-32</code>（技能存 ~/.hermes/skills）· <code>memory_tool.py:704-757</code>（漂移守卫 · 用户手改混同无来源标记）· <code>config.py:1679-1684</code>（💾 Memory updated 通知默认开）
   </div>
 
 </div>

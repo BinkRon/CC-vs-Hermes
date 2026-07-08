@@ -5,7 +5,7 @@
 **命名约定**（数字前缀 = 调研顺序，`inside`=轴一 Loop之内 / `outside`=轴二 Loop之外）：
 - 轴一：`01-inside-control-loop.html`（✅）、`02-inside-input.html`、`03-inside-output.html`
 - 轴一综合：`SYN-inside-story.html`（「一个 Loop 是怎么设计的」）
-- 轴二：`04-outside-time-trigger.html`、`05-outside-programmability.html`、`06-outside-environment.html`、`07-outside-multiagent.html`
+- 轴二：`04-outside-time-trigger.html`、`05-outside-user.html`（Loop 与用户，取代旧 `05-outside-programmability` + `05b-outside-user-adaptation`，已归档 `assets/`）、`06-outside-environment.html`、`07-outside-multiagent.html`
 - 轴二综合：`SYN-outside-story.html`（「Loop 之外是怎么设计的」）
 - 设计系统（勿动内容，仅复用其 style/script）：`_design-system.html`
 
