@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
-<title>轴二 · Loop 之外 · Loop 与用户：它该多懂你，这份「懂」谁说了算</title>
+<title>轴二 · Loop 之外 · Loop 与用户：它该多懂用户，这份「懂」谁说了算</title>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
 <style>
 /* ============ 设计系统（所有 findings 页面复用这套 <style> 与 <script>）============ */
@@ -187,14 +187,14 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 <div class="wrap">
 <div class="ch05u">
 
-  <div class="eyebrow"><span class="badge">第 5 篇 · 轴二 · Loop 之外</span><span class="tag">Loop 与用户 · 懂你</span></div>
-  <h1>它该多懂你，这份「懂」谁说了算</h1>
+  <div class="eyebrow"><span class="badge">第 5 篇 · 轴二 · Loop 之外</span><span class="tag">Loop 与用户 · 用户建模</span></div>
+  <h1>它该多懂用户，这份「懂」谁说了算</h1>
   <p class="subtitle">和 agent 打交道，是一场双重让渡——它记得住你交出去的东西吗？</p>
-  <p class="lead" style="font-size:14px;margin-bottom:4px"><span class="cc">CC</span> 把「你」当四类记忆里的一类 · <span class="hm">Hermes</span> 单开一本 1375 字符的册子 · 边界分软硬两层、各走一条路</p>
+  <p class="lead" style="font-size:14px;margin-bottom:4px"><span class="cc">CC</span> 把用户当四类记忆里的一类 · <span class="hm">Hermes</span> 单开一份 1375 字符的记忆档案 · 边界分软硬两层、各走一条路</p>
 
   <div class="thesis">
     <p style="margin:0 0 10px">你跟一个 agent 打交道，本质是一场<b>双重让渡</b>——你交出意图（想要什么，说给它听），也交出<b>行动权</b>（让它替你改文件、跑命令）。</p>
-    <p style="margin:0">让渡内生两个期望：它得<b>懂</b>你的意图、它的行动得<b>顺</b>你的心意。所以「懂用户」不是锦上添花的功能，是委托关系里长出来的内生需求。这一章拆两家怎么定义「懂你」、用什么手段做到、以及懂了之后凭什么不无条件照办。</p>
+    <p style="margin:0">让渡内生两个期望：它得<b>懂</b>你的意图、它的行动得<b>顺</b>你的心意。所以「懂用户」不是锦上添花的功能，是委托关系里长出来的内生需求。这一章拆两家怎么定义「懂用户」、用什么手段做到、以及懂了之后凭什么不无条件照办。</p>
   </div>
 
   <div class="story" style="margin-top:16px">
@@ -202,12 +202,12 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
     <p style="margin:0"><b>今天你新开一个对话——它还记得吗？</b> 留意这四句话，正好对应它该「懂」你的四个方面：你是谁、你的边界、你的规矩、你的口味。</p>
   </div>
 
-  <h2><span class="num">01</span>「懂你」是什么：读它给自己发的空白登记表</h2>
-  <p class="lead">想知道一家怎么定义「懂你」，别看它记住了什么，看它给自己发了一张<b>什么样的空白登记表</b>——源码里写死的是表格的栏目和填表须知，不是填好的内容。两家的表长得完全不同。</p>
+  <h2><span class="num">01</span>定义「懂用户」：看两家给记忆预设了什么样的空表</h2>
+  <p class="lead">想知道一家怎么定义「懂用户」，别看它记住了什么，要看它为记忆预留了<b>什么样的空表</b>——源码里写死的是记忆的分类和填写须知，不是填好的内容。两家的记忆结构长得完全不同。</p>
 
   <div class="regforms">
     <div class="regcol cc-col">
-      <p class="rh"><span class="cc">Claude Code</span> · 一张四栏登记表</p>
+      <p class="rh"><span class="cc">Claude Code</span> · 一张装下四类记忆的通表</p>
       <p class="rsub">「你」是这四类记忆之一，跟项目、外部资源同表登记</p>
       <div class="frow you"><div class="k">user<span class="youtag">← 「你」在这</span></div><div class="v">你的角色、目标、知识水平、偏好——好的 user 记忆让它按你的视角调整行为</div></div>
       <div class="frow"><div class="k">feedback</div><div class="v">你给过的做法指导，既含「别这么做」也含「这么做对了」，要连 <b>为什么</b> 一起记</div></div>
@@ -222,7 +222,7 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
     </div>
 
     <div class="regcol hm-col">
-      <p class="rh"><span class="hm">Hermes</span> · 给「你」单开一本册子</p>
+      <p class="rh"><span class="hm">Hermes</span> · 给用户单开一份记忆档案</p>
       <p class="rsub">它记自己的教训、它记你这个人——分成两本，各自独立预算</p>
       <div class="booklets">
         <div class="booklet">
@@ -242,85 +242,22 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
       <div class="artifact"><span class="lbl">还专门盯着你的挫败信号 · 原文</span>Frustration signals like 'stop doing X', 'this is too verbose', 'just give me the answer', 'you always do Y and I hate it' ... are FIRST-CLASS skill signals, not just memory signals.</div>
     </div>
   </div>
-  <p class="lead" style="margin-top:14px">半秒就看得出的差别：<span class="cc">CC</span> 把「你」<b>塞进一张四栏通表</b>的其中一栏；<span class="hm">Hermes</span> 干脆给「你」<b>单开一本册子</b>、配一份专属字数预算。</p>
+  <p class="lead" style="margin-top:14px">半秒就看得出的差别：<span class="cc">CC</span> 把用户<b>塞进一张四类记忆通表</b>的其中一栏；<span class="hm">Hermes</span> 干脆给用户<b>单开一份记忆档案</b>、配一份专属字数预算。</p>
 
-  <p style="margin:22px 0 6px">从这两张表的栏目，能把「懂你」拆成四个方面。逐个看两家分别登记在哪：</p>
+  <p style="margin:22px 0 6px">从这两张表的栏目，能把「懂用户」拆成四个方面。逐个看两家分别登记在哪：</p>
   <p style="margin:10px 0"><span class="dimtag">你是谁。</span>「后端出身、第一次碰前端」——<span class="cc">CC</span> 的 user 类专管这个，须知里写明「对资深工程师和第一次写代码的学生，要用不同方式协作」；<span class="hm">Hermes</span> 干脆给你单开的 USER.md 就是这本画像。</p>
   <p style="margin:10px 0"><span class="dimtag">你的规矩。</span>「所有改动合成一个 PR」这种项目怪规矩——<span class="cc">CC</span> 分给 project 类（记代码里读不出来的项目决策）和 feedback 类（记你纠正过的走法）；<span class="hm">Hermes</span> 把它塞进 MEMORY.md 的项目惯例。</p>
   <p style="margin:10px 0"><span class="dimtag">你的口味。</span>「嫌它啰嗦」这种风格偏好——<span class="cc">CC</span> 收进 feedback；<span class="hm">Hermes</span> 更进一步，把挫败信号列为<b>一等信号</b>，要求把教训写进「管这类任务的技能」正文里，下次开局就已经懂。</p>
   <p style="margin:10px 0"><span class="dimtag">你的边界。</span>这一维要分两层说，别写成一句话。软性的做法边界（「别擅自 mock 数据库」）<b>确实进记忆的暗通道</b>——<span class="cc">CC</span> 的 feedback 分类里逐字写着 don't mock the database 这个例子，<span class="hm">Hermes</span> 记忆的第一优先级也正是「用户偏好与反复纠正」。但记忆里的边界只是被注入系统提示的<b>建议性文本、没有强制力</b>；真正有牙的硬授权（哪些工具/命令能不能跑）走的是独立的权限/审批系统，结构上就进不了记忆。</p>
   <div class="artifact"><span class="lbl">软性边界进记忆的直接证据（CC feedback 类举的例子）· 原文</span>user: don't mock the database in these tests — we got burned last quarter when mocked tests passed but the prod migration failed
 assistant: [saves team feedback memory: integration tests must hit a real database, not mocks ...]</div>
-  <p style="margin:12px 0 0;color:var(--muted)">一句话记住这一维：<b>边界分两层</b>，软的走「它学你」、硬的走「你规定它」——是四维里唯一被两条路分治的方面。这正好引出下一节的分析视角。</p>
+  <p style="margin:12px 0 0;color:var(--muted)">一句话记住这一维：<b>边界分两层</b>，软的走记忆（它学你）、硬的走权限（你来规定）——是四维里唯一横跨「记忆」和「你规定它」两侧的方面，后面两节正好分别拆这两侧。</p>
 
-  <h2><span class="num">02</span>两条路：你规定它，和它学你</h2>
-  <p class="lead">「懂你」落地只有两条路，这是我们看这一章的分析视角。判据是<b>谁发起、谁费心</b>——不是信息从谁嘴里出。（所以 <span class="hm">Hermes</span> 那套开机访谈，虽然是你开口回答，但发起权在它、费心的也是它，归第二条路「它学你」的主动形态。）</p>
+  <h2><span class="num">02</span>它学你：沉淀成记忆，也沉淀成技能</h2>
+  <p class="lead">上一节的四维「懂用户」，大部分落进<b>记忆</b>——但不全是：「你的口味」这一维，<span class="hm">Hermes</span> 就把它写进<b>技能</b>正文。记忆记「你是谁」，技能记「怎么为你做这类任务」，两者分工。所以「它学你」这条学习线趁你不在时沉淀出<b>两样东西：记忆和技能</b>，主要靠它<b>自动学</b>（把你说过、纠正过的记下来）；少数你也能<b>亲手写</b>（直接编辑记忆文件、或手写一个技能），但那只是补充，主体是它自己学。（<span class="hm">Hermes</span> 那套开机访谈虽是你开口回答，但发起、费心的都是它，仍算「它学」的主动形态。）</p>
 
-  <p style="margin:0 0 4px">先看两条路各自的地形。下面每一侧都分上下两栏：上栏「你规定它」是你显式写死的指令，下栏「它学你」是它趁机记下的适应。<b>中间那条分界线，是整张图的灵魂</b>——它决定了「你写的」和「它学的」怎么不打架。</p>
-
-  <div class="channels">
-    <div class="chan cc-col">
-      <p class="ch-h"><span class="cc">Claude Code</span></p>
-      <div class="zone">
-        <div class="zt">上栏 · 你规定它（你发起 / 你费心）</div>
-        <div class="spec">
-          <span class="sc" data-tip="自然语言指令文件，按优先级四层叠加：企业强制层 → 用户全局 → 项目 → 本地私有">CLAUDE.md 四层级</span>
-          <span class="arrow">→</span>
-          <span class="sc" data-tip="可切换的预置行为模式，替换或追加系统提示：如 Explanatory 边做边讲、Learning 让你手写练习">输出风格</span>
-          <span class="arrow">→</span>
-          <span class="sc" data-tip="在生命周期事件触发的确定性 shell 命令，让壳（而非模型）执行固定动作">钩子</span>
-          <span class="arrow">→</span>
-          <span class="sc" data-tip="工具授权规则；你选『总是允许』时规则落盘 settings 文件">权限规则</span>
-          <span class="endnote">一条「能规定多深」的光谱，末端注：改不了源码，官方替你凿好插槽</span>
-        </div>
-      </div>
-      <div class="divider">
-        <span class="dt">中间划界 · 规则去重防火墙</span>
-        记忆有一条明令：CLAUDE.md 里已写死的、代码能现读出来的，一律不许再存进记忆——用规则把「配置层」和「适应层」隔开、不重叠。
-      </div>
-      <div class="zone learn">
-        <div class="zt">下栏 · 它学你（它发起 / 它费心）</div>
-        <div class="spec">
-          <span class="sc">四类记忆（user / feedback / project / reference）</span>
-          <span class="sc">会话笔记</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="chan hm-col">
-      <p class="ch-h"><span class="hm">Hermes</span></p>
-      <div class="zone">
-        <div class="zt">上栏 · 你规定它（你发起 / 你费心）</div>
-        <div class="spec">
-          <span class="sc" data-tip="人格 / 身份槽，每条消息都重读，控制它的性格语气">SOUL.md</span>
-          <span class="arrow">→</span>
-          <span class="sc" data-tip="项目级指令，随 git 根目录加载">HERMES.md</span>
-          <span class="arrow">→</span>
-          <span class="sc" data-tip="被扫描注入的项目规则文件（仅顶层 / 兼容 Cursor）">AGENTS.md · .cursorrules</span>
-          <span class="arrow">→</span>
-          <span class="sc" data-tip="显式开关：审批模式、记忆写入闸、命令白名单…">config.yaml</span>
-          <span class="arrow">→</span>
-          <span class="sc" data-tip="你可以直接手改这本用户档案——和它自学写的是同一本">手写 USER.md</span>
-          <span class="endnote">光谱末端不是插槽，是「改源码」——谁拥有代码的答案在此落点</span>
-        </div>
-      </div>
-      <div class="divider">
-        <span class="dt">中间划界 · 文件写权限隔离</span>
-        自学工具只能写 MEMORY.md / USER.md 两本册子，碰不到 SOUL / HERMES.md 等你的显式指令文件。但要诚实标注：USER.md 内部，你手写的与它学来的<b style="color:var(--amber)">混在同一本、无来源标记</b>。
-      </div>
-      <div class="zone learn">
-        <div class="zt">下栏 · 它学你（它发起 / 它费心）</div>
-        <div class="spec">
-          <span class="sc">两本册子（MEMORY.md · USER.md）</span>
-          <span class="sc">技能自造</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <p class="lead" style="margin-top:14px">半秒看到的差别：<b>两家都修了两条路</b>，但划界的手法相反——<span class="cc">CC</span> 靠一条<b>规则</b>去重（明令不许重复存），<span class="hm">Hermes</span> 靠<b>文件写权限</b>隔离（自学工具够不着你的指令文件）。<span style="color:var(--faint);font-size:13px">（光谱里的词条悬停可见一句话解释。）</span></p>
-
-  <h3 style="font-size:18px;margin:34px 0 4px">「它学你」这条路，在四个时刻做功</h3>
-  <p class="lead">「它学你」不是玄妙的自我进化，而是在不同时间尺度上、趁你不在的时候做记忆家务。四个尺度从最细（边聊边记）到最粗（跨人共享），左蓝 <span class="cc">CC</span>、右紫 <span class="hm">Hermes</span> 并置。</p>
+  <h3 style="font-size:18px;margin:34px 0 4px">它学你：在四个时刻做功</h3>
+  <p class="lead">它自动学不是玄妙的自我进化，而是在不同时间尺度上、趁你不在的时候在后台维护记忆。四个尺度从最细（边聊边记）到最粗（跨人共享），左蓝 <span class="cc">CC</span>、右紫 <span class="hm">Hermes</span> 并置。</p>
 
   <div class="diagram">
     <div class="tscale">
@@ -360,10 +297,65 @@ assistant: [saves team feedback memory: integration tests must hit a real databa
 
   <h3 style="font-size:18px;margin:34px 0 4px">用户建模：单开一个子系统，还是揉进记忆？</h3>
   <p class="lead">这是「它学你」这条路上最大的真分野，别抹平。</p>
-  <p style="margin:0 0 4px"><span class="hm">Hermes</span> 把「你是谁」做成一等公民：<b>独立的用户档案</b>（USER.md，跟它记自己教训的册子分开、两套预算、系统提示里分两块渲染）＋开机就<b>主动提议建档</b>（你有史以来第一条消息就触发，还带一道「先问你同不同意」的门）＋每轮请求前由外接组件现取现注一份画像。</p>
+  <p style="margin:0 0 4px"><span class="hm">Hermes</span> 把「你是谁」做成一等公民：<b>独立的用户档案</b>（USER.md，跟它记自己教训的那份记忆文件分开、两套预算、系统提示里分两块渲染）＋开机就<b>主动提议建档</b>（你有史以来第一条消息就触发，还带一道「先问你同不同意」的门）＋每轮请求前由外接组件现取现注一份画像。<b style="color:var(--amber)">（但要诚实标注：USER.md 内部，你手写的偏好与它自学的混在同一本、无来源标记。）</b></p>
   <p style="margin:14px 0 0"><span class="cc">CC</span> 没有独立画像文件，也<b>从不主动访谈</b>你——它把「记你偏好」和「记你反馈」当成通用记忆的两类揉进四类记忆里，每一轮再用一个小模型从所有记忆标题里<b>挑不超过 5 条</b>注入当前对话。（你手动造技能的流程里它确会访谈你，但那是你触发、且为造技能，不是为了给你这个人建档。）</p>
 
-  <h2><span class="num">03</span>懂了，不等于就该无条件照办</h2>
+  <h2><span class="num">03</span>不止让它懂你——你还能直接改它，改多深？</h2>
+  <p class="lead">记忆让它<b>懂</b>你（被动理解你是谁）；但你也能反过来<b>主动规定</b>它——从写一句指令，到设权限、挂钩子，一路到改它的源码。这条线不为「懂」，为的是让它的行为直接<b>顺</b>你，正好接上开篇那个「顺」的期望。关键看两家让你能走<b>多深</b>——而这条光谱的尽头，就是本章反复要问的那句：<b>谁拥有代码</b>。</p>
+
+  <div class="channels">
+    <div class="chan cc-col">
+      <p class="ch-h"><span class="cc">Claude Code</span> · 止于官方插槽</p>
+      <div class="zone">
+        <div class="zt">一条「能改多深」的光谱（浅 → 深）</div>
+        <div class="spec">
+          <span class="sc" data-tip="自然语言指令文件，按优先级四层叠加：企业强制层 → 用户全局 → 项目 → 本地私有">CLAUDE.md 四层级</span>
+          <span class="arrow">→</span>
+          <span class="sc" data-tip="可切换的预置行为模式，替换或追加系统提示：如 Explanatory 边做边讲、Learning 让你手写练习">输出风格</span>
+          <span class="arrow">→</span>
+          <span class="sc" data-tip="在生命周期事件触发的确定性 shell 命令，让壳（而非模型）执行固定动作">钩子</span>
+          <span class="arrow">→</span>
+          <span class="sc" data-tip="工具授权规则；你选『总是允许』时规则落盘 settings 文件">权限规则</span>
+          <span class="arrow">→</span>
+          <span class="sc" data-tip="接入外部工具与数据源的官方扩展点；插件生态与换 provider 的细节属另一面，此处只作光谱最深端一例">接外部能力 MCP</span>
+        </div>
+      </div>
+      <div class="divider">
+        <span class="dt">落点 · 改不到源码</span>
+        这些都是官方替你凿好的口子——你能配置、扩展，但改不到它自己的源码。闭源托管，核心归厂商。
+      </div>
+    </div>
+
+    <div class="chan hm-col">
+      <p class="ch-h"><span class="hm">Hermes</span> · 尽头是源码</p>
+      <div class="zone">
+        <div class="zt">一条「能改多深」的光谱（浅 → 深）</div>
+        <div class="spec">
+          <span class="sc" data-tip="人格 / 身份槽，每条消息都重读，控制它的性格语气">SOUL.md</span>
+          <span class="arrow">→</span>
+          <span class="sc" data-tip="项目级指令，随 git 根目录加载">HERMES.md</span>
+          <span class="arrow">→</span>
+          <span class="sc" data-tip="被扫描注入的项目规则文件（仅顶层 / 兼容 Cursor）">AGENTS.md · .cursorrules</span>
+          <span class="arrow">→</span>
+          <span class="sc" data-tip="显式开关：审批模式、记忆写入闸、命令白名单…">config.yaml</span>
+          <span class="arrow">→</span>
+          <span class="sc" data-tip="开源自托管，全部代码都在你自己机器上">改源码</span>
+        </div>
+      </div>
+      <div class="divider">
+        <span class="dt">落点 · 能改源码</span>
+        同样一排配置口，尽头却多一层 CC 没有的：代码就在你机器上，不满意直接改。开源自托管，核心归你。
+      </div>
+    </div>
+  </div>
+  <p class="lead" style="margin-top:14px">半秒看到的差别：两家都给你一排从浅到深的配置口，<b>但光谱尽头不同</b>——<span class="cc">CC</span> 止于官方插槽（改不到源码），<span class="hm">Hermes</span> 一路通到源码。这就是「谁拥有代码」的落点。<span style="color:var(--faint);font-size:13px">（词条悬停可见一句话解释。）</span></p>
+
+  <div class="divider" style="margin-top:16px">
+    <span class="dt">配置层和记忆层怎么不打架</span>
+    你写的配置（上面这排）和它学的记忆是两个独立通道，两家都设了墙防串味：<span class="cc">CC</span> 用一条<b>规则</b>去重——CLAUDE.md 里已写死、代码能现读的，不许再存进记忆；<span class="hm">Hermes</span> 用<b>文件写权限</b>隔离——自学工具只能写记忆文件，碰不到 SOUL / HERMES.md 这些你的指令文件。
+  </div>
+
+  <h2><span class="num">04</span>懂了，不等于就该无条件照办</h2>
   <p class="lead">这是最容易被忽略、也最值得单拎的一点：一个会自己攒记忆的 agent，<b>不只越用越懂你，也会越用越固执</b>——把一次临时故障硬记成永久规则。所以两家都在「懂」和「顺」之间设了一道闸，正好呼应开篇那两个期望。姿态却相反。</p>
   <div class="compare">
     <div class="side cc">
@@ -382,7 +374,7 @@ assistant: [saves team feedback memory: integration tests must hit a real databa
 Imperative phrasing gets re-read as a directive in later sessions and can cause repeated work or override the user's current request.</div>
   <p style="margin:16px 0 0;color:var(--muted)">在 <span class="hm">Hermes</span> 那侧，这道闸还露在 UI 上：它学到一条就在聊天里提示「💾 Memory updated」（默认开），你随时可以用 /memory 审查、撤回它学的每一条——<b>学习不是黑箱</b>。<span class="cc">CC</span> 的对应物是记忆本身就是你机器上可读可删的明文文件。</p>
 
-  <h2><span class="num">04</span>逐维对照：同一个「懂你」，答案落在几处</h2>
+  <h2><span class="num">05</span>逐维对照：同一个「懂用户」，答案落在几处</h2>
   <p class="lead">横扫每一行，看两家在四个方面加三件事上各自落在哪。</p>
   <div class="matrix">
     <div class="mh"></div>
@@ -411,7 +403,7 @@ Imperative phrasing gets re-read as a directive in later sessions and can cause 
 
     <div class="dim">住哪 · 跟谁走</div>
     <div>你机器上的明文文件，但可经团队记忆同步<b>跨人共享</b>（组织维度）。</div>
-    <div>你的单机、单人、两本册子，不跨人。</div>
+    <div>你的单机、单人、两份记忆文件，不跨人。</div>
 
     <div class="dim">有没有闸</div>
     <div><b>预防式</b>：用前必核实、做梦删被推翻的旧事实。</div>
@@ -419,17 +411,17 @@ Imperative phrasing gets re-read as a directive in later sessions and can cause 
   </div>
 
   <div class="thesis">
-    <p style="margin:0 0 10px">同一个「懂用户」的诉求，两家给出的答案<b>形状不同</b>——差别最终落在一句话上：你的档案<b>住在哪、跟谁走</b>。</p>
-    <p style="margin:0"><span class="cc">CC</span>：一份透明的明文档案，且能<b>跨团队共享</b>——一人纠正、全队受益，「你」被放进组织的维度里理解；<span class="hm">Hermes</span>：住在你自己的单机、单人独享、是你机器上的两本册子。顺着这条线，两家的定位分野也就清楚了：<b>多租户生产力工具</b> vs <b>单人自托管陪伴</b>。</p>
+    <p style="margin:0 0 10px">这一章问了两件事——它怎么<b>懂</b>你（记忆与技能），你怎么<b>改</b>它（可定制）。两条线的答案指向同一处：你的记忆档案<b>住在哪、跟谁走</b>，你的配置<b>能改到多深、代码归谁</b>。</p>
+    <p style="margin:0"><span class="cc">CC</span>：一份透明的明文档案，能<b>跨团队共享</b>（一人纠正、全队受益，「你」被放进组织的维度里理解），配置止于官方插槽、源码归厂商；<span class="hm">Hermes</span>：住在你自己的单机、单人独享、是你机器上的两份记忆文件，连它的源码都在你手里。顺着这条线，两家的定位分野也就清楚了：<b>多租户生产力工具</b> vs <b>单人自托管陪伴</b>。</p>
   </div>
 
-  <h2><span class="num">05</span>悬而未决 · 防夸大红线</h2>
+  <h2><span class="num">06</span>悬而未决 · 防夸大红线</h2>
   <ul class="open">
     <li><b>[默认口径要锚定]</b> <span class="cc">CC</span>：auto-memory 默认开（opt-out）、skillImprovement 默认关、skillify 仅内部用户开放；<span class="hm">Hermes</span>：文中「默认开」一律指<b>出厂发行版</b>口径，裸库无配置键时兜底是关。</li>
     <li><b>[CC 夜间做梦非默认]</b> 夜间做梦 / KAIROS 助手日志是<b>特性门控·非默认</b>，是「另一形态」而非出厂常态，别当主线支柱。</li>
     <li><b>[边界维措辞]</b> 软边界进记忆，但只是被注入的建议性文本、<b>没有强制拦截力</b>——别写成「记忆能拦住它」。真正能阻断危险动作的是独立的权限 / 审批系统。</li>
     <li><b>[Hermes 不是防火墙]</b> USER.md 内部，你手写的与它自学的是<b>混同</b>的、无来源标记——别把「文件写权限隔离」夸成「Hermes 也有 CC 那种去重防火墙」。它的隔离是按「谁能写哪个文件」划界，不是「同层区分来源、显式压过学习」。</li>
-    <li><b>[不评优劣 · 时间切片]</b> 本篇讲「懂你」的<b>形态</b>，不评两条路孰优——取决于你要的是托管多租户产品，还是自托管的长期单人陪伴。切片：CC main / Hermes @daf4f1a7a。</li>
+    <li><b>[不评优劣 · 时间切片]</b> 本篇讲「懂用户」与「你改它」的<b>形态</b>，不评孰优——取决于你要的是托管多租户产品，还是自托管的长期单人陪伴。切片：CC main / Hermes @daf4f1a7a。</li>
   </ul>
 
   <nav style="max-width:1080px;margin:40px auto 0;padding:16px 28px;border-top:1px solid #2a3342;text-align:center;font-size:13px;color:#8b98a9">导读：<a href="04-outside-time-trigger.html">← 04 Loop 与时间</a> · <b>05 Loop 与用户</b> · <a href="06-outside-environment.html">06 Loop 与环境 →</a></nav>
