@@ -1,0 +1,262 @@
+{
+  "meta": {
+    "source": "Hermes Agent current source (read-only)",
+    "repo_path": "/Users/bink/.hermes/hermes-agent",
+    "HEAD": "8e734810d",
+    "head_date": "2026-07-08",
+    "slice_date": "2026-07-08",
+    "note": "旧版 1fc7bdc5e 的 research-hermes.json 已作废，本文件全部以 8e734810d 为准并覆盖之。相对旧版最大变化：(1) delegate_task 现在**默认后台/异步**执行(不再严格同步阻塞)；(2) 新增 tools/async_delegation.py 后台委派登记表。这两点直接推翻旧结论「Hermes 无异步/后台委派」。"
+  },
+
+  "A_mechanisms": [
+    {
+      "id": "A1-delegate_task",
+      "finding": "delegate_task：父 agent 派生一个或多个子 agent 在隔离上下文里干活。每子有独立会话、独立终端会话(独立工作目录+状态)、独立 toolset。只有最终 summary 回父上下文，子的中间 tool 结果永不进入父窗口。两模式：单任务(goal) / 批量并行(tasks 数组)。",
+      "verbatim": "Spawn one or more subagents to work on tasks in isolated contexts. Each subagent gets its own conversation, terminal session, and toolset. Only the final summary is returned -- intermediate tool results never enter your context window.",
+      "file_line": "tools/delegate_tool.py:3211-3214(desc); 模块 docstring :3-16",
+      "default_state": "default-on：delegate_task 在 CLI 核心默认工具集 _HERMES_CORE_TOOLS 内(toolsets.py:65)，模型默认就有此工具。",
+      "shares_context": "fresh 零共享。模块 docstring 明写子有 'A fresh conversation (no parent history)'(:10)。**代码中没有 CC 那种「继承父上下文的 fork」对应物**——delegate 一律 fresh + 靠 context 字段人工搬运。(唯一的 fork 是 background_review 记忆/技能复盘，与用户多智能体协作无关。)"
+    },
+    {
+      "id": "A1-async_delegation",
+      "finding": "async_delegation(新增·tools/async_delegation.py)：后台(daemon 线程池)委派登记表。父派发后立即拿 handle 返回，用户与模型继续干活；子完成时把 completion 事件推到共享 process_registry.completion_queue(type='async_delegation')，CLI process_loop 与 gateway watcher 在 agent idle 时排空队列、把每个事件锻造成一个全新 user/internal 回合。刻意复用既有队列(自带去重/崩溃恢复/排空线)而不侵入运行中的 agent loop——保证严格消息角色交替与 prompt cache 不被破坏。",
+      "verbatim": "the parent agent dispatches a subagent that runs on a module-level daemon executor and returns a handle immediately, so the user and the model can keep working while the child runs. ... completions surface as a NEW turn when the agent is idle, never spliced between a tool result and an assistant message.",
+      "file_line": "tools/async_delegation.py:1-35, 124-247, 322-438(batch)",
+      "default_state": "顶层模型发起的 delegate_task **默认走后台**：run_agent.py:5664-5684 硬编码 background=(not _is_subagent)；schema 里的 background 参数已废弃/被忽略(delegate_tool.py:3405-3415)。唯一例外：orchestrator 子 agent(depth>0)的委派仍同步。",
+      "shares_context": "同 delegate：子 fresh 无父历史。回流事件携带 RICH self-contained task-source block(原始 goal / 父给的 context / toolsets / model / dispatch 时间 / status / 完整 result summary)，因为父回流时可能已深陷无关上下文、不记得为何有此子。(async_delegation.py:24-29)"
+    },
+    {
+      "id": "A1-orchestrator-nesting",
+      "finding": "嵌套 orchestrator：给子传 role='orchestrator' 让它保留 delegate_task、自己再派 worker(嵌套编排)。role='leaf'(默认)是纯 worker、不能再委派。orchestrator 需自己综合 worker 结果再回报父(它负责最终 summary，不是它的 worker)。",
+      "verbatim": "'leaf' (default) = focused worker, cannot delegate further. 'orchestrator' = can use delegate_task to spawn its own workers.  ...  Coordinate your workers' results and synthesize them before reporting back to your parent. You are responsible for the final summary, not your workers.",
+      "file_line": "tools/delegate_tool.py:3313-3317; orchestrator 子 prompt 块 705-735; depth 守卫 1084-1086",
+      "default_state": "**默认 OFF/扁平**：MAX_DEPTH=1(delegate_tool.py:125)——父(0)→子(1)、孙被拒。需显式把 delegation.max_spawn_depth 抬到 2+ 才解锁嵌套；另有全局 kill switch delegation.orchestrator_enabled(默认 True, :514)。工具描述会动态告诉模型当前是否开启。",
+      "shares_context": "fresh，同 delegate"
+    },
+    {
+      "id": "A1-kanban",
+      "finding": "Kanban：持久化任务看板(SQLite kanban.db)，把工作拆成 ticket，多 agent 通过原子认领(claim)+依赖图协作。含 decompose(拆 spec→task 图)、specify、diagnostics 子模块。DB 层全在 kanban_db，CLI 层 `hermes kanban …`。",
+      "verbatim": "CLI for the Hermes Kanban board — `hermes kanban …` subcommand.",
+      "file_line": "hermes_cli/kanban.py:1-13; kanban_db.py; kanban_decompose.py:1-15",
+      "default_state": "**需显式进入的重路径**：kanban 工具集经 check_fn 门控——仅当 env HERMES_KANBAN_TASK 已设(dispatcher 派生的 worker)或当前 profile 显式开启 kanban 工具集时才进 schema(toolsets.py:70-77; tools/kanban_tools.py:68-77)。看板 dispatcher 循环在 gateway 里默认开(kanban.dispatch_in_gateway=True, config.py:2687-2692)，但**无 kanban 任务时它什么都不做**——是否有任务/启用工具集才是那道显式门。",
+      "shares_context": "非 fresh 继承：worker 靠共享 DB 看板 + 黑板注释交接(见 F)。每个 worker 是 dispatcher fork 出的**独立 OS 进程**(`hermes -p <assignee> chat -q …`, config.py:2683)，非父上下文继承。"
+    },
+    {
+      "id": "A1-swarm",
+      "finding": "Kanban Swarm v1：在 Kanban 内核之上写一张固定拓扑任务图的薄封装(不引入第二个调度器)。拓扑：planning root(立即 done、充当共享黑板+审计锚) → 一批并行 specialist worker(ready) → verifier(等所有 worker 完成) → synthesizer(等 verifier 完成)。",
+      "verbatim": "planning root (completed immediately) / ├─ parallel specialist workers (ready) / └─ verifier (todo until all workers done) / └─ synthesizer (todo until verifier done). The shared blackboard is also deliberately low-tech: structured JSON comments on the root task.",
+      "file_line": "hermes_cli/kanban_swarm.py:1-15, 77-185",
+      "default_state": "需显式进入(建 swarm 图 = 主动动作，走 kanban 重路径)。",
+      "shares_context": "共享 kanban.db + root 任务上的黑板注释；worker 各自独立进程。"
+    },
+    {
+      "id": "A1-profiles-roster",
+      "finding": "Profiles：花名册/角色的载体。每个 profile 是一个**完全独立的 HERMES_HOME 目录**(自带 config.yaml、.env、memory、sessions、skills、gateway、cron、logs)。default profile 就是 ~/.hermes 本体。Kanban/Swarm 用 profile 名作 assignee——把 ticket 派给某个 profile，dispatcher 就以那个 profile 起独立进程去做。所以 Hermes 的「多角色」= 多个隔离实例，而非一个进程内的多人格。",
+      "verbatim": "Profile management for multiple isolated Hermes instances. Each profile is a fully independent HERMES_HOME directory with its own config.yaml, .env, memory, sessions, skills, gateway, cron, and logs.",
+      "file_line": "hermes_cli/profiles.py:1-9; decompose 读花名册 kanban_decompose.py:5-11, 22-27",
+      "default_state": "default profile 恒在(=~/.hermes)；额外 profile 需 `hermes profile create` 显式建。",
+      "shares_context": "各 profile 完全隔离(独立 home)；只在 kanban.db 层面共享任务图。"
+    },
+    {
+      "id": "A1-moa",
+      "finding": "Mixture-of-Agents(MoA)：单回合内的多模型集成——多个 reference 模型各自生成答案，一个 aggregator 模型再综合成最终答案。这是「多模型」而非「多 agent 带工具跑任务」；通过 run_conversation 的 moa_config 参数注入。默认 reference=gpt-5.5/deepseek-v4-pro，aggregator=claude-opus-4.8。",
+      "verbatim": "Mixture-of-Agents configuration and slash-command helpers.  DEFAULT_MOA_REFERENCE_MODELS ... DEFAULT_MOA_AGGREGATOR = {provider: openrouter, model: anthropic/claude-opus-4.8}",
+      "file_line": "hermes_cli/moa_config.py:1-21; run_agent.py:5754,5767(moa_config 透传)",
+      "default_state": "默认关：需用户配置/切到某个 MoA preset(经 moa_cmd/slash 命令)才激活；平时 run_conversation 的 moa_config=None。preset 自身有 enabled 字段(默认 True 但要先被选中)。",
+      "shares_context": "N/A(同一回合、同一上下文，多模型并列生成再聚合)。"
+    },
+    {
+      "id": "A1-batch_runner",
+      "finding": "batch_runner.py：**离线数据集批处理/轨迹生成器**(eval/训练数据用)，用 multiprocessing 把 agent 跑在一个 dataset 的多个 prompt 上，带 checkpoint 断点续跑、轨迹保存(from/value 对)、工具使用统计。**不是运行态的多 agent 协作机制**——各 prompt 相互独立、无交接。",
+      "verbatim": "This module provides parallel batch processing capabilities for running the agent across multiple prompts from a dataset.",
+      "file_line": "batch_runner.py:1-22",
+      "default_state": "独立 CLI 脚本，与交互式 agent 无关；不在模型工具面。",
+      "shares_context": "各 prompt 独立、零共享。"
+    }
+  ],
+
+  "B_trigger_timing": [
+    {
+      "id": "B1-when-to-use",
+      "finding": "delegate_task 的 WHEN TO USE 全文",
+      "verbatim": "WHEN TO USE delegate_task:\n- Reasoning-heavy subtasks (debugging, code review, research synthesis)\n- Tasks that would flood your context with intermediate data\n- Parallel independent workstreams (research A and B simultaneously)",
+      "file_line": "tools/delegate_tool.py:3226-3229",
+      "intent_or_guardrail": "intent(产品意图：省父上下文 + 并行独立工作流 + 隔离重推理)"
+    },
+    {
+      "id": "B1-when-not-to-use",
+      "finding": "delegate_task 的 WHEN NOT TO USE 全文",
+      "verbatim": "WHEN NOT TO USE (use these instead):\n- Mechanical multi-step work with no reasoning needed -> use execute_code\n- Single tool call -> just call the tool directly\n- Tasks needing user interaction -> subagents cannot use clarify\n- Durable long-running work that must outlive the current turn -> use cronjob (action='create') or terminal(background=True, notify_on_complete=True) instead. Background delegations are NOT durable: if the parent session is closed (/new) or the process exits before a subagent finishes, that subagent's work is discarded, and /stop cancels every running background subagent.",
+      "file_line": "tools/delegate_tool.py:3230-3239",
+      "intent_or_guardrail": "guardrail(防滥用/防误用：机械活别派、单调用别派、要交互别派、要持久活改用 cron/后台终端；并点明后台委派不持久)"
+    },
+    {
+      "id": "B2-both-modes-background",
+      "finding": "两模式都后台跑、别等别 poll 的分级择时",
+      "verbatim": "BOTH MODES RUN IN THE BACKGROUND. delegate_task returns immediately — you and the user keep working, and each subagent's full result re-enters the conversation as its own new message when it finishes. A batch is just N independent background subagents (N handles, each completes on its own). Do NOT wait or poll; just continue with other work after dispatching.",
+      "file_line": "tools/delegate_tool.py:3220-3225",
+      "intent_or_guardrail": "intent(异步是默认交互契约：不阻塞、结果自己回流)"
+    },
+    {
+      "id": "B2-async-capacity-fallback",
+      "finding": "后台并发满时的择时：拒绝(不排队)，让 caller 退回同步或告知用户；提示可调 config",
+      "verbatim": "Async delegation capacity reached ({max_async_children} running). Wait for one to finish (its result will re-enter the chat), or run this task synchronously (background=false). Raise delegation.max_concurrent_children in config.yaml to allow more concurrent background subagents.",
+      "file_line": "tools/async_delegation.py:199-206",
+      "intent_or_guardrail": "guardrail(封顶防 runaway 模型堆积无界后台活；满则拒绝而非排队)"
+    },
+    {
+      "id": "B2-orchestrator-when-to-delegate",
+      "finding": "orchestrator 子 agent 的分级择时(何时再往下拆)",
+      "verbatim": "WHEN to delegate:\n- The goal decomposes into 2+ independent subtasks that can run in parallel (e.g. research A and B simultaneously).\n- A subtask is reasoning-heavy and would flood your context with intermediate data.\n\nWHEN NOT to delegate:\n- Single-step mechanical work — do it directly.\n- Trivial tasks you can execute in one or two tool calls.\n- Re-delegating your entire assigned goal to one worker (that's just pass-through with no value added).",
+      "file_line": "tools/delegate_tool.py:720-729",
+      "intent_or_guardrail": "混合：intent(2+ 独立子任务并行/隔离重推理) + guardrail(别把整个 goal 原样转派、别派琐碎活)"
+    },
+    {
+      "id": "B3-swarm-protocol",
+      "finding": "swarm worker 的协作时机/协议(注入进每个 worker body)",
+      "verbatim": "## Swarm protocol\n- Swarm root / shared blackboard: `{root_id}`.\n- Read sibling/parent handoffs from Kanban context before working.\n- Put machine-readable facts in completion metadata.\n- Put cross-worker notes on the root task using structured comments.\n- Goal: {goal}",
+      "file_line": "hermes_cli/kanban_swarm.py:66-74",
+      "intent_or_guardrail": "intent(协作协议：先读交接、机器可读事实进 completion metadata、跨 worker 笔记进 root 黑板)"
+    }
+  ],
+
+  "C_problem_definition": [
+    {
+      "id": "C1-single-agent-limits",
+      "finding": "自认的 single-agent 局限(为什么委派)：中间数据会淹没父上下文；重推理子任务；多条独立工作流可并行。isolated context 就是核心卖点——子的中间 tool 结果永不进父窗口。",
+      "verbatim": "Only the final summary is returned -- intermediate tool results never enter your context window. ... Tasks that would flood your context with intermediate data ... Parallel independent workstreams (research A and B simultaneously)",
+      "file_line": "tools/delegate_tool.py:3213-3229"
+    },
+    {
+      "id": "C2-when-single-agent-enough",
+      "finding": "何时不该拆、单 agent 就够：机械多步活→execute_code；单个 tool 调用→直接调；orchestrator 层还多一条『别把整个 goal 原样转派一个 worker(纯 pass-through 无增值)』。",
+      "verbatim": "Mechanical multi-step work with no reasoning needed -> use execute_code / Single tool call -> just call the tool directly ... Re-delegating your entire assigned goal to one worker (that's just pass-through with no value added).",
+      "file_line": "tools/delegate_tool.py:3231-3232, 728-729"
+    }
+  ],
+
+  "D_trust_and_cost": [
+    {
+      "id": "D1-self-report-verify",
+      "finding": "分身 summary 是**自报**、非核实事实；对有外部副作用的操作，父必须要求子返回可验证 handle(URL/ID/绝对路径/HTTP 状态)并**亲自复核**(fetch/stat/读回)后才能告诉用户成功。",
+      "verbatim": "Subagent summaries are SELF-REPORTS, not verified facts. A subagent that claims \"uploaded successfully\" or \"file written\" may be wrong. For operations with external side-effects (HTTP POST/PUT, remote writes, file creation at shared paths, publishing), require the subagent to return a verifiable handle (URL, ID, absolute path, HTTP status) and verify it yourself — fetch the URL, stat the file, read back the content — before telling the user the operation succeeded.",
+      "file_line": "tools/delegate_tool.py:3248-3254"
+    },
+    {
+      "id": "D2-clarify-blocked",
+      "finding": "分身**不能找用户确认**：clarify 被硬性 block(连同 delegate_task/memory/send_message/execute_code/cronjob)。leaf 与 orchestrator 都不能 clarify。工具描述与 blocklist 两处一致。",
+      "verbatim": "DELEGATE_BLOCKED_TOOLS = [ 'delegate_task', 'clarify'(no user interaction), 'memory'(no writes to shared MEMORY.md), 'send_message'(no cross-platform side effects), 'execute_code', 'cronjob' ]  ...  Tasks needing user interaction -> subagents cannot use clarify",
+      "file_line": "tools/delegate_tool.py:45-54, 3233, 3255-3259"
+    },
+    {
+      "id": "D3-cost-budgets",
+      "finding": "成本痕迹一览：(1) 并发上限 max_concurrent_children 默认 3(delegate_tool.py:118)，>10 记一次性警告『每子独立烧 token、高值线性乘成本』；后台并发同一把尺(旧 max_async_children 已废弃合并)。(2) 后台并发满则拒绝(不排队)。(3) 子迭代预算 max_iterations 默认 50(delegate_tool.py:1178-1181)、每子独立。(4) child_timeout_seconds 默认 None=无墙钟超时(:431-441)——刻意取消旧版一刀切超时，改用心跳 staleness 监控兜卡死；opt-in 时下限 30s。(5) 嵌套深度 max_spawn_depth 默认 1(扁平)。(6) 按父『剩余上下文』裁剪 summary：动态预算=剩余 headroom×0.5÷批量大小，与静态 max_summary_chars(默认 24000)取 min，超限截断+溢出全文落盘留指针，最小保底 2000 字符。",
+      "verbatim": "each child consumes API tokens independently. High values multiply cost linearly. ... Each subagent gets its own iteration budget capped at max_iterations (configurable via delegation.max_iterations, default 50). ... Default: None (no timeout).",
+      "file_line": "delegate_tool.py:118,125,368-376,431-464,1178-1181,590-598,1625-1716; async_delegation.py:72,196-206"
+    },
+    {
+      "id": "D4-isolation",
+      "finding": "隔离分三档：(a) delegate_task 子=父进程内 ThreadPoolExecutor 线程，但每子拿**独立 task_id→独立终端会话(独立工作目录+state)**、独立 file-ops cache、受限 toolset；危险命令在子线程默认 auto-deny(delegation.subagent_auto_approve=true 才 YOLO auto-approve)。(b) kanban/swarm 每个 worker=dispatcher 起的**独立 OS 进程**(`hermes -p <assignee> chat`)，按 profile 完全隔离(独立 HERMES_HOME)——最强隔离。(c) 子默认继承父 toolset 与 MCP(inherit_mcp_toolsets 默认 True)。无『默认各自沙箱容器』——共享宿主文件系统。",
+      "verbatim": "Each child gets: - Its own task_id (own terminal session, file ops cache) ...  Each subagent gets its own terminal session (separate working directory and state).  false (default) → _subagent_auto_deny (safe); true → _subagent_auto_approve (opt-in YOLO)",
+      "file_line": "delegate_tool.py:9-13,68-73,3264; config dispatcher config.py:2683; profiles.py:1-6"
+    }
+  ],
+
+  "F_results_flow": [
+    {
+      "id": "F1-return-form",
+      "finding": "回流形式：(同步/orchestrator 路径)结果永远是数组、每任务一条 {status, summary, api_calls, duration_seconds, ...}；(默认后台路径)每子完成后其**完整 result 作为一条全新会话消息**在 agent idle 时重进对话，批量则父占一个 async slot、整批完成后合成一条多任务消息回流。",
+      "verbatim": "each subagent's full result re-enters the conversation as its own new message when it finishes. ... Results are always returned as an array, one entry per task. ... a SINGLE completion event is pushed ... carrying the full per-task results list, so the consolidated summaries re-enter the conversation as one message once every child is done.",
+      "file_line": "delegate_tool.py:3220-3225,3265; async_delegation.py:336-353,467-488"
+    },
+    {
+      "id": "F2-who-merges",
+      "finding": "谁合并：(delegate)父自己综合回流的 summary(s)；(嵌套)orchestrator 负责综合其 worker 结果再回报，『你负责最终 summary，不是你的 worker』；(swarm)专设 verifier 卡(gate: pass/block)+ synthesizer 卡两个独立角色，verifier 审所有 worker 交接+黑板、够格才放行，synthesizer 综合产出。",
+      "verbatim": "Coordinate your workers' results and synthesize them before reporting back to your parent. You are responsible for the final summary, not your workers. ... verifier ... Gate the swarm: complete only with metadata {\"gate\": \"pass\"} ... synthesizer (todo until verifier done)",
+      "file_line": "delegate_tool.py:730-732; kanban_swarm.py:8-9,175-185"
+    },
+    {
+      "id": "F3-where-results-land",
+      "finding": "成果落点：(delegate)父上下文(summary)+ 超限溢出全文落盘留指针；(kanban/swarm)共享 kanban.db——机器可读事实进 task completion metadata、跨 worker 笔记进 root 任务的结构化『黑板』注释([swarm:blackboard] 前缀)，全部是既有 task_comments/task_events 行(不新增服务)。",
+      "verbatim": "Put machine-readable facts in completion metadata. Put cross-worker notes on the root task using structured comments. ... structured JSON comments on the root task. That keeps all state in existing task_comments/task_events rows.",
+      "file_line": "kanban_swarm.py:11-13,26,66-74; delegate_tool.py:1672-1709"
+    },
+    {
+      "id": "F4-cross-subagent-input",
+      "finding": "一分身成果作另一分身输入 / 依赖交接：delegate 批量是 N 个相互独立子(无横向交接)；跨子交接靠 **kanban 依赖图**——todo 任务待依赖满足才 promote 到 ready，dispatcher 提升依赖满足的 todo、原子认领防抢；swarm 用固定依赖链(workers→verifier→synthesizer)+ root 黑板做上下游交接，worker『先读兄弟/父的交接再干活』。",
+      "verbatim": "promotes dependency-satisfied todos to ready ... the verifier waits for every worker, and the synthesizer waits for the verifier. ... Read sibling/parent handoffs from Kanban context before working.",
+      "file_line": "config.py:2682-2683; kanban_swarm.py:70,96-98; kanban_decompose.py(依赖链接)"
+    },
+    {
+      "id": "F5-visibility",
+      "finding": "可见性(TUI /agents 面板)：JSON-RPC delegation.status 返回当前活跃子树 snapshot(subagent_id/parent_id/depth/goal/model/started_at/tool_count/status)+paused+两个 limit，喂 TUI 的 /agents overlay(ui-tui agentsOverlay)；delegation.pause 全局暂停新 spawn(活跃子照跑)；subagent.interrupt 打断单个子(软停在下个迭代边界、递归到孙、非硬杀线程)；子的 subagent.* 事件(start/tool/thinking/text/complete)实时镜像给旁观窗口，overlay『Output』区拉子最近 N 条 tool 结果(cc-swarm-parity)；状态栏 ⛓ 指示器显示后台/async 子实时计数(async_delegation.active_count)。",
+      "verbatim": "Powers the TUI's /agents overlay (see ui-tui/src/components/agentsOverlay). ... Request that a single running subagent stop at its next iteration boundary. Does not hard-kill the worker thread; sets the child's interrupt flag which propagates to in-flight tools and recurses into grandchildren. ... Globally block/unblock new delegate_task spawns. Active children keep running.",
+      "file_line": "delegate_tool.py:152-215; tui_gateway/server.py:8145-8188, 3234-3239"
+    },
+    {
+      "id": "F6-persistence",
+      "finding": "持久化对比：delegate/async 委派**不持久**——父 session /new 关闭或进程退出则未完成子的活丢弃、/stop 取消所有后台子(见 B1);但 TUI 在 turn-complete 把最终 spawn-tree snapshot 写盘($HERMES_HOME/spawn-trees/<session_id>/<ts>.json)供 /replay。kanban.db 则是**持久沉淀**——任务/评论/事件/黑板长存 SQLite，dispatcher 重启也在、可续跑。",
+      "verbatim": "Background delegations are NOT durable: if the parent session is closed (/new) or the process exits before a subagent finishes, that subagent's work is discarded ... On turn-complete it posts the final tree here; /replay and /replay-diff fetch past snapshots.",
+      "file_line": "delegate_tool.py:3234-3239; tui_gateway/server.py:8190-8213; kanban_db.py(持久 DB)"
+    }
+  ],
+
+  "G_to_verify": [
+    {
+      "id": "G1-acp-external-interop",
+      "finding": "ACP(Agent Client Protocol)：存在，但方向是**出向传输**——Hermes 可让子/父经 ACP 驱动 Copilot 等外部 agent 作后端(CopilotACPClient)。由 delegation.acp_command/acp_args 配置注入，且这两字段对模型隐藏(_MODEL_HIDDEN_TASK_FIELDS 剥离，:3443-3462)。override_provider 与 ACP 互斥保护(:1238-1250)。**不是**一个让任意外来 agent 入向接管/挂载的花名册；更像『把某外部 ACP agent 当子后端调用』。",
+      "verbatim": "External consumers (gateway SSE, ACP adapter, ...). ... If explicitly forcing an ACP transport override, the provider MUST be copilot-acp so run_agent.py initializes the CopilotACPClient.",
+      "file_line": "tools/delegate_tool.py:629,790,1058-1060,1216-1250,3443-3462",
+      "status": "存在但为出向 provider 传输、config 驱动、对模型隐藏——非通用入向 agent 互通花名册"
+    },
+    {
+      "id": "G2-kanban-explicit-entry",
+      "finding": "kanban/swarm 是否需显式进入：是。工具集 check_fn 门控(env HERMES_KANBAN_TASK 或 profile 显式启用)；dispatcher 循环虽在 gateway 里默认开(dispatch_in_gateway=True)、auto_decompose 默认 True，但都只在**已存在 kanban 任务**时才动作——建任务/启用工具集/跑 `hermes kanban` 才是那道显式门。delegate_task 才是默认常态工具。",
+      "verbatim": "Kanban multi-agent coordination — only in schema when the agent is spawned as a kanban worker (HERMES_KANBAN_TASK env set) or the current profile explicitly enables the kanban toolset. ... dispatch_in_gateway: True (On by default — the cost is ~300µs every dispatch_interval_seconds when idle)",
+      "file_line": "toolsets.py:70-77; tools/kanban_tools.py:68-77; config.py:2686-2728",
+      "status": "闭环可用但需显式进入(重路径)；派发默认在 gateway 开但无任务即空转"
+    },
+    {
+      "id": "G3-observe-pause-interrupt-ui",
+      "finding": "旁观/暂停/打断单分身靠什么界面：TUI /agents overlay(前端 ui-tui/src/components/agentsOverlay)+ 三个 gateway JSON-RPC(delegation.status 旁观、delegation.pause 暂停新 spawn、subagent.interrupt 打断单个)。子事件实时镜像到 spectator 窗口；状态栏 ⛓ 显示后台子计数。",
+      "verbatim": "Powers the TUI's /agents overlay (see ui-tui/src/components/agentsOverlay). The registry lives in tools/delegate_tool — these handlers are thin translators between JSON-RPC and the Python API.",
+      "file_line": "tui_gateway/server.py:8145-8188, 166, 3696-3841(subagent.* 镜像)",
+      "status": "闭环可用(观察=delegation.status/事件镜像；暂停=delegation.pause;打断单个=subagent.interrupt)"
+    }
+  ],
+
+  "H_async_delegation_deep": [
+    {
+      "id": "H1-what",
+      "finding": "是什么：后台委派登记表。模块级 daemon 线程池跑子，父派发即拿 handle 返回；子完成时把 completion 事件推共享 completion_queue，CLI/gateway 在 idle 时排空、锻造成新回合。刻意复用既有队列不侵入运行中 loop，保证角色交替合法+prompt cache 不坏(硬不变量：绝不改动过去上下文)。",
+      "verbatim": "Backs delegate_task(background=true): the parent agent dispatches a subagent that runs on a module-level daemon executor and returns a handle immediately ... We deliberately reuse that rail rather than reaching into a running agent loop ... hard invariant: never mutate past context.",
+      "file_line": "tools/async_delegation.py:1-35"
+    },
+    {
+      "id": "H2-when",
+      "finding": "何时用：现在是**顶层模型 delegate_task 的默认路径**(不再是 opt-in)。模型不选、不能选——run_agent 硬编码 background=(not _is_subagent)。工具描述直接教模型『两模式都后台跑、别等别 poll、继续干别的活』。",
+      "verbatim": "BOTH MODES RUN IN THE BACKGROUND. delegate_task returns immediately ... Do NOT wait or poll; just continue with other work after dispatching.  (background 参数) DEPRECATED / IGNORED. Single-task delegations always run in the background automatically — you do not need to (and cannot) opt in or out.",
+      "file_line": "tools/delegate_tool.py:3220-3225,3405-3415; run_agent.py:5664-5684",
+      "intent_or_guardrail": "intent(默认非阻塞交互模型)"
+    },
+    {
+      "id": "H3-default-state",
+      "finding": "默认状态：顶层委派默认 background=true；唯一同步例外=orchestrator 子(depth>0)的委派(它需在自己回合内拿到 worker 结果综合，且子不拥有 async 结果要路由回去的 gateway session)。后台并发默认 3(与同步批量共用 max_concurrent_children)。",
+      "verbatim": "The one exception: A delegation from an ORCHESTRATOR SUBAGENT (depth > 0) stays synchronous: the orchestrator needs its workers' results within its own turn to compose a summary, and a subagent doesn't own the gateway session the async result would route back to.",
+      "file_line": "run_agent.py:5669-5674; async_delegation.py:72,196-206",
+      "default_state": "default-on(顶层)；orchestrator 子委派同步"
+    },
+    {
+      "id": "H4-vs-sync",
+      "finding": "和同步 delegate 的区别：同步路径 _run_all_children 会 join 到所有子完成、结果在同一 tool-call 内返回(模块 docstring『The parent blocks until all children complete』——这是 Python 直接调用/orchestrator 子路径的语义)。异步路径立即返回 handle、子在 daemon 线程跑、完成后事件回流成新回合；满则拒绝不排队；session 结束/‌/stop 会 interrupt 该 session 的在飞后台子(interrupt_for_session/interrupt_all)。",
+      "verbatim": "The parent blocks until all children complete. (sync docstring)  vs  runs on a module-level daemon executor and returns a handle immediately (async)",
+      "file_line": "delegate_tool.py:7(docstring); async_delegation.py:124-247,511-592"
+    },
+    {
+      "id": "H5-flow-back",
+      "finding": "成果怎么回流：子完成→_finalize 把 record 标记完成→_push_completion_event 推 type='async_delegation' 事件到 process_registry.completion_queue，携带 self-contained 块(goal/context/toolsets/role/model/status/summary/error/api_calls/duration/dispatch+complete 时间)；CLI process_loop 与 gateway watcher idle 时排空、锻造成新 user/internal 回合注入对话。批量则整批一个 slot、一条合并事件带全部 per-task results。回流失败会响亮记 log(结果丢失风险)。",
+      "verbatim": "When the child finishes, a completion event is pushed onto the SHARED process_registry.completion_queue with type=\"async_delegation\". The CLI (cli.py process_loop) and gateway ... poll that queue while the agent is idle and forge a fresh user/internal turn from each event.",
+      "file_line": "tools/async_delegation.py:9-14,249-319,441-496"
+    }
+  ]
+}

@@ -1,0 +1,360 @@
+{
+  "meta": {
+    "dimension": "Loop 与其他 agent（多智能体协作）",
+    "source_repo": "/Users/bink/cc_project/claude-code-main",
+    "source_type": "真实 TypeScript 源码树（非 git 仓库，无 .git，无版本哈希）",
+    "collected_by": "code-facts-researcher (CH-A2R-03)",
+    "supersedes": "本文件此前是二进制 strings 提取版；现已用真实源码 file:line 全量重采覆盖",
+    "notes": "feature('X') 是 bun:bundle 编译期常量（compile-time flag）；getFeatureValue_CACHED_MAY_BE_STALE('tengu_*') 是 GrowthBook 运行时灰度；process.env.CLAUDE_CODE_* 是环境变量门控；process.env.USER_TYPE==='ant' 表示 Anthropic 内部构建。"
+  },
+
+  "A_mechanism_inventory": [
+    {
+      "id": "A1-subagent",
+      "finding": "subagent（Agent 工具，指定 subagent_type）：主 agent 通过 Agent 工具启动一个专门化子进程 agent 自主完成复杂多步任务；每种 agent 类型有各自工具集。",
+      "file_line": "src/tools/AgentTool/prompt.ts:202-212, src/tools/AgentTool/AgentTool.tsx:90-100",
+      "default_state": "default-on（Agent 工具本体常驻）。内置 agent 集受门控：general-purpose+statusline 恒在；Explore/Plan 由 feature('BUILTIN_EXPLORE_PLAN_AGENTS') && GrowthBook 'tengu_amber_stoat'(默认 true) 决定；verification 由 feature('VERIFICATION_AGENT') && 'tengu_hive_evidence'(默认 false) 决定；Code Guide 仅非 SDK 入口。",
+      "shares_context": "零共享（fresh，zero context）",
+      "file_line_default": "src/tools/AgentTool/builtInAgents.ts:13-72"
+    },
+    {
+      "id": "A1-fork",
+      "finding": "fork（Agent 工具，省略 subagent_type）：隐式 fork，子体继承父的完整对话上下文 + 系统提示词，后台运行，其工具输出不进入父上下文。与 subagent 是两个不同机制。",
+      "file_line": "src/tools/AgentTool/forkSubagent.ts:18-71, src/tools/AgentTool/prompt.ts:208-212",
+      "default_state": "特性门控 feature('FORK_SUBAGENT')（编译期）；且与 coordinator 互斥、非交互 session 禁用。启用后 subagent_type 变可选、省略即触发 fork、所有 spawn 走后台、并解锁 /fork 斜杠命令。",
+      "shares_context": "继承父完整上下文（inherits full conversation context + system prompt bytes，byte-exact 复用父 prompt cache）",
+      "file_line_default": "src/tools/AgentTool/forkSubagent.ts:32-39, 55-71"
+    },
+    {
+      "id": "A1-parallel-fanout",
+      "finding": "并行 fan-out：单条消息里放多个 Agent 工具调用即并行启动多个 agent；fork 亦可在一条消息里并行多个。",
+      "file_line": "src/tools/AgentTool/prompt.ts:246-249, 271, 86, src/coordinator/coordinatorMode.ts:210-213",
+      "default_state": "default-on（能力恒在；prompt 中的鼓励语按 subscription/模式条件出现）",
+      "shares_context": "取决于每个成员是 subagent（零共享）还是 fork（继承）"
+    },
+    {
+      "id": "A1-background-agent",
+      "finding": "后台 agent：run_in_background=true 让 agent 异步跑，完成时自动通知父，父不必 sleep/poll。fork 模式下所有 spawn 强制后台。",
+      "file_line": "src/tools/AgentTool/prompt.ts:262-264, src/tools/AgentTool/forkSubagent.ts:26-27",
+      "default_state": "default-on（run_in_background 参数常在），但被 CLAUDE_CODE_DISABLE_BACKGROUND_TASKS 关掉、in-process teammate 场景不可用、fork 模式下该 prompt 段落隐藏（因 fork 恒后台）",
+      "shares_context": "同 subagent（零共享）"
+    },
+    {
+      "id": "A1-coordinator",
+      "finding": "coordinator 模式：主 agent 变纯编排者（coordinator），只通过 worker（subagent_type='worker'）做研究/实现/验证，自己负责 synthesis 与对用户沟通；有专属系统提示词。",
+      "file_line": "src/coordinator/coordinatorMode.ts:36-41, 111-368",
+      "default_state": "特性门控 feature('COORDINATOR_MODE') && env CLAUDE_CODE_COORDINATOR_MODE 真值（双重门控，默认关）。与 fork 互斥。",
+      "shares_context": "worker 零共享（coordinator 反复强调 workers can't see your conversation，必须自包含 prompt）",
+      "file_line_default": "src/coordinator/coordinatorMode.ts:36-41, src/tools/AgentTool/forkSubagent.ts:34"
+    },
+    {
+      "id": "A1-teammates-team",
+      "finding": "teammates 团队（agent swarms）：TeamCreate 建团队，Agent 工具带 team_name+name 派生 teammate 加入团队；成员通过 SendMessage 互相通信、共享任务看板。Team 与 TaskList 1:1。",
+      "file_line": "src/tools/TeamCreateTool/prompt.ts:1-113, src/utils/agentSwarmsEnabled.ts:26-46",
+      "default_state": "ant 构建恒开；外部构建需 (env CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS 或 --agent-teams flag) + GrowthBook 'tengu_amber_flint'(默认 true) killswitch，默认关。",
+      "shares_context": "teammate 零共享上下文，但共享文件态：team config、共享 TaskList；靠 SendMessage 显式传信",
+      "file_line_default": "src/utils/agentSwarmsEnabled.ts:26-46"
+    },
+    {
+      "id": "A1-task-board",
+      "finding": "共享任务看板：TaskCreate/TaskUpdate/TaskList/TaskGet 等在 ~/.claude/tasks/{team}/ 维护结构化任务清单；teammate 认领（set owner）、标完成、发现新活建任务。单人模式下同一套工具退化成 todo 清单。",
+      "file_line": "src/tools/TaskCreateTool/prompt.ts:5-14, src/tools/TeamCreateTool/prompt.ts:24, 93-110",
+      "default_state": "TaskCreate 本体 default-on（当 todo 清单用）；『分配给 teammate』语义由 isAgentSwarmsEnabled() 决定（同 teammates 门控）",
+      "shares_context": "共享磁盘状态（所有 teammate 可读同一 TaskList）"
+    },
+    {
+      "id": "A1-inprocess-teammate",
+      "finding": "in-process teammate：同进程内的 teammate（InProcessTeammateTask），只支持同步 subagent、不可用 run_in_background/name/team_name/mode 参数、不能再派生 teammate。",
+      "file_line": "src/tools/AgentTool/prompt.ts:276-283, src/tasks/InProcessTeammateTask/, src/constants/tools.ts:36-52",
+      "default_state": "isAgentSwarmsEnabled() 派生场景内",
+      "shares_context": "有额外允许工具集 IN_PROCESS_TEAMMATE_ALLOWED_TOOLS（Task*/SendMessage/可选 Cron*）"
+    },
+    {
+      "id": "A1-remote-isolation",
+      "finding": "远程隔离 agent：isolation:'remote' 把 agent 丢进远程 CCR（Claude Code Remote）沙箱，恒后台，完成通知；面向需要新鲜沙箱的长任务。",
+      "file_line": "src/tools/AgentTool/AgentTool.tsx:99, 430-478, prompt.ts:272-275",
+      "default_state": "仅 ant 构建（USER_TYPE==='ant'）；schema 与 prompt 段落对外部用户隐藏，只暴露 'worktree'",
+      "shares_context": "零共享 + 独立远程沙箱"
+    },
+    {
+      "id": "A1-observer-dream",
+      "finding": "观察/后台辅助 agent：(a) AgentSummary 每~30s fork 子体对话生成 3-5 词进度摘要供 UI 显示（coordinator 模式）；(b) DreamTask 自动记忆整固（auto-dream）后台 fork agent，把不可见的 fork 显式挂进 footer pill / Shift+Down 对话框。",
+      "file_line": "src/services/AgentSummary/agentSummary.ts:1-11, 26-46, src/tasks/DreamTask/DreamTask.ts:1-6",
+      "default_state": "AgentSummary 随 coordinator 模式；DreamTask 随 auto-dream 服务（feature 门控）",
+      "shares_context": "AgentSummary 用与父相同 CacheSafeParams 复用 prompt cache、但 canUseTool 全 deny（只读摘要）"
+    },
+    {
+      "id": "A1-peer-cross-session",
+      "finding": "peer 跨会话/跨机器：SendMessage 的 to 可为 'uds:<socket>'（同机另一个 Claude 会话）或 'bridge:<session-id>'（经 Anthropic 服务器的 Remote Control 跨机对端）；ListPeers 发现对端。见 G1——传输层实现在此源码树缺失。",
+      "file_line": "src/tools/SendMessageTool/prompt.ts:6-20, src/tools/SendMessageTool/SendMessageTool.ts:586-602, src/utils/peerAddress.ts:8-21",
+      "default_state": "特性门控 feature('UDS_INBOX')（编译期）；bridge 目标另需 Remote Control 已连接",
+      "shares_context": "零共享，纯消息传递（对端是独立会话/进程/机器）"
+    }
+  ],
+
+  "B_trigger_timing": [
+    {
+      "id": "B-fork-when",
+      "finding": "何时 fork（fork 模式启用时）",
+      "verbatim": "Fork yourself (omit `subagent_type`) when the intermediate tool output isn't worth keeping in your context. The criterion is qualitative — \"will I need this output again\" — not task size.\n- **Research**: fork open-ended questions. If research can be broken into independent questions, launch parallel forks in one message. A fork beats a fresh subagent for this — it inherits context and shares your cache.\n- **Implementation**: prefer to fork implementation work that requires more than a couple of edits. Do research before jumping to implementation.",
+      "file_line": "src/tools/AgentTool/prompt.ts:83-88",
+      "intent_or_guardrail": "intent（判据是『这输出我还需不需要』而非任务大小；核心产品意图是保护父上下文窗口）"
+    },
+    {
+      "id": "B-fork-cost-discipline",
+      "finding": "fork 成本纪律：共享缓存、别设 model、给短 name 让用户可见可干预",
+      "verbatim": "Forks are cheap because they share your prompt cache. Don't set `model` on a fork — a different model can't reuse the parent's cache. Pass a short `name` (one or two words, lowercase) so the user can see the fork in the teams panel and steer it mid-run.",
+      "file_line": "src/tools/AgentTool/prompt.ts:89",
+      "intent_or_guardrail": "guardrail（省 token / 保缓存命中 / 保可干预性）"
+    },
+    {
+      "id": "B-fork-dontpeek",
+      "finding": "fork 别偷看、别抢跑",
+      "verbatim": "**Don't peek.** The tool result includes an `output_file` path — do not Read or tail it unless the user explicitly asks for a progress check. You get a completion notification; trust it. Reading the transcript mid-flight pulls the fork's tool noise into your context, which defeats the point of forking.\n**Don't race.** After launching, you know nothing about what the fork found. Never fabricate or predict fork results in any format... If the user asks a follow-up before the notification lands, tell them the fork is still running — give status, not a guess.",
+      "file_line": "src/tools/AgentTool/prompt.ts:91-93",
+      "intent_or_guardrail": "guardrail（防上下文污染 + 防幻觉编造子体结果）"
+    },
+    {
+      "id": "B-subagent-when-nonfork",
+      "finding": "何时不用 Agent 工具（非 fork 默认版）",
+      "verbatim": "When NOT to use the Agent tool:\n- If you want to read a specific file path, use the Read tool or the Glob tool instead of the Agent tool, to find the match more quickly\n- If you are searching for a specific class definition like \"class Foo\", use the Glob tool instead, to find the match more quickly\n- If you are searching for code within a specific file or set of 2-3 files, use the Read tool instead of the Agent tool, to find the match more quickly\n- Other tasks that are not related to the agent descriptions above",
+      "file_line": "src/tools/AgentTool/prompt.ts:234-240",
+      "intent_or_guardrail": "guardrail（防滥用委派、目标已知就直接用 Read/Glob）"
+    },
+    {
+      "id": "B-fg-vs-bg",
+      "finding": "前台 vs 后台分级择时",
+      "verbatim": "**Foreground vs background**: Use foreground (default) when you need the agent's results before you can proceed — e.g., research agents whose findings inform your next steps. Use background when you have genuinely independent work to do in parallel.",
+      "file_line": "src/tools/AgentTool/prompt.ts:264",
+      "intent_or_guardrail": "intent（按依赖关系选同步/异步）"
+    },
+    {
+      "id": "B-write-prompt-directive-vs-briefing",
+      "finding": "写 prompt 分级：fork 用 directive（指令，不重述背景），fresh subagent 当『刚进门的聪明同事』完整 briefing",
+      "verbatim": "**Writing a fork prompt.** Since the fork inherits your context, the prompt is a *directive* — what to do, not what the situation is. Be specific about scope: what's in, what's out, what another agent is handling. Don't re-explain background.\n...(fresh)... Brief the agent like a smart colleague who just walked into the room — it hasn't seen this conversation, doesn't know what you've tried, doesn't understand why this task matters.",
+      "file_line": "src/tools/AgentTool/prompt.ts:95, 99-113",
+      "intent_or_guardrail": "intent（fork 省重复上下文；fresh 需完整背景）"
+    },
+    {
+      "id": "B-never-delegate-understanding",
+      "finding": "别把理解外包给分身",
+      "verbatim": "**Never delegate understanding.** Don't write \"based on your findings, fix the bug\" or \"based on the research, implement it.\" Those phrases push synthesis onto the agent instead of doing it yourself. Write prompts that prove you understood: include file paths, line numbers, what specifically to change.",
+      "file_line": "src/tools/AgentTool/prompt.ts:112；coordinator 同义 src/coordinator/coordinatorMode.ts:255-268",
+      "intent_or_guardrail": "guardrail（防甩锅式委派，synthesis 是编排者自己的活）"
+    },
+    {
+      "id": "B-coordinator-worker-rules",
+      "finding": "coordinator 调 worker 的择时铁律",
+      "verbatim": "- Do not use one worker to check on another. Workers will notify you when they are done.\n- Do not use workers to trivially report file contents or run commands. Give them higher-level tasks.\n- Do not set the model parameter. Workers need the default model for the substantive tasks you delegate.\n- Continue workers whose work is complete via SendMessage to take advantage of their loaded context",
+      "file_line": "src/coordinator/coordinatorMode.ts:136-139",
+      "intent_or_guardrail": "guardrail（防 worker 互查内耗 / 防琐碎委派 / 保模型一致 / 复用 loaded context）"
+    },
+    {
+      "id": "B-continue-vs-spawn",
+      "finding": "coordinator 续用 vs 新开的决策表（按上下文重叠度）",
+      "verbatim": "There is no universal default. Think about how much of the worker's context overlaps with the next task. High overlap -> continue. Low overlap -> spawn fresh.（表：研究恰好碰了要改的文件→Continue；研究宽泛而实现窄→Spawn fresh；纠错/延续→Continue；验证别人写的代码→Spawn fresh 让验证者用 fresh eyes；首次实现走错路→Spawn fresh 避免锚定失败路径）",
+      "file_line": "src/coordinator/coordinatorMode.ts:280-293",
+      "intent_or_guardrail": "intent（上下文重叠度驱动的续用/新开选择）"
+    },
+    {
+      "id": "B-teamcreate-when",
+      "finding": "何时建团队",
+      "verbatim": "Use this tool proactively whenever:\n- The user explicitly asks to use a team, swarm, or group of agents\n- The user mentions wanting agents to work together, coordinate, or collaborate\n- A task is complex enough that it would benefit from parallel work by multiple agents (e.g., building a full-stack feature with frontend and backend work, refactoring a codebase while keeping tests passing...)\nWhen in doubt about whether a task warrants a team, prefer spawning a team.",
+      "file_line": "src/tools/TeamCreateTool/prompt.ts:5-12",
+      "intent_or_guardrail": "intent（复杂/并行/协作即建团队，存疑时倾向建团队）"
+    },
+    {
+      "id": "B-teammate-role-match",
+      "finding": "给 teammate 选 agent 类型按工具能力匹配",
+      "verbatim": "- **Read-only agents** (e.g., Explore, Plan) cannot edit or write files. Only assign them research, search, or planning tasks. Never assign them implementation work.\n- **Full-capability agents** (e.g., general-purpose) have access to all tools including file editing... Use these for tasks that require making changes.",
+      "file_line": "src/tools/TeamCreateTool/prompt.ts:18-20",
+      "intent_or_guardrail": "guardrail（防把实现活派给只读 agent）"
+    },
+    {
+      "id": "B-sendmessage-must",
+      "finding": "团队里必须用 SendMessage 才被听见",
+      "verbatim": "Your plain text output is NOT visible to other agents — to communicate, you MUST call this tool. Messages from teammates are delivered automatically; you don't check an inbox. Refer to teammates by name, never by UUID.（团队 prompt 同义：Your team cannot hear you if you do not use the SendMessage tool.）",
+      "file_line": "src/tools/SendMessageTool/prompt.ts:36, src/tools/TeamCreateTool/prompt.ts:107",
+      "intent_or_guardrail": "guardrail（文本输出不是通信，必须显式发消息）"
+    },
+    {
+      "id": "B-broadcast-cost",
+      "finding": "广播成本告警",
+      "verbatim": "`\"*\"` | Broadcast to all teammates — expensive (linear in team size), use only when everyone genuinely needs it",
+      "file_line": "src/tools/SendMessageTool/prompt.ts:34",
+      "intent_or_guardrail": "guardrail（广播线性成本，慎用）"
+    },
+    {
+      "id": "B-taskcreate-when-not",
+      "finding": "何时不建任务清单（单 agent 够用）",
+      "verbatim": "Skip using this tool when:\n- There is only a single, straightforward task\n- The task is trivial and tracking it provides no organizational benefit\n- The task can be completed in less than 3 trivial steps\n- The task is purely conversational or informational\nNOTE that you should not use this tool if there is only one trivial task to do. In this case you are better off just doing the task directly.",
+      "file_line": "src/tools/TaskCreateTool/prompt.ts:33-40",
+      "intent_or_guardrail": "guardrail（琐碎单任务别开销）"
+    }
+  ],
+
+  "C_problem_definition": [
+    {
+      "id": "C-subagent-value",
+      "finding": "subagent 的产品价值定位（自主处理复杂多步 + 保护主上下文）",
+      "verbatim": "Launch a new agent to handle complex, multi-step tasks autonomously. The Agent tool launches specialized agents (subprocesses) that autonomously handle complex tasks.（fork 段：Reach for it when research or multi-step implementation work would otherwise fill your context with raw output you won't need again.）",
+      "file_line": "src/tools/AgentTool/prompt.ts:202-204, 85-88",
+      "intent_or_guardrail": "intent"
+    },
+    {
+      "id": "C-context-protection",
+      "finding": "核心 single-agent 局限 = 上下文窗口会被原始输出塞满；fork/subagent 的存在理由就是把『不再需要的原始输出』挡在父上下文外",
+      "verbatim": "Fork yourself when the intermediate tool output isn't worth keeping in your context. ... Reading the transcript mid-flight pulls the fork's tool noise into your context, which defeats the point of forking.",
+      "file_line": "src/tools/AgentTool/prompt.ts:85, 91, forkSubagent.ts:24-27",
+      "intent_or_guardrail": "intent"
+    },
+    {
+      "id": "C-coordinator-synthesis",
+      "finding": "coordinator 存在的问题定义：把编排/synthesis 与执行分层，synthesis 是编排者最重要且不可外包的活",
+      "verbatim": "### Always synthesize — your most important job. When workers report research findings, you must understand them before directing follow-up work. ... You never hand off understanding to another worker.",
+      "file_line": "src/coordinator/coordinatorMode.ts:255-259",
+      "intent_or_guardrail": "intent"
+    },
+    {
+      "id": "C-when-not-split",
+      "finding": "何时不该拆（编排者应直接答、不委派力所能及的活）",
+      "verbatim": "Answer questions directly when possible — don't delegate work that you can handle without tools.（+ B-taskcreate-when-not 单任务别开清单；+ B-subagent-when-nonfork 目标已知用 Read/Glob）",
+      "file_line": "src/coordinator/coordinatorMode.ts:123, TaskCreateTool/prompt.ts:33-40, AgentTool/prompt.ts:234-240",
+      "intent_or_guardrail": "guardrail"
+    }
+  ],
+
+  "D_trust_and_cost": [
+    {
+      "id": "D1-trust-outputs",
+      "finding": "分身自报做完，父默认信任（fork 拿到完成通知即信、不复读 transcript；非 fork prompt 明说 outputs 应被信任）",
+      "verbatim": "You get a completion notification; trust it.（+ 非 fork：The agent's outputs should generally be trusted）",
+      "file_line": "src/tools/AgentTool/prompt.ts:91, 268",
+      "intent_or_guardrail": "n/a"
+    },
+    {
+      "id": "D1-verification-layer",
+      "finding": "coordinator 模式引入『信任但核验』第二层：实现 worker 自验是第一层 QA，独立 verification worker 是第二层；验证=证明代码能跑而非确认存在，别橡皮图章；验证 worker 用 spawn fresh 让 fresh eyes。VERIFICATION_AGENT 输出强制 VERDICT: PASS/FAIL/PARTIAL。",
+      "verbatim": "Verification means **proving the code works**, not confirming it exists. A verifier that rubber-stamps weak work undermines everything. ... **Test independently** — prove the change works, don't rubber-stamp.",
+      "file_line": "src/coordinator/coordinatorMode.ts:220-227, 289, 328, src/tools/AgentTool/built-in/verificationAgent.ts:120-133",
+      "intent_or_guardrail": "guardrail"
+    },
+    {
+      "id": "D2-cannot-reach-user",
+      "finding": "分身不能直接找用户确认，也不能再派生 agent：ASYNC_AGENT_ALLOWED_TOOLS 白名单不含 AskUserQuestion、不含 Agent。结果对用户不可见，须父转达。",
+      "verbatim": "When the agent is done, it will return a single message back to you. The result returned by the agent is not visible to the user. To show the user the result, you should send a text message back to the user with a concise summary of the result.",
+      "file_line": "src/tools/AgentTool/prompt.ts:257, src/constants/tools.ts:55-71（白名单无 AskUserQuestion/Agent）",
+      "intent_or_guardrail": "guardrail"
+    },
+    {
+      "id": "D3-cost-cache-sharing",
+      "finding": "成本痕迹（提示缓存复用）：fork 子体构造成 byte-identical API 前缀以最大化父 prompt cache 命中；所有 fork 用同一 placeholder tool_result('Fork started — processing in background')、只末尾 directive 文本每子不同；别设 model（异模型无法复用缓存）。",
+      "verbatim": "For prompt cache sharing, all fork children must produce byte-identical API request prefixes. ... Only the final text block differs per child, maximizing cache hits.（+ Forks are cheap because they share your prompt cache.）",
+      "file_line": "src/tools/AgentTool/forkSubagent.ts:44-58, 91-169, prompt.ts:89",
+      "intent_or_guardrail": "n/a"
+    },
+    {
+      "id": "D3-usage-trailer",
+      "finding": "成本数字：完成通知里带 <usage>（total_tokens/tool_uses/duration_ms）；coordinator 收到的 task-notification 也含 usage 块。AgentSummary 显式不设 maxOutputTokens 以免破坏缓存 thinking config。任务磁盘输出上限 MAX_TASK_OUTPUT_BYTES=5GB。",
+      "verbatim": "<usage>\\n  <total_tokens>N</total_tokens>\\n  <tool_uses>N</tool_uses>\\n  <duration_ms>N</duration_ms>\\n</usage>",
+      "file_line": "src/coordinator/coordinatorMode.ts:150-159, AgentTool.tsx:1369-1371, agentSummary.ts:100-104, diskOutput.ts:30",
+      "intent_or_guardrail": "n/a"
+    },
+    {
+      "id": "D3-fork-maxturns",
+      "finding": "fork agent 默认 maxTurns=200；agent 的 maxTurns 可被工具参数覆盖 agentDefinition.maxTurns。AgentSummary 摘要间隔 30_000ms。",
+      "verbatim": "maxTurns: 200 （FORK_AGENT 定义）；SUMMARY_INTERVAL_MS = 30_000",
+      "file_line": "src/tools/AgentTool/forkSubagent.ts:65, runAgent.ts:756, agentSummary.ts:26",
+      "intent_or_guardrail": "n/a"
+    },
+    {
+      "id": "D4-isolation-tiers",
+      "finding": "隔离档位：默认同 cwd（同工作目录，同进程）→ cwd 参数覆盖工作目录 → isolation:'worktree' 临时 git worktree（隔离仓库副本，无改动自动清理，有改动返回 worktree 路径+分支）→ isolation:'remote' 远程 CCR 沙箱（仅 ant）。worktree 与 cwd 互斥。",
+      "verbatim": "You can optionally set `isolation: \"worktree\"` to run the agent in a temporary git worktree, giving it an isolated copy of the repository. The worktree is automatically cleaned up if the agent makes no changes; if changes are made, the worktree path and branch are returned in the result.",
+      "file_line": "src/tools/AgentTool/prompt.ts:272-275, AgentTool.tsx:99-100, 430-478, 582-650",
+      "intent_or_guardrail": "guardrail（防多分身踩脚：写活隔离到各自 worktree/沙箱）"
+    },
+    {
+      "id": "D4-write-concurrency",
+      "finding": "防踩脚的并发纪律：只读研究可自由并行；写活（实现）同一组文件一次一个；验证有时可与实现在不同文件区并行。fork+worktree 注入通知告诉子体路径需翻译、改动被隔离。",
+      "verbatim": "- **Read-only tasks** (research) — run in parallel freely\n- **Write-heavy tasks** (implementation) — one at a time per set of files\n- **Verification** can sometimes run alongside implementation on different file areas",
+      "file_line": "src/coordinator/coordinatorMode.ts:215-218, forkSubagent.ts:205-210",
+      "intent_or_guardrail": "guardrail"
+    }
+  ],
+
+  "F_results_usage": [
+    {
+      "id": "F1-summary-not-trace",
+      "finding": "回流形式=只回结论摘要（single message / 结构化 report），不回完整轨迹。fork 子体被强制固定输出格式（Scope/Result/Key files/Files changed/Issues，≤500 词，首行必须 Scope:）；general-purpose 也要求 concise report。",
+      "verbatim": "Output format (plain text labels, not markdown headers):\\n  Scope: ...\\n  Result: ...\\n  Key files: ...\\n  Files changed: <list with commit hash>...\\n  Issues: ...（+ Keep your report under 500 words ... Your response MUST begin with \"Scope:\"）",
+      "file_line": "src/tools/AgentTool/forkSubagent.ts:171-198, generalPurposeAgent.ts:20",
+      "intent_or_guardrail": "n/a"
+    },
+    {
+      "id": "F1-structured-notification",
+      "finding": "coordinator/后台场景回流是结构化 XML <task-notification>（task-id/status/summary/result/usage），以 user-role 消息投递、由 <task-notification> 开标签区分；fork 完成通知同样是后续 turn 的 user-role 消息，绝不由父自己写。",
+      "verbatim": "Worker results arrive as **user-role messages** containing `<task-notification>` XML. They look like user messages but are not. Distinguish them by the `<task-notification>` opening tag.",
+      "file_line": "src/coordinator/coordinatorMode.ts:142-164, AgentTool.tsx:1344-1371, prompt.ts:93",
+      "intent_or_guardrail": "n/a"
+    },
+    {
+      "id": "F2-parent-merges",
+      "finding": "谁合并多分身结果 = 父/coordinator 自己 synthesize；这是编排者最重要且不可外包的活，必须真读懂再写含 file:line 的下一步 spec，禁止『based on your findings』甩锅。",
+      "verbatim": "### Always synthesize — your most important job ... write a prompt that proves you understood by including specific file paths, line numbers, and exactly what to change. Never write \"based on your findings\"...",
+      "file_line": "src/coordinator/coordinatorMode.ts:255-268",
+      "intent_or_guardrail": "n/a"
+    },
+    {
+      "id": "F3-where-results-land",
+      "finding": "成果落点：分身 final message → 父上下文（作 task-notification）；对用户不可见须父发文本转达；worktree 有改动则改动落在隔离 worktree（返回路径+分支）；团队协作成果落共享 TaskList/文件。",
+      "verbatim": "The result returned by the agent is not visible to the user.（+ worktree path and branch are returned in the result）",
+      "file_line": "src/tools/AgentTool/prompt.ts:257, 272-275",
+      "intent_or_guardrail": "n/a"
+    },
+    {
+      "id": "F4-dependency-handoff",
+      "finding": "一分身成果作另一分身输入=靠父 synthesize 后写进新 prompt（fresh 需完整重述；continue 复用 loaded context）；coordinator 明确『research 完 → 你综合 → 选 continue 还是 spawn』；团队里靠共享 TaskList 的 blocks/blockedBy 依赖 + owner 认领做交接。",
+      "verbatim": "After research completes, you always do two things: (1) synthesize findings into a specific prompt, and (2) choose whether to continue that worker via SendMessage or spawn a fresh one.（+ TaskCreate: use TaskUpdate to set up dependencies (blocks/blockedBy)）",
+      "file_line": "src/coordinator/coordinatorMode.ts:253, 280-301, TaskCreateTool/prompt.ts:53, TeamCreateTool/prompt.ts:98-104",
+      "intent_or_guardrail": "n/a"
+    },
+    {
+      "id": "F5-visibility",
+      "finding": "可见性：fork 短 name 让用户在 teams panel 看见并 mid-run steer；AgentSummary 每~30s 生成 3-5 词进度供 UI；DreamTask 把不可见 fork 挂进 footer pill / Shift+Down 对话框；teammate 的 peer DM 摘要进 idle notification 给 team lead 可见性。中间成果默认不进父上下文（Don't peek），除非用户显式要 progress check（读 output_file）。",
+      "verbatim": "Pass a short `name` ... so the user can see the fork in the teams panel and steer it mid-run.（+ **Peer DM visibility.** When a teammate sends a DM to another teammate, a brief summary is included in their idle notification.）",
+      "file_line": "src/tools/AgentTool/prompt.ts:89, TeamCreateTool/prompt.ts:72, agentSummary.ts:26-46, DreamTask.ts:1-6",
+      "intent_or_guardrail": "n/a"
+    },
+    {
+      "id": "F6-persistence",
+      "finding": "持久化：agent 全轨迹写磁盘 output 文件（$projectTemp/$sessionId/tasks/{taskId}.output，读被内部路径自动放行，上限 5GB）；session 级 transcript 由 sessionStorage 存（getAgentTranscript 按 agentId 取，供 resume/summary）；worktree 改动持久为 git 分支；团队 TaskList/config 持久在 ~/.claude/。sessionId 首次取值后固定，/clear 不换路径以免背景 bash 输出丢失。",
+      "verbatim": "getTaskOutputPath(taskId) → join(getTaskOutputDir(), `${taskId}.output`)；getTaskOutputDir = join(getProjectTempDir(), getSessionId(), 'tasks')",
+      "file_line": "src/utils/task/diskOutput.ts:30, 50-73, agentSummary.ts:24, 68, resumeAgent.ts",
+      "intent_or_guardrail": "n/a"
+    }
+  ],
+
+  "G_to_verify": [
+    {
+      "id": "G1-peer-cross-session",
+      "status": "impl-missing（提示词层+寻址解析层齐全，传输层+注册表层+ListPeers 工具在此源码树缺失）",
+      "finding": "peer 跨会话/跨机器闭环性核查（四层）：① 提示词层齐全（SendMessageTool/prompt.ts:6-20 描述 uds:/bridge: 用法、跨会话回复协议 <cross-session-message from>）；② 寻址解析层齐全（peerAddress.ts:8-21 parseAddress 解析 uds/bridge/other scheme）；③ 传输层缺失——SendMessageTool.ts:757-779 用 lazy require 引 '../../bridge/peerSessions.js'(postInterClaudeMessage) 与 '../../utils/udsClient.js'(sendToUdsSocket)，这两个文件在源码树不存在（find/grep 全树未命中）；④ 注册表/发现层缺失——tools.ts:126-127 require('./tools/ListPeersTool/ListPeersTool.js')，该目录/文件不存在，prompt 反复让用 ListPeers 但工具实现缺席。结论：peer 通信在本源码快照下 impl-missing，无法端到端闭环。另注 bridge 目标有跨机安全门（SendMessageTool.ts:586-600：safetyCheck 强制用户显式同意、classifierApprovable:false、bypass-immune，防跨机 prompt injection）。",
+      "verbatim": "Send a message to Remote Control session ${input.to}? It arrives as a user prompt on the receiving Claude (possibly another machine) via Anthropic's servers.（decisionReason: safetyCheck, 'Cross-machine bridge message requires explicit user consent', classifierApprovable: false）",
+      "file_line": "src/tools/SendMessageTool/prompt.ts:6-20, src/utils/peerAddress.ts:8-21, src/tools/SendMessageTool/SendMessageTool.ts:586-602, 757-779, src/tools.ts:126-127（引用缺失文件 bridge/peerSessions.js、utils/udsClient.js、tools/ListPeersTool/ListPeersTool.js）"
+    },
+    {
+      "id": "G2-acp-external-agent",
+      "status": "not-found（本维度）",
+      "finding": "ACP / 外来 agent 互通：本次在多智能体维度未找到 ACP 协议或第三方外来 agent 互通实现；跨会话唯一路径是 UDS_INBOX（同机 socket）与 Remote Control bridge（经 Anthropic 服务器），且见 G1 传输层缺失。存在 SDK 入口（CLAUDE_CODE_ENTRYPOINT=sdk-*）与 SDK 消息适配（src/remote/sdkMessageAdapter.ts）但属 SDK 集成，非 agent-to-agent 协议。",
+      "file_line": "src/tools/AgentTool/builtInAgents.ts:54-62, src/remote/sdkMessageAdapter.ts"
+    },
+    {
+      "id": "G3-observe-pause-interrupt",
+      "status": "closed（有实现）",
+      "finding": "旁观/暂停/打断单分身：① 旁观——fork 短 name 进 teams panel、AgentSummary 30s 进度、DreamTask footer pill / Shift+Down 对话框；② 打断——TaskStop 工具停跑偏的 worker（传 task_id，停后仍可 SendMessage 续），coordinator 有专章讲用法；③ 干预——用户可对 named fork mid-run steer；④ 进度查看——用户显式要时读 output_file（Read/tail）。界面靠 teams panel + footer pill + Shift+Down 任务对话框 + task registry。",
+      "verbatim": "Use TaskStop to stop a worker you sent in the wrong direction — for example, when you realize mid-flight that the approach is wrong... Pass the `task_id` from the Agent tool's launch result. Stopped workers can be continued with SendMessage.",
+      "file_line": "src/coordinator/coordinatorMode.ts:236-249, src/tasks/stopTask.ts, src/tasks/DreamTask/DreamTask.ts:1-6, src/tools/AgentTool/prompt.ts:89"
+    }
+  ]
+}

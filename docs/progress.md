@@ -24,6 +24,21 @@
 - **待办·恢复后第一步**：**PM 浏览器 smoke**（0 error + 深色 + 飞轮 mermaid 渲染；本章无 stepper）→ 通过 `python3 build.py`（08 旧已在 CHAPTERS·直接替换重生成 index.html）→ 置 done 迁档三处（backlog=done·删本块·结论沉 archive）；打回按意见改。
 - **阻塞**：**等 PM 浏览器 smoke**。与 CH-A2R-01（同等 PM 浏览器 smoke）并行、互不依赖。
 
+### CH-A2R-03 · 其他 agent(07) 关系重构（rendering · 成稿已出+自审过·待余门+PM smoke · 第 7 棒 · 2026-07-08）
+- **指针**：成稿待覆盖 `findings/07-outside-multiagent.html`（旧稿=「消息网 vs 看板流水线」·七组对照＋反直觉收尾模板）｜依赖 CH-A2R-05=done。
+- **PM 方法纪律（2026-07-08 定）**：**事实先行、叙事后置**——先列问题 list 把双库事实采齐、再用一种视角组织事实、最后才想收口与可视化；**不预设「六拍/Hero/可视化」**（六拍叙事框架已被 PM 否掉）。
+- **本章定性**：**产品手段章**（single-agent 撞墙→逼出协作机制），全五章**最弱产品观信号**；分析仪器＝从 system prompt 对「**何时触发哪种协作**」的原文描述，读设计者「何时用什么协作」的意图。
+- **三条红线**：①委派层两家**趋同**、要诚实呈现（分歧在「协作重量/触发时机」不在「问题定义」）；②防「默认→绝对」——触发描述的**理想触发 vs 实际默认可达性**分两层（team 多灰度门控·kanban 需显式进入）；③**不碰「在场/人在不在环」**（综合②独占总变量），收口只落「对协作这个手段的定位」。
+- **代码基线（本机映射·不改 CLAUDE.md 路径——跨机项目 luohuibin 路径在另一台有效）**：CC=`/Users/bink/cc_project/claude-code-main`（真源码树·无 git）｜Hermes=`/Users/bink/.hermes/hermes-agent`@`8e734810d`（2026-07-08 最新·用户选定新基线）。
+- **研究已完成（第 2 棒·2026-07-08）**：双库真源码事实采齐→`docs/scratch/ch-a2r-03/research-cc.json`（11 机制·真 file:line）＋`research-hermes.json`（8 机制+async 专查·@8e734810d）。两条翻案：①Hermes `delegate_task` **顶层默认后台异步**（run_agent.py:5664 硬编码·模型不能选）、非旧结论「无异步委派」；②确认 Hermes **无 CC 那种继承父上下文的 fork**。
+- **待查证结果**：CC peer 跨会话/跨机器＝**impl-missing**（提示词+寻址层在·传输+注册表实现文件全树 grep 未命中·不可端到端闭环）→旧「存疑」证实未闭环、**别当既成能力写**；ACP：CC not-found／Hermes 仅出向 provider（驱动 Copilot 当子后端·非通用互通）；旁观/暂停/打断单分身两家都 closed。
+- **事实梳理已成（第 3 棒·2026-07-08）**：按调研脉络平铺→`docs/scratch/ch-a2r-03/fact-map.md`（每节标趋同/分岔）。骨架：**问题定义层趋同**；**三处真分岔**＝①委派同步/异步控制（模型选 vs 壳固化）②信任自报（默认信 vs 默认疑·接轴一）③成果重心（父中心 vs 共享 DB 黑板）；**两处非对称**＝CC 独有 fork／Hermes 独有 profiles-as-roster；peer 跨机=impl-missing 别当既成。
+- **收尾方向已定（第 4 棒·2026-07-08）**：PM 拍板——**弃统一轴**（候选轴「中心 vs 外化」经 adversarial 验证不成立：①基本是「在场」换皮·踩综合②红线②二分不干净·CC 团队层也用共享 TaskList）。定＝**三处分岔并列**（手段章·最弱产品观信号该有的样子），「成果与协调」层用具体分野**「分身互发消息的同事网 vs 分身不说话只读写共享状态板」**（旧稿对的那个·不碰在场）；统一变量留综合②。
+- **视觉脚本已成（第 5 棒·2026-07-08）**：`docs/scratch/ch-a2r-03/visual-script.md`（五问+全序重量表覆盖全机制·支线降 §07/页脚不丢）。唯一重档=§05 协调拓扑两图对比（消息网 vs 共享状态板）；安静基线=问题定义/成本/隔离/边界。节序=01 为何拆→02 范式(fork/profiles 非对称)→03 委派控制→04 信任→05 拓扑 Hero→06 取舍收尾→07 边界。
+- **成稿已出+自审过（第 7 棒·2026-07-08）**：`findings/07-outside-multiagent.html`（node --check PASS·div 69/69·节 01-07·两图差异高亮·mermaid 裹 MERMAID_OK·本地 smoke 0 error）。**自审已修四处**：①收掉回潮的「中心 vs 外化」统一轴（lead+§06 改中性/§05 口径·thesis 明写不拔统一轴）②修 background DEPRECATED 失真原文回逐字 schema 原文。
+- **下一步**：主 session 过 完整性门 + 设计门（Codex soundness 门额度耗尽→主 session 手动核替）→PM 浏览器 smoke→`python3 build.py`（07 已在 CHAPTERS·替换重生成 index.html）→done 迁档两处。
+- **阻塞**：余门（完整性/设计门）待主 session 过；PM 浏览器 smoke 待做（0 error+深色+两图 mermaid 渲染+data-tip 悬浮；本章无 stepper）。
+
 ---
 
 ## 🟡 等谁
@@ -39,7 +54,7 @@
 
 ## ⚪ 接下来（未开工排队 · 每条 = ID + 解锁条件）
 
-1. **CH-A2R-02 / 03** 环境 / 其他 agent — 样板已锁（05）→ **✅ 可领**（互不依赖·可换 session 并行；领取套 05 样板：六拍推演＋三层收尾＋防「默认→绝对」门；01 时间章、04 自己章正并行推进、不阻塞）
+1. **CH-A2R-02** 环境（06）— 样板已锁（05）→ **✅ 可领**（领取套 05 样板：六拍推演＋三层收尾＋防「默认→绝对」门；01/03/04 正并行推进、不阻塞）〔03 已于 2026-07-08 领取，见「在做」〕
 2. **EXT-01** 出错之后（切面专题）— 依赖 CH-SYN2 已 done → **可领**
 3. **ART-01** Harness 产品观（独立文章，非合订本章节）— 依赖无 → **可领**；初稿 `docs/harness-product-view.md`，PM 议是否入册
 4. **SYN2-R** 综合②重编 — 依赖升级为**全轴二章 done**（CH-A2R-01~05）→ 轴二整改收官后解锁
@@ -61,6 +76,7 @@
 - **CH-08 定名**：「Loop 与自己」待定名（推荐「Loop 与经验」；`CH-A2R-04` 收窄后偏「Loop 与变强/与下一代」）
 - **前 9 章排版**：是否按综合②新排版标杆回头提升（PM 看完综合②再定；DSN 已落地随各批手术自然承接）
 - **ART-01 入册**：Harness 产品观文章是否并入合订本
+- **Hermes 版本 gap（2026-07-08 提出）**：前 11 章基线＝`daf4f1a7a`（已不在当前 git 历史）·`CH-A2R-03` 起用最新 `8e734810d`（差 4778 commit·delegate/tui/profiles 大改+async_delegation 新增）。本章成稿显著标注切片；**是否把全书 Hermes 统一迁最新版重核**待 PM 定（不阻塞本章）。
 
 ---
 
