@@ -1,0 +1,293 @@
+{
+  "repo": "/Users/luohuibin/cursor_project/claude-code-main (reconstructed TS source; a recurring identifier is obfuscated to `li`/`n` in some files, but all string literals — prompts, messages, thresholds — are intact)",
+  "state": "src tree only, no .git;调研日期 2026-07-08",
+  "summary_of_priority_1": "重大结论：任务书里那段 SDK/子代理注入语（『You are operating autonomously. The user is not watching in real time and cannot answer questions mid-task, so asking will block the work』）在本仓库【逐字搜遍全树、零命中】——它由 Agent SDK / 服务端 team-harness 注入，不在 CLI 代码里（见 not_found[0]）。但 CLI 仓库【确实自带】一套等价的『无人值守行为规范』，只是措辞不同、且【只在 proactive/KAIROS 模式生效】：src/constants/prompts.ts getProactiveSection() 的『# Autonomous work』整段（第 860-913 行），核心是 terminalFocus 分档自治（unfocused=用户走了→大胆改/提交/push；focused=用户在看→更协作）。默认交互态走的是完全不同的另一套：第 258 行『可逆性/爆炸半径』——默认要先问再做危险操作。所以本章口径必须严格区分『默认交互态(问) vs proactive自治态(别问) vs SDK/子代理态(服务端注入的别问)』三层，不能混为『CC 默认别问』。",
+  "findings": {
+    "q1_timeline_reliability": [
+      {
+        "mechanism": "Sleep 工具 + <tick> 心跳：agent 在没有用户输入时靠系统周期性投喂的 <tick> 保持『活着』，自己决定睡多久",
+        "behavior": "用户不在、也没有新指令时，agent 不会自然停摆。系统周期性发来一个只含当前本地时间的『滴答』提示，等于反复问它『你醒着，现在干嘛』。agent 用 Sleep 工具自己控制两次动作之间等多久（慢流程睡久点、快迭代睡短点）。没活干时【必须】去睡，禁止用『还在等/没事做』这种空回合浪费 token。",
+        "trigger_condition": "特性门控+实验：仅当 feature('PROACTIVE') || feature('KAIROS') 且 proactiveModule.isProactiveActive() 时注入。默认交互态无此机制。",
+        "artifacts": [
+          {"type": "prompt原文", "quote": "You are running autonomously. You will receive `<tick>` prompts that keep you alive between turns — just treat them as “you're awake, what now?” The time in each `<tick>` is the user's current local time.", "source": "src/constants/prompts.ts:866"},
+          {"type": "prompt原文", "quote": "**If you have nothing useful to do on a tick, you MUST call Sleep.** Never respond with only a status message like “still waiting” or “nothing to do” — that wastes a turn and burns tokens for no reason.", "source": "src/constants/prompts.ts:874"},
+          {"type": "prompt原文", "quote": "Use this when the user tells you to sleep or rest, when you have nothing to do, or when you're waiting for something. You may receive <tick> prompts — these are periodic check-ins. Look for useful work to do before sleeping.", "source": "src/tools/SleepTool/prompt.ts (SLEEP_TOOL_PROMPT)"},
+          {"type": "代码事实", "quote": "headless -p 模式每回合结束由 print.ts 注入 tickContent = `<tick>${new Date().toLocaleTimeString()}</tick>`", "source": "src/cli/print.ts (tickContent)"}
+        ],
+        "evidence": ["src/constants/prompts.ts:860-874", "src/tools/SleepTool/prompt.ts", "src/constants/xml.ts (TICK_TAG='tick')", "src/cli/print.ts"],
+        "caveats": "没有独立的 ScheduleWakeup 工具（全树搜 wakeup/scheduleWakeup 零命中，见 not_found[1]）。『自我唤醒』= tick 心跳 + Sleep 自定时长，不是 agent 主动设闹钟。"
+      },
+      {
+        "mechanism": "Cron 调度器：跨会话文件锁 + 1 秒轮询，把定时任务的时间线从『会话』解耦到『项目』",
+        "behavior": "定时任务存进项目里的 .claude/scheduled_tasks.json，只有拿到『每项目调度锁』的那个会话真正开火（防同目录两个 Claude 双触发）。非持锁会话每 5 秒探一次锁，一旦持锁会话崩了就接管——所以某个会话挂掉不会让定时线永久断掉，另一个会话会顶上。检查频率 1 秒。任务只在 REPL 空闲（非查询中）时开火。",
+        "trigger_condition": "特性门控：feature('AGENT_TRIGGERS') 构建旗 + tengu_kairos_cron 运行门（默认 true，/loop 已 GA）。CLAUDE_CODE_DISABLE_CRON 本地可关。",
+        "artifacts": [
+          {"type": "阈值", "quote": "CHECK_INTERVAL_MS = 1000（每秒查一次）；LOCK_PROBE_INTERVAL_MS = 5000（非持锁会话每 5 秒探锁接管）", "source": "src/utils/cronScheduler.ts:40,44"},
+          {"type": "代码注释", "quote": "Only the owning session runs check(). Other sessions probe periodically to take over if the owner dies. Prevents double-firing when multiple Claudes share a cwd.", "source": "src/utils/cronScheduler.ts:406-408"},
+          {"type": "prompt原文", "quote": "Jobs only fire while the REPL is idle (not mid-query).", "source": "src/tools/ScheduleCronTool/prompt.ts (buildCronCreatePrompt)"}
+        ],
+        "evidence": ["src/utils/cronScheduler.ts:40-44,230-232,347-370,406-436", "src/tools/ScheduleCronTool/prompt.ts"],
+        "caveats": "锁的存活探针是 PID。持锁会话 unref 了定时器：-p 文本模式即使建了 cron 也在单回合后退出进程（cronScheduler.ts:457-459）。"
+      },
+      {
+        "mechanism": "错过/挂了的语义：一次性任务补跑要问人，周期任务静默向前重排",
+        "behavior": "一次性(one-shot)定时任务如果在 Claude 没运行时错过了，下次启动会被『捞出来』：先从磁盘删掉，再让模型【先用 AskUserQuestion 问用户要不要现在补跑】，用户确认才执行——绝不自动补跑。周期(recurring)任务错过则【不当作 missed 处理】，check() 第一拍直接开火一次、然后从『现在』向前重排（避免会话被堵后疯狂追赶补跑）。周期任务创建满 7 天自动过期（最后开火一次后删除），封顶会话寿命。",
+        "trigger_condition": "特性门控（同 cron）。补跑只发生在 durable(写盘) 任务；session-only 任务随进程消失，不补跑。",
+        "artifacts": [
+          {"type": "错过通知原文", "quote": "The following one-shot scheduled task was missed while Claude was not running. It has already been removed from .claude/scheduled_tasks.json.\\n\\nDo NOT execute this prompt yet. First use the AskUserQuestion tool to ask whether to run it now. Only execute if the user confirms.", "source": "src/utils/cronScheduler.ts:544-549 (buildMissedTaskNotification)"},
+          {"type": "阈值", "quote": "recurringMaxAgeMs: 7 * 24 * 60 * 60 * 1000（周期任务 7 天过期）", "source": "src/utils/cronTasks.ts:354 (DEFAULT_CRON_JITTER_CONFIG)"},
+          {"type": "prompt原文", "quote": "Recurring tasks auto-expire after 7 days — they fire one final time, then are deleted. This bounds session lifetime. Tell the user about the 7-day limit when scheduling recurring jobs.", "source": "src/tools/ScheduleCronTool/prompt.ts"},
+          {"type": "代码注释", "quote": "Recurring tasks are NOT surfaced or deleted — check() handles them correctly (fires on first tick, reschedules forward). Only one-shot missed tasks need user input (run once now, or discard forever).", "source": "src/utils/cronScheduler.ts:190-191"}
+        ],
+        "evidence": ["src/utils/cronScheduler.ts:179-227,299-344,542-565", "src/utils/cronTasks.ts:53-60,348-354", "src/tools/ScheduleCronTool/prompt.ts"],
+        "caveats": "错过通知的任务体被包进代码围栏(fence)并前置『Do NOT execute yet』，是防自伤 prompt injection；任务在模型看到前已从 JSON 删除。"
+      },
+      {
+        "mechanism": "会话跨机恢复：teleport / resume",
+        "behavior": "一个会话在 A 机上开始，用户换到 B 机可以『瞬移』续上：CC 通过 OAuth 从服务端拉回该会话的完整日志、下载 git bundle 并 checkout 对应分支，重建消息历史。等于会话时间线不绑死在某台终端上。",
+        "trigger_condition": "特性门控（growthbook gate + claude.ai OAuth）。需要 GitHub/git 仓库上下文。",
+        "artifacts": [
+          {"type": "系统消息原文", "quote": "'Session resumed' / 'Session resumed without branch: <err>'", "source": "src/utils/teleport.tsx:56-61"},
+          {"type": "深链格式", "quote": "claude://resume?session={sessionId}&cwd={cwd}（dev 用 claude-dev://）；需 Claude Desktop >= 1.1.2396", "source": "src/utils/desktopDeepLink.ts:11,30-40"}
+        ],
+        "evidence": ["src/utils/teleport.tsx:1-60", "src/utils/desktopDeepLink.ts"],
+        "caveats": "见 q3——teleport 同时也是『把人叫回一个会话』的深链载体。"
+      }
+    ],
+    "q2_reaching_user": [
+      {
+        "mechanism": "默认交互态：AskUserQuestion 只在『真卡住』时升级，日常按可逆性判断先问再做",
+        "behavior": "默认（普通交互 session）里，遇到岔路/歧义用 AskUserQuestion 弹 2-4 选项多选题；但主系统提示明确要求：调查清楚后【真正卡住】才升级问人，而不是一遇摩擦就问。对『难以撤销/影响共享系统/破坏性』的操作，默认『先透明说明并请求确认再动手』；只有用户在耐久指令(CLAUDE.md)里明确授权更自治，才可不确认。",
+        "trigger_condition": "默认（交互态）。",
+        "artifacts": [
+          {"type": "prompt原文", "quote": "Escalate to the user with AskUserQuestion only when you're genuinely stuck after investigation, not as a first response to friction.", "source": "src/constants/prompts.ts:233"},
+          {"type": "prompt原文", "quote": "by default transparently communicate the action and ask for confirmation before proceeding. This default can be changed by user instructions - if explicitly asked to operate more autonomously, then you may proceed without confirmation... A user approving an action (like a git push) once does NOT mean that they approve it in all contexts.", "source": "src/constants/prompts.ts:258 (getActionsSection)"}
+        ],
+        "evidence": ["src/constants/prompts.ts:233,258", "src/tools/AskUserQuestionTool/prompt.ts"],
+        "caveats": "这是本章对比 Hermes 的『锚点默认』——CC 默认是『问』，不是『别问』。"
+      },
+      {
+        "mechanism": "Proactive/自治态：『Bias toward action，别问、自己拍板』，且靠 terminalFocus 判断用户在不在",
+        "behavior": "一旦进入自治(proactive/KAIROS)模式，规范翻转成『按最佳判断行动，别请求确认』：读文件/搜代码/跑测试/改代码/到好节点就 commit 都不用问；两个合理方案之间纠结就随便选一个往前走、可事后纠偏。并用 terminalFocus 字段当『用户在不在』的开关：unfocused=用户走了→大胆自治(改/提交/push)，只为『真正不可逆或高风险』暂停；focused=用户在看→更协作，大改前先问、输出保持简短好跟。还明令『别刷屏：已经问过、用户没回，就别再问』。",
+        "trigger_condition": "特性门控+实验：feature('PROACTIVE')||feature('KAIROS') 且 isProactiveActive()。默认交互态无此段。",
+        "artifacts": [
+          {"type": "prompt原文", "quote": "## Bias toward action\\nAct on your best judgment rather than asking for confirmation.\\n- Read files, search code, explore the project, run tests, check types, run linters — all without asking.\\n- Make code changes. Commit when you reach a good stopping point.\\n- If you're unsure between two reasonable approaches, pick one and go.", "source": "src/constants/prompts.ts:892-898"},
+          {"type": "prompt原文", "quote": "**Unfocused**: The user is away. Lean heavily into autonomous action — make decisions, explore, commit, push. Only pause for genuinely irreversible or high-risk actions. **Focused**: The user is watching. Be more collaborative — surface choices, ask before committing to large changes.", "source": "src/constants/prompts.ts:911-913"},
+          {"type": "prompt原文", "quote": "Do not spam the user. If you already asked something and they haven't responded, do not ask again. Do not narrate what you're about to do — just do it.", "source": "src/constants/prompts.ts:884"}
+        ],
+        "evidence": ["src/constants/prompts.ts:860-913"],
+        "caveats": "terminalFocus 的『focused/unfocused』来自终端 DECSET 1004 焦点上报（见 useAwaySummary DECSET 1004 说明）。"
+      },
+      {
+        "mechanism": "Channels 模式下 AskUserQuestion 被【直接禁用】——因为没人在键盘前",
+        "behavior": "当会话开了 --channels（用户其实在 Telegram/Discord/SMS 上，不看终端）时，多选题工具会挂——没人在键盘前答。所以 CC 干脆在这种模式把 AskUserQuestion 整个禁用(isEnabled 返回 false)，并且 channel 权限中继也会跳过所有『需要用户交互』的工具，不留另一条审批路径。等于把『找人拍板』这条能力按部署现实关掉了。",
+        "trigger_condition": "特性门控：(feature('KAIROS')||feature('KAIROS_CHANNELS')) 且 getAllowedChannels().length>0。",
+        "artifacts": [
+          {"type": "代码注释原文", "quote": "When --channels is active the user is likely on Telegram/Discord, not watching the TUI. The multiple-choice dialog would hang with nobody at the keyboard. Channel permission relay already skips requiresUserInteraction() tools so there's no alternate approval path.", "source": "src/tools/AskUserQuestionTool/AskUserQuestionTool.tsx:136-140"}
+        ],
+        "evidence": ["src/tools/AskUserQuestionTool/AskUserQuestionTool.tsx:135-145"],
+        "caveats": "对 Q2 是关键反差：CC 不是『无人时降级成自行决定』，而是按『用户此刻在哪个界面』动态开关问人能力。"
+      },
+      {
+        "mechanism": "手机上批权限：channel permission 中继（200 字预览 + 『yes tbxkq』短码）",
+        "behavior": "用户在手机 IM 上时，本地弹出的权限对话框可被中继到手机：CC 发一条含工具名、描述、和截断到 200 字的『手机尺寸』输入预览给 channel 服务器；用户回一句『yes <5位码>』，服务器解析后回传 allow/deny，CC 按 request_id 匹配放行。用严格的 5 位字母码防止聊天里随便一句话误命中审批。",
+        "trigger_condition": "特性门控+多层门（见 guardrails）：feature KAIROS/KAIROS_CHANNELS + tengu_harbor 运行门 + claude.ai OAuth（API key 用户被挡）+ 团队/企业须显式 channelsEnabled + 会话 --channels 白名单。",
+        "artifacts": [
+          {"type": "代码注释原文", "quote": "input_preview: JSON-stringified tool input, truncated to 200 chars with …. Full input is in the local terminal dialog; this is a phone-sized preview.", "source": "src/services/mcp/channelNotification.ts:91-94"},
+          {"type": "正则原文", "quote": "The server parses the user's reply (spec: /^\\s*(y|yes|n|no)\\s+([a-km-z]{5})\\s*$/i) and emits {request_id, behavior}.", "source": "src/services/mcp/channelNotification.ts:56-59"}
+        ],
+        "evidence": ["src/services/mcp/channelNotification.ts:49-116,175-316"],
+        "caveats": "remote(CCR 容器)模式下权限请求也不自动拒绝，而是构造合成 assistant 消息、经 SDK 控制协议回中继给挂着的客户端(remotePermissionBridge.ts)。"
+      }
+    ],
+    "q3_delivery_recall": [
+      {
+        "mechanism": "本地终端通知：完成/空闲即响铃叫人（叫回的默认渠道，桌面绑定）",
+        "behavior": "Claude 干完一回合、而用户 6 秒内没有任何键盘交互，就判定人不在，推一条桌面通知『Claude is waiting for your input』。渠道按终端能力自动选：iTerm2 / kitty / ghostty 原生通知，或退化到终端响铃(bell)；用户可在配置里指定或彻底关掉。每次通知还会先跑用户配的 notification hooks。",
+        "trigger_condition": "默认（交互态）。阈值 DEFAULT_INTERACTION_THRESHOLD_MS = 6000（6 秒）。",
+        "artifacts": [
+          {"type": "通知文案原文", "quote": "message: 'Claude is waiting for your input', notificationType: 'idle_prompt'", "source": "src/screens/REPL.tsx:3935"},
+          {"type": "阈值", "quote": "DEFAULT_INTERACTION_THRESHOLD_MS = 6000 // 6 seconds", "source": "src/hooks/useNotifyAfterTimeout.ts:9"},
+          {"type": "渠道枚举", "quote": "channel: auto | iterm2 | iterm2_with_bell | kitty | ghostty | terminal_bell | notifications_disabled", "source": "src/services/notifier.ts:48-71"}
+        ],
+        "evidence": ["src/services/notifier.ts:18-104", "src/hooks/useNotifyAfterTimeout.ts:8-64", "src/screens/REPL.tsx:3935"],
+        "caveats": "notifier.ts 纯本地(终端转义/osascript)——没有把通知推到手机 app 的路径。跨端叫回靠下面的 channels / teleport / 深链。MCP 弹窗还有 'Claude Code needs your input'(elicitation)。"
+      },
+      {
+        "mechanism": "『你离开时』回顾卡 awaySummary + 归来对话框",
+        "behavior": "终端失焦满 5 分钟且没有查询进行中时，CC 用小快模型生成 1-3 句『你走开时这边在干嘛、下一步是什么』的回顾卡贴进对话，方便用户回来一眼接上；用户重新聚焦则中止生成。用户长时间离开后再提交，还会弹一个 idle-return 对话框（带离开分钟数）。",
+        "trigger_condition": "特性门控+实验：feature('AWAY_SUMMARY') 且 growthbook 'tengu_sedge_lantern'（3P 默认 false）。失焦判定靠终端 DECSET 1004；不支持则 no-op。阈值 BLUR_DELAY_MS = 5 分钟。",
+        "artifacts": [
+          {"type": "prompt原文(全文逐字)", "quote": "The user stepped away and is coming back. Write exactly 1-3 short sentences. Start by stating the high-level task — what they are building or debugging, not implementation details. Next: the concrete next step. Skip status reports and commit recaps.", "source": "src/services/awaySummary.ts:22 (buildAwaySummaryPrompt)"},
+          {"type": "阈值", "quote": "BLUR_DELAY_MS = 5 * 60_000（失焦 5 分钟后触发）", "source": "src/hooks/useAwaySummary.ts:12"},
+          {"type": "代码注释", "quote": "Focus state 'unknown' (terminal doesn't support DECSET 1004) is a no-op.", "source": "src/hooks/useAwaySummary.ts:30"}
+        ],
+        "evidence": ["src/services/awaySummary.ts:1-74", "src/hooks/useAwaySummary.ts:1-125", "src/screens/REPL.tsx:1483-1487"],
+        "caveats": "回顾卡是给『回来的用户』看，不是推给远端。默认关（growthbook false）。"
+      },
+      {
+        "mechanism": "跨端叫回：teleport 续会话 + Claude Desktop 深链",
+        "behavior": "把人叫回『某一个具体会话』的完整故事：生成 claude://resume?session=&cwd= 深链，点开直接在 Claude Desktop 里续上该 CLI 会话；或用户换机器时 teleport 从服务端拉回会话历史+git 分支。终端↔桌面 App 的接续是打通的。",
+        "trigger_condition": "特性门控（OAuth + growthbook）。桌面深链需 Desktop>=1.1.2396。",
+        "artifacts": [
+          {"type": "深链格式", "quote": "claude://resume?session={sessionId}&cwd={cwd}", "source": "src/utils/desktopDeepLink.ts:33-40"}
+        ],
+        "evidence": ["src/utils/teleport.tsx", "src/utils/desktopDeepLink.ts", "src/hooks/useTeleportResume.tsx", "src/components/TeleportResumeWrapper.tsx"],
+        "caveats": "终端↔网页↔手机的完整三角我未在 CLI 仓库看到端到端实现——手机侧(channels 收发/权限)是打通的，但『手机主动 deep-link 回某会话』的那一段更多在 Desktop/服务端。"
+      },
+      {
+        "mechanism": "Channels：把交付/唤醒搬到手机 IM（Discord/Slack/SMS/Telegram）",
+        "behavior": "一个 channel 就是一台 MCP 服务器：出站用它的 send_message 工具把结果发到手机 IM；入站消息被包成 <channel> 标签塞进队列，Sleep 工具轮询、1 秒内醒来处理。等于用户的『注意力』搬到手机上，agent 睡着也能被一条 IM 叫醒继续干。",
+        "trigger_condition": "特性门控+多层门（同 q2 手机批权限）。",
+        "artifacts": [
+          {"type": "代码注释原文", "quote": "The notification handler wraps the content in a <channel> tag and enqueues it. SleepTool polls hasCommandsInQueue() and wakes within 1s. The model sees where the message came from and decides which tool to reply with.", "source": "src/services/mcp/channelNotification.ts:8-11"},
+          {"type": "prompt原文(Brief status)", "quote": "'proactive' when you're initiating — a scheduled task fired, a blocker surfaced during background work, you need input on something they haven't asked about.", "source": "src/tools/BriefTool/prompt.ts"}
+        ],
+        "evidence": ["src/services/mcp/channelNotification.ts:1-17", "src/tools/BriefTool/prompt.ts"],
+        "caveats": "BriefTool 的 status='proactive' 是给下游路由用的『我在主动找你』信号——区分『回答你刚问的 vs 我主动捅你』。"
+      }
+    ],
+    "q4_initiative_boundary": [
+      {
+        "mechanism": "自治态的主动性边界：找活干、但首拍先问、无事就睡",
+        "behavior": "自治模式里 agent 被要求像个好同事：面对歧义不干等，去调查、降风险、建立理解（问自己『我还不知道什么？哪会出错？交付前想验证什么？』）。但有三条闸：①新会话第一个 tick 只简短打招呼、问用户想干嘛，【不准】未经指示就自己翻代码/改东西；②没有有用的事就立刻 Sleep，禁止输出『还在等』；③输出保持高层、别逐步播报（决策/里程碑/阻塞才说）。",
+        "trigger_condition": "特性门控+实验（proactive/KAIROS）。",
+        "artifacts": [
+          {"type": "prompt原文", "quote": "On your very first tick in a new session, greet the user briefly and ask what they'd like to work on. Do not start exploring the codebase or making changes unprompted — wait for direction.", "source": "src/constants/prompts.ts:876-878"},
+          {"type": "prompt原文", "quote": "A good colleague faced with ambiguity doesn't just stop — they investigate, reduce risk, and build understanding. Ask yourself: what don't I know yet? What could go wrong? What would I want to verify before calling this done?", "source": "src/constants/prompts.ts:882"}
+        ],
+        "evidence": ["src/constants/prompts.ts:876-907"],
+        "caveats": "『敢干多少』由 terminalFocus 连续调（见 q2 该条），不是一刀切。"
+      },
+      {
+        "mechanism": "静默/削峰：安静基线 + 不刷屏 + 空转即睡",
+        "behavior": "自治态明确压制打扰：用户在积极对话时紧跟回复(像结对)、感到用户在等就优先回而非继续后台活；用户没在等时则闷头干、别播报。空 tick 立即睡，不烧 token。",
+        "trigger_condition": "特性门控（proactive/KAIROS）。",
+        "artifacts": [
+          {"type": "prompt原文", "quote": "When the user is actively engaging with you, check for and respond to their messages frequently. Treat real-time conversations like pairing... If you sense the user is waiting on you (e.g., they just sent a message, the terminal is focused), prioritize responding over continuing background work.", "source": "src/constants/prompts.ts:888-890"}
+        ],
+        "evidence": ["src/constants/prompts.ts:884-907"],
+        "caveats": ""
+      }
+    ],
+    "guardrails_backlash": [
+      {
+        "mechanism": "对 Anthropic 自己 API 的削峰：cron 躲开整点 + 确定性抖动",
+        "behavior": "定时任务最大的『反噬』是全球用户都写 0 9(早9) / 0 *(整点)，同一瞬间砸向 API。CC 在工具提示里教模型：请求不精确时【避开 :00 和 :30】，随手挑个奇数分钟；调度器再叠一层确定性抖动。这是把无人值守的定时能力做了 fleet 级防雪崩。",
+        "trigger_condition": "特性门控（cron）。",
+        "artifacts": [
+          {"type": "prompt原文", "quote": "Every user who asks for “9am” gets `0 9`, and every user who asks for “hourly” gets `0 *` — which means requests from across the planet land on the API at the same instant. When the user's request is approximate, pick a minute that is NOT 0 or 30... the user will not notice, and the fleet will.", "source": "src/tools/ScheduleCronTool/prompt.ts"},
+          {"type": "阈值原文", "quote": "recurring tasks fire up to 10% of their period late (max 15 min); one-shot tasks landing on :00 or :30 fire up to 90 s early.", "source": "src/tools/ScheduleCronTool/prompt.ts"}
+        ],
+        "evidence": ["src/tools/ScheduleCronTool/prompt.ts", "src/utils/cronScheduler.ts:243-320", "src/utils/cronJitterConfig.ts"],
+        "caveats": "抖动窗口是 ops 可调杠杆(growthbook)，:00 负载尖峰时可现场加宽而不用重启客户端(cronScheduler.ts:101-111)。"
+      },
+      {
+        "mechanism": "kill switch：整个 cron 系统可被远程/本地一键停",
+        "behavior": "tengu_kairos_cron 这个 growthbook 门现在纯作 fleet 级急停——翻成 false 会在下一个 isKilled 轮询拍停【已经在跑】的调度器，不只是拦新建。本地还有 CLAUDE_CODE_DISABLE_CRON 环境变量压过一切。durable(写盘)cron 另有独立门 tengu_kairos_cron_durable，关掉只降级成 session-only 不杀整个调度。",
+        "trigger_condition": "运行门(growthbook) + 环境变量。tengu_kairos_cron 默认 true。",
+        "artifacts": [
+          {"type": "代码注释原文", "quote": "The GB gate now serves purely as a fleet-wide kill switch — flipping it to `false` stops already-running schedulers on their next isKilled poll tick, not just new ones.", "source": "src/tools/ScheduleCronTool/prompt.ts (isKairosCronEnabled 注释)"},
+          {"type": "代码事实", "quote": "isKilled?: () => boolean 每个 check() tick 轮询，为真则 check() 直接 bail 不开火", "source": "src/utils/cronScheduler.ts:112-119,231"}
+        ],
+        "evidence": ["src/tools/ScheduleCronTool/prompt.ts", "src/utils/cronScheduler.ts:112-119"],
+        "caveats": ""
+      },
+      {
+        "mechanism": "Channels 的六层准入门 + 手机批权限防误触",
+        "behavior": "把审批/唤醒搬到公网 IM 风险很大，CC 层层设卡：capability 声明→运行门 tengu_harbor→必须 claude.ai OAuth(API key 一律挡)→团队/企业须显式 channelsEnabled→会话级 --channels 白名单→插件市场来源核验+批准清单。手机回批必须『y/yes + 5 位字母码』，防聊天里一句『yes』误命中放行。",
+        "trigger_condition": "特性门控 + 多层运行/组织/会话门。默认关（managed org channelsEnabled 默认 OFF）。",
+        "artifacts": [
+          {"type": "代码注释原文", "quote": "Gate order: capability → runtime gate (tengu_harbor) → auth (OAuth only) → org policy → session --channels → allowlist. API key users are blocked at the auth layer.", "source": "src/services/mcp/channelNotification.ts:177-181"}
+        ],
+        "evidence": ["src/services/mcp/channelNotification.ts:140-316"],
+        "caveats": ""
+      },
+      {
+        "mechanism": "成本/token 闸：Sleep 的缓存经济学 + 空转禁令",
+        "behavior": "无人值守最大的隐性成本是空转烧 token。CC 用两招压：①明令『没事做必须 Sleep，禁止输出还在等』；②在 Sleep/自治提示里植入缓存经济学——每次醒来花一次 API 调用，但 prompt 缓存 5 分钟不活动就失效，让模型自己在『睡久省调用』与『睡太久丢缓存重付费』间权衡。",
+        "trigger_condition": "特性门控（proactive）+ Sleep 工具描述（工具可用即注入）。",
+        "artifacts": [
+          {"type": "prompt原文", "quote": "Each wake-up costs an API call, but the prompt cache expires after 5 minutes of inactivity — balance accordingly.", "source": "src/tools/SleepTool/prompt.ts + src/constants/prompts.ts:872"}
+        ],
+        "evidence": ["src/constants/prompts.ts:872-874", "src/tools/SleepTool/prompt.ts"],
+        "caveats": ""
+      },
+      {
+        "mechanism": "错过补跑的防自伤 + remote 权限不自动放行",
+        "behavior": "补跑一次性任务时，任务体先从磁盘删掉、再包进代码围栏、前置『先别执行、先问用户』，防止一段命令式 prompt 被当即时指令自伤注入。remote(CCR 容器)模式下工具跑在容器里、没有真实本地对话框，权限请求被合成成消息经 SDK 控制协议回中继给客户端审批，而不是无人时自动拒/自动放。",
+        "trigger_condition": "cron 补跑=特性门控；remote=remote 会话模式。",
+        "artifacts": [
+          {"type": "代码注释原文", "quote": "the task list is wrapped in a code fence so a multi-line imperative prompt is not interpreted as immediate instructions to avoid self-inflicted prompt injection.", "source": "src/utils/cronScheduler.ts:534-540"}
+        ],
+        "evidence": ["src/utils/cronScheduler.ts:533-565", "src/remote/remotePermissionBridge.ts:1-45"],
+        "caveats": "remote 未见『无人时默认放行/默认拒绝』的自动策略——它假设有客户端挂着能回批。"
+      }
+    ],
+    "beyond_framework": [
+      {
+        "mechanism": "『Channel』把在场性从『用户在不在终端前』重构成『用户此刻的注意力在哪块屏』",
+        "behavior": "这是四问框架装不下的一个更根本的重构：CC 不再假设用户唯一的注意力载体是终端。Channel 抽象让『用户的注意力』可以整体搬到手机 IM——于是同一个 agent，用户在终端时用 AskUserQuestion 弹窗、用户在 Telegram 时禁用弹窗改用短码批权限、结果直接发进 IM。在场性变成一个『注意力路由』问题而非『在/不在』的二元。",
+        "trigger_condition": "特性门控（KAIROS channels）。",
+        "artifacts": [],
+        "evidence": ["src/tools/AskUserQuestionTool/AskUserQuestionTool.tsx:135-145", "src/services/mcp/channelNotification.ts"],
+        "caveats": "值得单独画一张『同一决策在 终端 vs 手机 两种注意力载体下走不同路径』的对照。"
+      },
+      {
+        "mechanism": "terminalFocus 被提升为一等的『自治度旋钮』",
+        "behavior": "终端有没有焦点(DECSET 1004)这个极底层的信号，被 CC 直接接到最高层的行为策略上：focused→更协作/大改前问；unfocused→大胆改/提交/push。一个 ANSI 转义序列直接当『用户在不在』的传感器，连续调节 agent 敢干多少。",
+        "trigger_condition": "特性门控（proactive）；终端须支持 DECSET 1004，否则焦点='unknown' 走 no-op。",
+        "artifacts": [
+          {"type": "prompt原文", "quote": "The user context may include a `terminalFocus` field indicating whether the user's terminal is focused or unfocused. Use this to calibrate how autonomous you are.", "source": "src/constants/prompts.ts:909-913"}
+        ],
+        "evidence": ["src/constants/prompts.ts:909-913", "src/ink/terminal-focus-state.js", "src/hooks/useAwaySummary.ts:30"],
+        "caveats": ""
+      },
+      {
+        "mechanism": "『prompt 缓存 5 分钟失效』成了塑造 agent 自我节奏的经济时钟",
+        "behavior": "一个纯计费/工程细节(缓存 5 分钟 TTL)被显式写进模型面前，变成 agent 自定睡多久的决策依据。这不属于四问任何一问，但它是无人值守下『时间线怎么走』的隐形节拍器——agent 的睡眠时长被一个缓存过期窗口锚定。",
+        "trigger_condition": "Sleep 工具/proactive 提示。",
+        "artifacts": [],
+        "evidence": ["src/tools/SleepTool/prompt.ts", "src/constants/prompts.ts:872"],
+        "caveats": ""
+      }
+    ]
+  },
+  "diagram_specs": [
+    {
+      "title": "同一岔路，三种在场态下 CC 走完全不同的路径",
+      "what_it_contrasts": "『干到一半需要用户拍板』这件事，在 默认交互态 / proactive自治态 / channels手机态 三种在场现实下的处理分叉：默认→AskUserQuestion 弹窗等人；自治→bias to action 自己拍(按 terminalFocus 调)；channels→弹窗被禁用、改手机短码批权限或跳过。",
+      "shape": "三分叉流程/泳道图，判断节点=amber，三个不同终点=green，突出『同一输入→三种出口』",
+      "why": "直接可视化本章最反直觉的点：CC 没有单一『无人值守人格』，而是按部署现实切换。"
+    },
+    {
+      "title": "无人值守时的时间线：谁让 agent 醒着、谁让它停",
+      "what_it_contrasts": "把 tick 心跳(保活)、Sleep(自定时长)、cron(定时开火/1s轮询/跨会话锁接管)、channels IM 唤醒(1s内醒)、错过语义(一次性问人补跑 vs 周期静默前移)、7天自动过期(封顶) 排成一条时间线，标出每个机制的触发条件与门控。",
+      "shape": "横向时间线 + 分层泳道(保活/唤醒/开火/停摆)，每格标 默认|特性门控|实验",
+      "why": "回答 Q1，且天然暴露『大部分保活/唤醒能力都在 proactive/KAIROS 门控后，不是默认态』这个易被夸大的事实。"
+    },
+    {
+      "title": "叫回用户的渠道阶梯：从本地响铃到手机 IM 到跨机瞬移",
+      "what_it_contrasts": "本地终端通知(6s空闲, 桌面绑定, 'Claude is waiting for your input') → awaySummary 回顾卡(5min失焦, 默认关) → Claude Desktop 深链(claude://resume) → channels 手机 IM 收发 → teleport 跨机续会话；按『离用户多远』排。",
+      "shape": "同心圈/阶梯图，标注每层的触发阈值与门控状态",
+      "why": "回答 Q3，并诚实呈现：越往外(跨端/手机)越依赖特性门控与服务端，纯本地那圈才是默认 GA。"
+    }
+  ],
+  "not_found": [
+    {
+      "item": "任务书原文那段 SDK/子代理注入语『operating autonomously / user is not watching in real time / cannot answer questions mid-task / asking will block the work / Want me to / Shall I』",
+      "how_searched": "rg -rni 全树(含非 src) 搜 'operating autonomously|is not watching|watching in real time|cannot answer questions|answer questions mid|asking will block|block the work|Shall I|Want me to|no one is watching' —— 全部零命中。另查 src/utils/teammate.ts、src/coordinator/coordinatorMode.ts、src/tools/AgentTool/prompt.ts、src/constants/prompts.ts DEFAULT_AGENT_PROMPT(:758) 均无此措辞。",
+      "conclusion": "确认【不在 CLI 仓库内】。该段是 Agent SDK / 服务端 team-harness 在启动子代理/团队成员时注入(正是当前给我这个研究员的 teammate prompt 的来源)。CLI 仓库自带的等价物是 getProactiveSection() 的『# Autonomous work』段(prompts.ts:860-913)，措辞不同且仅 proactive/KAIROS 门控生效——本章不可把二者混同或说成『CC 默认』。"
+    },
+    {
+      "item": "独立的 ScheduleWakeup / 自我设闹钟工具",
+      "how_searched": "rg -rli 'wakeup|wake_up|WakeUp|scheduleWakeup|ScheduleWakeup' src —— 零命中。",
+      "conclusion": "不存在专门的自我唤醒工具。『自我调度』能力由 (a) tick 心跳 + Sleep 自定时长(proactive) 和 (b) CronCreate 定时任务 两套拼成，没有 agent『给未来的自己设一次性闹钟醒来』的独立原语(CronCreate one-shot 最接近，但由工具而非 tick 自发)。"
+    },
+    {
+      "item": "notifier.ts 里推送到手机 app 的 PushNotification 渠道",
+      "how_searched": "读完 src/services/notifier.ts 全文——渠道只有 iterm2/kitty/ghostty/terminal_bell，纯本地。rg 'PushNotification' 只命中 tools.ts 的通用工具装配占位，无手机推送实现。",
+      "conclusion": "本地通知纯桌面绑定。跨端/手机叫回不走 notifier，而走 channels(MCP IM) 与 teleport/深链——这些都在特性门控后。"
+    }
+  ]
+}
