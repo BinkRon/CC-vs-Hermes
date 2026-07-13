@@ -32,6 +32,12 @@ h1{font-size:34px;margin:.1em 0 .15em;letter-spacing:-.5px}
 .thesis{background:linear-gradient(120deg,#12241f,#0f1e2e);border:1px solid #234;
   border-left:4px solid var(--green);border-radius:12px;padding:18px 22px;margin:28px 0 8px;font-size:17px}
 .thesis b{color:var(--green)}
+/* 开篇导读范式（DSN-04）：TL;DR 绿标 + 00·问题 house 框——单独 review 用；合订本走 _design-system.html 单一真相 */
+.thesis .thesis-tag{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--green);margin-bottom:9px;opacity:.92}
+.problem{max-width:var(--col,100%);background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 26px;margin:16px 0 0}
+.problem p{font-size:16px;line-height:1.82;color:var(--text);margin:0 0 14px}
+.problem p:last-child{margin-bottom:0}
+.problem p b{font-weight:650}
 h2{font-size:24px;margin:52px 0 6px;padding-top:18px;border-top:1px solid var(--border)}
 h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 .lead{color:var(--muted);margin:0 0 20px}
@@ -223,19 +229,20 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 <div class="syn1">
 
   <div class="eyebrow"><span class="badge">综合① · 轴一</span><span class="tag">Loop 之内</span></div>
-  <h1>一个 Loop 是怎么设计的</h1>
+  <h1>综合①：一个 Loop 是怎么设计的</h1>
   <p class="subtitle">三侧拆完拼回来：一个回合的一生，与所有分叉的最终去向。</p>
-  <p class="metrics">一个回合 ＝ <b>8 站</b> &nbsp;·&nbsp; 三章分叉共 <b>8 处</b>：6 →改壳 / 1 →改模型 / 1 →例外 &nbsp;·&nbsp; 本章<b>只编织不开采</b>（每站每处分叉回指 01/02/03）</p>
 
   <div class="thesis">
+    <div class="thesis-tag">TL;DR</div>
     <p>读完三侧，最该带走的不是「两家有多不同」，而是两家的 Loop <span class="hl">八成是同一门手艺</span>——机械循环同构、装配骨架同一张、协议地板互相通用。真正的分叉只有 <b>8 处</b>，而且几乎全部通向两个变量：<b>敢多信这个模型</b>（信任，决定壳的厚度）；<b>拥不拥有这个模型</b>（所有权，决定有没有第二根杠杆）。</p>
     <p><span class="cc">Claude Code</span> 押注一个自家托管的强模型——通向两杠杆的 7 处分叉上，它的答案全是「不铺、不分、不训」，单杠杆且轻用；<span class="hm">Hermes</span> 面对一群参差的开源模型、又自己训模型——改壳、改模型两根杠杆一起拉。外加一处诚实的例外：有一处分叉谁的杠杆都不归，它只是「产品和底座长得不一样」。</p>
   </div>
 
-  <div class="story" style="margin-top:16px">
-    <p>前三章像三张解剖图：01 拆「循环为什么转得下去」，02 拆「每轮那个请求包怎么拼」，03 拆「吐出来的生料怎么加工」。每张图都对，但解剖图有个天生的缺陷——看完三张，你还是没见过这台机器<b>跑起来</b>的样子。</p>
-    <p>所以这一章干两件事：先把一个回合从头到尾走一遍（8 站，每站标清「这里两家一样」还是「这里分了叉」）；再把全部分叉收拢到一张图上，看它们到底汇向哪里。本章不新增任何机制——每一站、每处分叉，都回指三章里已过门的结论。</p>
+  <div class="sec"><span class="k">00 · 问题</span><h2>三张解剖图都对，可你还是没见过这台机器跑起来</h2></div>
+  <div class="problem">
+    <p>前三章像三张解剖图：01 拆「循环为什么转得下去」，02 拆「每轮那个请求包怎么拼」，03 拆「吐出来的生料怎么加工」。每张图都对——可解剖图有个天生的缺陷：<b>看完三张，你还是没见过这台机器跑起来的样子</b>。更要紧的是，三章各自拆出的那些分叉散落在各处，<b>它们到底通向哪里、是不是同几个变量在反复作祟，光靠解剖图也拼不出来</b>。</p>
   </div>
+  <p class="body">所以这一章不新增任何机制，只干两件事：先把一个回合从头到尾走一遍（8 站，每站标清「这里两家一样」还是「这里分了叉」），让机器真的转起来；再把全部分叉收拢到一张图上，看它们最终汇向哪里。每一站、每处分叉，都回指三章里已过门的结论。</p>
 
   <!-- ================= §01 上半 · 回合时间线 ================= -->
   <div class="sec">

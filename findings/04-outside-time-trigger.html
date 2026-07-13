@@ -36,6 +36,12 @@ h1{font-size:34px;margin:.1em 0 .15em;letter-spacing:-.5px}
 .thesis{background:linear-gradient(120deg,#12241f,#0f1e2e);border:1px solid #234;
   border-left:4px solid var(--green);border-radius:12px;padding:18px 22px;margin:28px 0 8px;font-size:17px}
 .thesis b{color:var(--green)}
+/* 开篇导读范式（DSN-04）：TL;DR 绿标 + 00·问题 house 框——单独 review 用；合订本走 _design-system.html 单一真相 */
+.thesis .thesis-tag{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--green);margin-bottom:9px;opacity:.92}
+.problem{max-width:var(--col,100%);background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 26px;margin:16px 0 0}
+.problem p{font-size:16px;line-height:1.82;color:var(--text);margin:0 0 14px}
+.problem p:last-child{margin-bottom:0}
+.problem p b{font-weight:650}
 
 /* 分节标题 */
 h2{font-size:24px;margin:52px 0 6px;padding-top:18px;border-top:1px solid var(--border)}
@@ -189,17 +195,18 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 <div class="ch04t">
 
   <div class="eyebrow"><span class="badge">第 4 篇 · 轴二 · Loop 之外</span><span class="tag">Loop 与时间 · 在场性</span></div>
-  <h1>你不在的时候，它把「你不在」当成什么</h1>
+  <h1>Loop 与时间：你不在的时候，它把「你不在」当成什么</h1>
   <p class="subtitle">交代完就走了——从这一刻起，它干活的时间线和你的注意力时间线彻底分了家。</p>
 
   <div class="thesis">
+    <div class="thesis-tag">TL;DR</div>
     <p style="margin:0 0 10px">你把要做的事交代完，人就走了。从这一刻起，agent 干活的时间线和你的注意力时间线<b>解了耦</b>——它继续走，你已经不在看。</p>
     <p style="margin:0">同样面对「你不在」，两家的读法相反：<span class="cc">CC</span> 把它当成一个<b>被持续测量、要设法弥合的信号</b>——设法把你的注意力找回来；<span class="hm">Hermes</span> 把它当成一个<b>由语境注定、要照章办的事实</b>——超时=没同意、错过=不补、无事=沉默。</p>
   </div>
 
-  <div class="story" style="margin-top:16px">
-    <p style="margin:0 0 10px">凌晨三点，你睡了。一个新 PR 刚合进来，或者你上周设的定时冒烟任务正好到点。</p>
-    <p style="margin:0">这段时间里，它得能<b>存在</b>、被叫醒、把活干完；万一半路卡住需要你拍板，它还得<b>找到你</b>；干完了，把结果送到你早上会看见的地方。<b>你不在，是常态，不是异常。</b></p>
+  <h2><span class="num">00</span>问题：你不在，才是这台机器的常态</h2>
+  <div class="problem">
+    <p>凌晨三点，你睡了。一个新 PR 刚合进来，或者你上周设的定时冒烟任务正好到点——agent 该动的时候，你不在。这段时间里它得能<b>存在</b>、被叫醒、把活干完；万一半路卡住需要你拍板，它还得<b>找到你</b>；干完了，把结果送到你早上会看见的地方。<b>你不在，是常态，不是异常</b>。于是真正的问题不是「它会不会干活」，而是：<b>当你不在，它到底把「你不在」这件事读成了什么——一个要设法弥合的缺口，还是一个照章办事的既定事实</b>？</p>
   </div>
 
   <h2><span class="num">01</span>你交出去的，是「在场监督权」</h2>

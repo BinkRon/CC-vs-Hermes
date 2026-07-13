@@ -36,6 +36,12 @@ h1{font-size:34px;margin:.1em 0 .15em;letter-spacing:-.5px}
 .thesis{background:linear-gradient(120deg,#12241f,#0f1e2e);border:1px solid #234;
   border-left:4px solid var(--green);border-radius:12px;padding:18px 22px;margin:28px 0 8px;font-size:17px}
 .thesis b{color:var(--green)}
+/* 开篇导读范式（DSN-04）：TL;DR 绿标 + 00·问题 house 框——单独 review 用；合订本走 _design-system.html 单一真相 */
+.thesis .thesis-tag{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--green);margin-bottom:9px;opacity:.92}
+.problem{max-width:var(--col,100%);background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 26px;margin:16px 0 0}
+.problem p{font-size:16px;line-height:1.82;color:var(--text);margin:0 0 14px}
+.problem p:last-child{margin-bottom:0}
+.problem p b{font-weight:650}
 
 /* 分节标题 */
 h2{font-size:24px;margin:52px 0 6px;padding-top:18px;border-top:1px solid var(--border)}
@@ -238,18 +244,18 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 <div class="ch05u">
 
   <div class="eyebrow"><span class="badge">第 5 篇 · 轴二 · Loop 之外</span><span class="tag">Loop 与用户 · 用户建模</span></div>
-  <h1>它该多懂用户，这份「懂」谁说了算</h1>
+  <h1>Loop 与用户：它该多懂用户，这份「懂」谁说了算</h1>
   <p class="subtitle">和 agent 打交道，是一场双重让渡——它记得住你交出去的东西吗？</p>
-  <p class="lead" style="font-size:14px;margin-bottom:4px"><span class="cc">CC</span> 把用户当四类记忆里的一类 · <span class="hm">Hermes</span> 单开一份 1375 字符的记忆档案 · 边界分软硬两层、各走一条路</p>
 
   <div class="thesis">
+    <div class="thesis-tag">TL;DR</div>
     <p style="margin:0 0 10px">你跟一个 agent 打交道，本质是一场<b>双重让渡</b>——你交出意图（想要什么，说给它听），也交出<b>行动权</b>（让它替你改文件、跑命令）。</p>
     <p style="margin:0">让渡内生两个期望：它得<b>懂</b>你的意图、它的行动得<b>顺</b>你的心意。所以「懂用户」不是锦上添花的功能，是委托关系里长出来的内生需求。这一章拆两家怎么定义「懂用户」、用什么手段做到、以及懂了之后凭什么不无条件照办。</p>
   </div>
 
-  <div class="story" style="margin-top:16px">
-    <p style="margin:0 0 10px">你昨天花十分钟跟它交代过你是谁：后端出身、第一次碰前端；讨厌它擅自 mock 数据库；这个项目的规矩是所有改动<b>合成一个 PR</b>、别拆；还嫌它答得太啰嗦。</p>
-    <p style="margin:0"><b>今天你新开一个对话——它还记得吗？</b> 留意这四句话，正好对应它该「懂」你的四个方面：你是谁、你的边界、你的规矩、你的口味。</p>
+  <h2><span class="num">00</span>问题：第二次打交道，它还得从头认识你吗</h2>
+  <div class="problem">
+    <p>你昨天花十分钟跟它交代过你是谁：后端出身、第一次碰前端；讨厌它擅自 mock 数据库；这个项目的规矩是所有改动<b>合成一个 PR</b>、别拆；还嫌它答得太啰嗦。今天你新开一个对话——<b>它还记得吗？还是又得从头认识你一遍？</b>这四句话，正好对应它该「懂」你的四个方面：你是谁、你的边界、你的规矩、你的口味。可一旦它真开始记你，问题就不止「记不记得」，而是：<b>该由谁来决定它记什么、记多深、记了之后归谁、又凭什么信</b>？</p>
   </div>
 
   <h2><span class="num">01</span>定义「懂用户」：看两家给记忆预设了什么样的空表</h2>

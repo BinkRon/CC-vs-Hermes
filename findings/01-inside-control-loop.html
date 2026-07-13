@@ -128,6 +128,14 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 .ch01 .lede .hm{color:var(--purple);font-weight:600}
 .ch01 .lede-note{max-width:100%;font-size:13.5px;line-height:1.66;color:var(--faint);margin:10px 0 0}
 
+/* TL;DR 绿标 + 00·问题 house 框已迁入 _design-system.html 单一真相（DSN-04·去 .ch01 scope）；下方保留一份供本章单独 review 时自包含 */
+.ch01 .thesis .thesis-tag{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--green);margin-bottom:9px;opacity:.92}
+.ch01 .problem{max-width:var(--col);background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:22px 26px;margin:16px 0 0}
+.ch01 .problem p{font-size:16px;line-height:1.82;color:var(--text);margin:0 0 14px}
+.ch01 .problem p:last-child{margin-bottom:0}
+.ch01 .problem p b{font-weight:650}
+
 /* 编辑式分节标题 —— 小字 kicker + 论断式大标题（去掉横线机械感） */
 .ch01 .sec{margin:60px 0 8px;max-width:var(--col)}
 .ch01 .sec .k{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:9px}
@@ -249,23 +257,24 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 <div class="wrap">
 <div class="ch01">
 
-  <div class="eyebrow"><span class="badge">轴一 · 控制侧</span><span class="tag">Loop 之内</span></div>
-  <h1>核心 Agent Loop</h1>
-  <p class="subtitle">模型每次只活一次调用；所谓连干六十轮，是壳一次次把它重新唤醒。</p>
-  <p class="metrics">模型一次调用只活一轮 &nbsp;·&nbsp; 续命重试几乎清一色<b>上限 3</b> &nbsp;·&nbsp; CC 高压纪律全在<b>条件层</b> &nbsp;·&nbsp; 按<b>模型</b>加压是 Hermes 独有轴（名单 8 家）</p>
+  <div class="eyebrow"><span class="badge">轴一 · Loop 之内</span><span class="tag">控制侧</span></div>
+  <h1>控制侧：核心 Agent Loop</h1>
+  <p class="subtitle">拆开 agent 那条「永不停歇」的主循环——它为什么转得下去，两家又在哪里分家。</p>
 
   <div class="thesis">
-    <p>「连续工作」不是模型的能力，是壳用<span class="hl">三层防线</span>撑起的一种幻觉：<b>机械层</b>一次次把模型重新唤醒，<b>纪律层</b>用写给模型的话拦住它偷懒，<b>强制层</b>用代码兜住它出错或想停。</p>
-    <p>最大的分歧藏在上面两层——<span class="cc">Claude Code</span> 默认赌模型自觉，<span class="hm">Hermes</span> 用壳去补模型的不足。<b>一个默认赌模型，一个补模型。</b></p>
+    <div class="thesis-tag">TL;DR</div>
+    <p>「连续工作」不是模型的能力，是壳造出来的幻觉——模型每一轮都被重新喂进整段历史、再被唤醒一次。壳用<span class="hl">三层防线</span>撑住循环：机械层（唤醒重发）、纪律层（写给模型的话、拦它偷懒）、强制层（用代码兜住出错与想停）。</p>
+    <p>机械层两家几乎同构；<b>分歧全在后两层</b>——<span class="cc">Claude Code</span> 默认赌模型自觉，<span class="hm">Hermes</span> 用壳去补模型的不足。</p>
   </div>
-  <p class="lede-note">本章只讲「循环为什么转下去」；上下文怎么拼、压缩怎么做见 02 章，输出块怎么处置、每类错误怎么办见 03 章。</p>
+  <p class="lede-note">本章只讲循环为什么转下去；上下文怎么拼、压缩怎么做见 02 章，输出块与错误处置见 03 章。</p>
 
-  <div class="sec"><span class="k">The illusion</span><h2>模型说完即死，『连续工作』从何而来</h2></div>
-  <div class="story">
-    <p>一个大模型的本质是一问一答：给它一段文字，它吐出一段文字，然后这次调用就结束了——它没有后台进程，也没有留在原地等下一步的能力。可我们看到的 agent 却能连着干六十轮：读代码、改文件、跑测试、看到报错再改。<b>这不是模型进化出了持久力，是壳制造出来的一种幻觉。</b></p>
-    <p>机关很朴素。模型这一轮想调什么工具，壳就替它把工具真的跑一遍，把结果拼回那段对话历史，然后带着整段加长的历史<b>再发起一次全新的调用</b>。模型所谓的「记忆」，其实就是每一轮被重新喂进去的那份历史——两家做法一模一样：上一轮的历史、模型这轮说的话、工具的执行结果，三段接龙成下一次调用的输入。</p>
-    <p>于是「能一直工作」可以拆成三个互不相同的问题：壳凭什么再调用一次（<b>机械层</b>）？模型凭什么不偷懒、不提前收工（<b>纪律层</b>）？模型想停下、或者要崩的时候，壳怎么办（强制层）？这三个问题的答案，就是本章要拆的三层防线。</p>
+  <div class="sec"><span class="k">00 · 问题</span><h2>模型说完就死，「连续工作」到底从哪儿来</h2></div>
+  <p class="body">这一章不谈抽象循环，只追一件具体的怪事：模型明明「说完即死」，agent 却像不知疲倦。</p>
+  <div class="problem">
+    <p>一个大模型每次调用只活一轮：你给它一段文字，它吐回一段文字，这次调用就结束了——它没有后台进程，也没有留在原地等下一步的能力。<b>说完，就死。</b>可我们看到的 agent 却能连着干几十轮：读代码、改文件、跑测试、看到报错再回去改，中途几乎不用你插手。这份不知疲倦的「连续工作」，到底是从哪儿来的？</p>
+    <p>把这个「凭什么」拆开，其实是三个层层递进的问题。头一个：模型每轮说完就死，<b>壳凭什么能把它再叫起来一次</b>、让循环继续往下推？就算壳能一直叫醒它，第二个问题跟着就来了——<b>模型凭什么不偷懒</b>？它完全可以丢下一份计划、或一句「我这就去做」就想收工。最后，模型真要停下、或者眼看就要崩了（工具报错、吐出空响应、话说到一半被截断），<b>壳又怎么兜住</b>、不让这一整轮的活白白报废？</p>
   </div>
+  <p class="body">头一个问题的机关其实很朴素：模型这一轮想调什么工具，壳就替它把工具真的跑一遍，把结果拼回那段对话历史，然后带着整段加长的历史再发起一次全新的调用。模型所谓的「记忆」，就是每一轮被重新喂进去的那份历史——两家做法一模一样。这三个问题的答案，正好对应壳的<b>三层防线</b>：机械层负责唤醒、纪律层拦住偷懒、强制层兜住出错与想停。而两家从头一个问题起就开始分道——分歧最大的，是后两个。下面就逐层拆。</p>
   <p class="body">两个补充。其一，物理上「agent 在工作」，是壳在一段段地把一个生成器往前摇——正因如此，中断、压缩、恢复才能干净地插在两段调用之间。其二，会话越滚越长，迟早撑爆模型的上下文窗口；让长会话不爆窗口靠的是上下文压缩——那是维持循环能转下去的地基，细节留给 02 章。</p>
 
   <div class="sec"><span class="k">Layer 1</span><h2>第一层·机械续命：继续还是收工，只看一个开关</h2></div>

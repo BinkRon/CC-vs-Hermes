@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
-<title>轴二 · Loop 之外 · Loop 与自己</title>
+<title>轴二 · Loop 之外 · Loop 的 self-improvement</title>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
 <style>
 /* ============ 设计系统（所有 findings 页面复用这套 <style> 与 <script>）============ */
@@ -36,6 +36,12 @@ h1{font-size:34px;margin:.1em 0 .15em;letter-spacing:-.5px}
 .thesis{background:linear-gradient(120deg,#12241f,#0f1e2e);border:1px solid #234;
   border-left:4px solid var(--green);border-radius:12px;padding:18px 22px;margin:28px 0 8px;font-size:17px}
 .thesis b{color:var(--green)}
+/* 开篇导读范式（DSN-04）：TL;DR 绿标 + 00·问题 house 框——单独 review 用；合订本走 _design-system.html 单一真相 */
+.thesis .thesis-tag{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--green);margin-bottom:9px;opacity:.92}
+.problem{max-width:var(--col,100%);background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 26px;margin:16px 0 0}
+.problem p{font-size:16px;line-height:1.82;color:var(--text);margin:0 0 14px}
+.problem p:last-child{margin-bottom:0}
+.problem p b{font-weight:650}
 
 /* 分节标题 */
 h2{font-size:24px;margin:52px 0 6px;padding-top:18px;border-top:1px solid var(--border)}
@@ -135,20 +141,25 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 .slf .artifact .lbl{display:block;font-family:inherit;color:var(--faint);font-size:11px;
   letter-spacing:.4px;margin-bottom:8px;text-transform:uppercase}
 .slf .artifact .hl{color:var(--amber)}
-.slf .hard{color:var(--muted);font-size:15px;margin:10px 0 0}
 .slf .decode{color:var(--faint);font-size:13px;line-height:1.6;margin:10px auto 0;max-width:760px;text-align:left}
 </style>
 <div class="slf">
 
   <div class="eyebrow"><span class="badge">第 8 篇 · 轴二 · Loop 之外</span><span class="tag">控制回路 · 积累环闭合 · 评估环断口</span></div>
-  <h1>Loop 与自己</h1>
-  <p class="subtitle">缺的不是自改手段，而是评估环节</p>
+  <h1>Loop 的 self-improvement：自改的手段都在，评估的环节缺席</h1>
+  <p class="subtitle">两家都能改写自己、都会把经验写回下一轮——却都没有一段代码，回头确认这次自改到底改对了没有。</p>
 
   <div class="thesis">
+    <div class="thesis-tag">TL;DR</div>
     <p>自我进化看起来像训练问题，其实是一个<b>控制回路</b>问题。两家都具备自改的手段（写记忆、造技能）和固化的机制（写盘、下次会话载入），<b>积累这半个回路是闭合的</b>——写入的经验，下一轮一定会被重新读到。</p>
     <p>缺的是<b>评估</b>这一环：<b>没有任何代码在一次自改之后，去检验它是否真的改善了后续结果</b>。评估缺席，回路就无法真正闭合。差别只在这一环由谁来补：<span class="cc">CC</span> 把评估外包给厂商，<span class="hm">Hermes</span> 拥有模型、却尚未把评估构建出来。</p>
   </div>
-  <p class="hard">自改手段 两家都有 · 运行时评估 两家都缺 · 这一环由谁补：<span class="cc">CC</span> 外包厂商 · <span class="hm">Hermes</span> 尚未构建</p>
+
+  <h2><span class="num">00</span>问题：自我进化，进化的是「变好」还是「变大」</h2>
+  <div class="problem">
+    <p>「自我进化」是这类 agent 最诱人的一个承诺：用得越久，它越懂你、越能干，仿佛会自己成长。这个画面背后藏着一个更基本、也更少被追问的问题——<b>一个 agent 说自己在自我进化，它究竟在进化什么：是真的变得更好，还是只是攒下越来越多的东西？</b></p>
+    <p>两家确实都在不停地往磁盘写记忆、造技能，下次开机再读回来，积累这件事实打实地转着。但<b>攒得多，不等于变得好</b>。于是真正的问题落在一个很具体的地方：<b>有没有哪一段代码，在一次自改之后，回头确认过这次改动真的让后来的结果变好了？</b>这一章要挖的，正是被「自我进化」四个字盖住的这道缺口——它到底在闭合哪半个回路。</p>
+  </div>
 
   <h2><span class="num">01</span>先厘清一个误读：你的使用没有在重训它的权重</h2>
   <p class="lead">Hermes 把自己写成「self-improving」，README 第一句就自称自带学习闭环。最容易产生的误读是「你每天跟它聊天，就在实时重训它的权重」——这个读法不成立，两家代码都不支持。</p>

@@ -18,7 +18,7 @@ CHAPTERS = [
     {"file": "05-outside-user.html", "group": "轴二 · Loop 之外", "label": "05 Loop 与用户", "id": "ch-05"},
     {"file": "06-outside-environment.html", "group": "轴二 · Loop 之外", "label": "06 Loop 与环境", "id": "ch-06"},
     {"file": "07-outside-multiagent.html", "group": "轴二 · Loop 之外", "label": "07 Loop 与其他 Agent", "id": "ch-07"},
-    {"file": "08-outside-self-improvement.html", "group": "轴二 · Loop 之外", "label": "08 Loop 与自己", "id": "ch-08"},
+    {"file": "08-outside-self-improvement.html", "group": "轴二 · Loop 之外", "label": "08 Loop 的 self-improvement", "id": "ch-08"},
     {"file": "SYN-outside-story.html", "group": "综合", "label": "综合② Loop 之外怎么设计", "id": "ch-syn2"},
 ]
 

@@ -32,6 +32,12 @@ h1{font-size:34px;margin:.1em 0 .15em;letter-spacing:-.5px}
 .thesis{background:linear-gradient(120deg,#12241f,#0f1e2e);border:1px solid #234;
   border-left:4px solid var(--green);border-radius:12px;padding:18px 22px;margin:28px 0 8px;font-size:17px}
 .thesis b{color:var(--green)}
+/* 开篇导读范式（DSN-04）：TL;DR 绿标 + 00·问题 house 框——单独 review 用；合订本走 _design-system.html 单一真相 */
+.thesis .thesis-tag{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--green);margin-bottom:9px;opacity:.92}
+.problem{max-width:var(--col,100%);background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 26px;margin:16px 0 0}
+.problem p{font-size:16px;line-height:1.82;color:var(--text);margin:0 0 14px}
+.problem p:last-child{margin-bottom:0}
+.problem p b{font-weight:650}
 h2{font-size:24px;margin:52px 0 6px;padding-top:18px;border-top:1px solid var(--border)}
 h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 .lead{color:var(--muted);margin:0 0 20px}
@@ -266,22 +272,23 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 <div class="ch03">
 
   <div class="eyebrow"><span class="badge">轴一 · 输出行动侧</span><span class="tag">Loop 之内</span></div>
-  <h1>模型吐生料，壳每轮加工两样成品</h1>
+  <h1>输出行动侧：模型吐生料，壳每轮加工两样成品</h1>
   <p class="subtitle">一样是能用的行动，一样是能回传给模型的历史。</p>
-  <p class="metrics">一次响应 = <b>多块混排</b>（推理 / 说给你听 / 要动手） &nbsp;·&nbsp; 壳每轮开<b>两条加工线</b> &nbsp;·&nbsp; 底层协议地板<b>两家共享</b> &nbsp;·&nbsp; 上层 Hermes 多铺<b>两层</b>（且两股根因不同）</p>
 
   <div class="thesis">
+    <div class="thesis-tag">TL;DR</div>
     <p>模型一次吐出的不是一句话，是一叠<span class="hl">异构块</span>——有它自己想的（推理）、有说给你听的（正文）、有要动手的（工具调用），混在一坨里。壳每一轮干的是两件加工活：把这叠生料变成 <b>① 能用的行动</b>、<b>② 能合法回传给模型的历史</b>。</p>
     <p>两条加工线结构一模一样——底层一层<b>协议地板</b>两家共享（<span class="cc">CC</span> 这层一点不薄，回传前重塑是它最厚的工程）；上面 <span class="hm">Hermes</span> 各多铺一层：行动线多铺<b>弱模型语义纠偏</b>、历史线多铺<b>异质 provider 适配</b>。这是两股<span class="hl">不同的根因</span>，不是一股。CC 之所以能不铺，只因它只伺候<b>一个受托管模型 + 一个 API</b>。</p>
   </div>
   <p class="lede-note">本章只讲「模型吐的块本轮怎么消费、回传前怎么规整」；循环为什么不致死、每类错误怎么续命见 01 章；每轮新塞什么进请求、历史怎么压缩见 02 章。</p>
 
-  <div class="sec"><span class="k">The raw material</span><h2>你以为模型回你一句话，其实它吐回来一叠块</h2></div>
-  <div class="story">
-    <p>你让 agent 改一行配置。它「回答」你的时候，底层其实一次性吐回了几段性质完全不同的东西：一段它自己的盘算（该改哪、会不会连累别处）、一句说给你听的话（「我来改」）、还有一条真要落到磁盘上的动作（改 config 第 12 行）。这三样<b>挤在同一次响应里</b>，壳收到的是一叠混排的块，不是一句干净的指令。</p>
-    <p>于是壳每一轮都要把这叠生料<b>拆开、分类、分别加工</b>。哪些是「要动手」的，得挑出来真去执行——这条是<b>行动线</b>；而这一整轮（它想的、说的、干的，加上工具跑出来的结果）又必须<b>原样塞回下一次调用</b>，好让模型「记得」自己刚才干了啥——这条是<b>历史线</b>。</p>
-    <p>本章就沿这两条线各走一遍。你会看到：两条线的<b>底层地板两家几乎一样</b>，真正的分野都在上面那薄薄一层——而且行动线和历史线上那一层，<b>是被两件完全不同的事逼出来的</b>。</p>
+  <div class="sec"><span class="k">00 · 问题</span><h2>你以为模型回你一句话，其实它吐回来一叠块</h2></div>
+  <p class="body">这一章不追"模型说了什么"，只追一件事：模型一次吐回来的那叠东西，壳每一轮到底拿它怎么办。</p>
+  <div class="problem">
+    <p>你让 agent 改一行配置。它「回答」你的时候，底层其实一次性吐回了几段性质完全不同的东西：一段它自己的盘算（该改哪、会不会连累别处）、一句说给你听的话（「我来改」）、还有一条真要落到磁盘上的动作（改 config 第 12 行）。这三样<b>挤在同一次响应里</b>，壳收到的不是一句干净的指令，是一叠混排的块。问题就在这儿：<b>壳每一轮拿这叠混排的生料，到底要做成什么</b>？而两家做的，<b>又在哪儿一样、哪儿不一样</b>？</p>
   </div>
+  <p class="body">于是壳每一轮都要把这叠生料<b>拆开、分类、分别加工</b>。哪些是「要动手」的，得挑出来真去执行——这条是<b>行动线</b>；而这一整轮（它想的、说的、干的，加上工具跑出来的结果）又必须<b>原样塞回下一次调用</b>，好让模型「记得」自己刚才干了啥——这条是<b>历史线</b>。</p>
+  <p class="body">本章就沿这两条线各走一遍。你会看到：两条线的<b>底层地板两家几乎一样</b>，真正的分野都在上面那薄薄一层——而且行动线和历史线上那一层，<b>是被两件完全不同的事逼出来的</b>。</p>
 
   <div class="sec"><span class="k">Anatomy A</span><h2>一次响应不是一句话，是一叠块——每块有两种命运</h2></div>
   <p class="body">先把模型一次响应摊开。它不是一段文字，是<b>一叠块</b>：推理块、正文块、工具调用块，可以混排、可以多个。壳收到后第一件事就是逐块认领——而每一块都有两种命运要分别交代：<b>这一轮怎么用它</b>（行动线的活）、<b>怎么把它塞回历史</b>（历史线的活）。下面这张表，就是后面两条线的预告。</p>

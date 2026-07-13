@@ -32,6 +32,12 @@ h1{font-size:34px;margin:.1em 0 .15em;letter-spacing:-.5px}
 .thesis{background:linear-gradient(120deg,#12241f,#0f1e2e);border:1px solid #234;
   border-left:4px solid var(--green);border-radius:12px;padding:18px 22px;margin:28px 0 8px;font-size:17px}
 .thesis b{color:var(--green)}
+/* 开篇导读范式（DSN-04）：TL;DR 绿标 + 00·问题 house 框——单独 review 用；合订本走 _design-system.html 单一真相 */
+.thesis .thesis-tag{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--green);margin-bottom:9px;opacity:.92}
+.problem{max-width:var(--col,100%);background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 26px;margin:16px 0 0}
+.problem p{font-size:16px;line-height:1.82;color:var(--text);margin:0 0 14px}
+.problem p:last-child{margin-bottom:0}
+.problem p b{font-weight:650}
 h2{font-size:24px;margin:52px 0 6px;padding-top:18px;border-top:1px solid var(--border)}
 h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 .lead{color:var(--muted);margin:0 0 20px}
@@ -322,22 +328,23 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 <div class="ch02">
 
   <div class="eyebrow"><span class="badge">轴一 · 输入侧</span><span class="tag">Loop 之内</span></div>
-  <h1>每轮那个请求怎么拼出来</h1>
+  <h1>输入侧：每轮那个请求怎么拼出来</h1>
   <p class="subtitle">壳每一轮要现拼一个发给模型的请求包——这个包分三层，你以为每轮全新，其实八成逐字复用。</p>
-  <p class="metrics">一次请求 = <b>静态前缀 + 工具 + 历史与每轮注入</b> &nbsp;·&nbsp; 两家都冻前缀吃缓存 &nbsp;·&nbsp; CC 面对 <b>1 个</b>模型 / Hermes 前缀按<b>模型名分叉</b> &nbsp;·&nbsp; 压缩都「先删后摘」外包给 LLM &nbsp;·&nbsp; 训回权重是 <b>Hermes 独有</b></p>
 
   <div class="thesis">
+    <div class="thesis-tag">TL;DR</div>
     <p>拼同一个请求包，两家的手艺<span class="hl">八成是重合的</span>——都为吃缓存把稳定内容冻在最前，都把每轮变化的东西塞进消息窗口、变了才补，都跑几乎一样的「先删后摘」压缩阶梯。</p>
     <p>真正的分叉都挤在同几条缝上，而每条缝都在泄露<b>它到底是什么</b>：<span class="cc">Claude Code</span> 首先是个<b>产品</b>（动态层塞满 IDE、终端、任务的信号）；<span class="hm">Hermes</span> 首先是个<b>面对一群自家开源模型的拥有者</b>（连冻在最前的『静态』前缀都得按模型分叉，且只有它能把压缩训回权重）。</p>
   </div>
   <p class="lede-note">本章只拆「每轮那个请求包怎么拼、分几层」；循环为什么能一直转下去见 01 章；记忆<b>怎么写、怎么蒸馏、跨会话怎么演化</b>的完整生命周期见 08／05 章。</p>
 
-  <div class="sec"><span class="k">The illusion</span><h2>你以为每轮是一份新输入，其实八成是逐字搬过来的</h2></div>
-  <div class="story">
-    <p>直觉里，模型每轮"看到"的，应该是一份为这一轮现写的输入。实际恰恰相反——壳每一轮都在拼<b>同一个请求包</b>，而这个包的绝大部分，是上一轮<b>逐字不变</b>地搬过来的。</p>
-    <p>原因是钱和速度。给模型发一次请求，最贵的成本是让它把长长的前缀重新"读"一遍；只要前缀一个字节都没变，服务端就能"认出这叠没动过"、直接命中缓存、又快又省（这就是 prompt cache）。于是两家做同一件事：把几乎不变的东西（身份守则、工具目录）死死钉在最前面当"冻结前缀"，把每轮要变的东西全赶到后面去——为的就是别惊动缓存。</p>
-    <p>所以"每轮那个请求怎么拼"，可以干净地拆成三层：最前面<b>冻起来吃缓存的静态层</b>，后面<b>每轮现塞进去的动态层</b>，以及当整个包快撑爆窗口时才启动的<b>压缩应急阀</b>。这一章就沿这三层各走一遍——你会看到两家在每一层都先高度趋同，再在同一处分叉。</p>
+  <div class="sec"><span class="k">00 · 问题</span><h2>你以为每轮是一份新输入，其实八成是逐字搬过来的</h2></div>
+  <p class="body">这一章不谈抽象的「上下文管理」，只追一件反直觉的事：模型每轮"看到"的那份输入，绝大部分根本不是这一轮写的。</p>
+  <div class="problem">
+    <p>直觉里，模型每轮"看到"的，应该是一份为这一轮现写的输入。实际恰恰相反——壳每一轮都在拼<b>同一个请求包</b>，而这个包的绝大部分，是上一轮<b>逐字不变</b>地搬过来的。于是那个"凭什么"就冒了出来：一个请求包由哪几部分组成，<b>哪些逐字不变、哪些每轮才换，壳又凭什么这么分</b>？更奇的是，两家壳的分法几乎一模一样——<b>是什么共同的约束，逼得它们不约而同都这么拼</b>？</p>
   </div>
+  <p class="body">头一个"凭什么"的答案朴素得意外：钱和速度。给模型发一次请求，最贵的成本是让它把长长的前缀重新"读"一遍；只要前缀一个字节都没变，服务端就能"认出这叠没动过"、直接命中缓存、又快又省（这就是 prompt cache）。于是两家做同一件事：把几乎不变的东西（身份守则、工具目录）死死钉在最前面当"冻结前缀"，把每轮要变的东西全赶到后面去——为的就是别惊动缓存。</p>
+  <p class="body">所以"每轮那个请求怎么拼"，可以干净地拆成三层：最前面<b>冻起来吃缓存的静态层</b>，后面<b>每轮现塞进去的动态层</b>，以及当整个包快撑爆窗口时才启动的<b>压缩应急阀</b>。这一章就沿这三层各走一遍——你会看到两家在每一层都先高度趋同，再在同一处分叉。</p>
 
   <div class="sec"><span class="k">The anatomy</span><h2>一次请求长什么样：两家共享的三层装配骨架</h2></div>
   <p class="body">先把一次请求摊平成一张图。最该看清的不是每一格写了什么，而是<b>两家的装配骨架几乎是同一张</b>——差异不在骨架，而在骨架的每一层内部（后面三节逐层拆）。自上而下就是发给模型的顺序：冻结的静态层在最前吃缓存，动态层每轮补在后面，压缩阀只在快撑爆时才动。</p>
