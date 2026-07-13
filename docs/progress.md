@@ -5,7 +5,7 @@
 > **格式契约见 `contract.md` 契约 4**（区块定义 / 接棒规则 / done 即迁档 / 每活跃需求出现且仅一次）。改结构先改契约、再改本文件。
 > 状态图例：🔴 在做（有 agent 推进中）· 🟡 等谁（停下等 PM）· ⚪ 接下来（未开工排队）
 
-**📍 此刻**：主线 11 篇已成稿过门；轴一结构手术四批（CH-A1R-01~04）已闭环。**轴二整改 campaign `CH-A2R` 首篇 `CH-A2R-05`（用户章）于 2026-07-08 完成——过三门并入合订本、置 done**（结论见 `archive.md`；本轮把第 2 节重设为「一条记忆的一生」三拍＋hero 时间轴、第 5 节重构三层记忆矩阵＋「用户是谁」反思收尾，门修正了「CC 后台通路默认性」以偏概全）。**`CH-A2R-01`（时间章）已于 2026-07-08 领取开工**（researching；PM 已批准新设计：脊＝「两条时间线的解耦与再对齐」，04/05 边界拍板＝05 答「懂你」、04 答「够得着你」，见「在做」任务块）。**PM 已定（2026-07-08）：`CH-A2R-05` 立为 campaign 样板**（方法样板＝其六拍推演＋三层收尾＋防「默认→绝对」门纪律）；02/03/04 随即解锁可领（见「接下来」）。`CH-A2R-01` 继续做时间章、不再担样板 gate。**`CH-A2R-04`（自己·08）于 2026-07-08 领取开工**（researching·与 01 并行）：PM 本 session 重定框架——旧「训练证伪」薄章（记忆/技能自造都已划给 05、只剩训练这根仓库外不可证的杠杆）转向**「自我进化＝控制回路问题」**，规模 S→L，双库定向研究已派（验控制回路五环各接通到哪、重点第 4 环评估/选择齿是否存在），立场只做实然。见「在做」任务块。
+**📍 此刻**：主线 11 篇已成稿过门；轴一结构手术四批（CH-A1R-01~04）已闭环。**轴二整改 campaign `CH-A2R` 首篇 `CH-A2R-05`（用户章）于 2026-07-08 完成——过三门并入合订本、置 done**（结论见 `archive.md`；本轮把第 2 节重设为「一条记忆的一生」三拍＋hero 时间轴、第 5 节重构三层记忆矩阵＋「用户是谁」反思收尾，门修正了「CC 后台通路默认性」以偏概全）。**`CH-A2R-01`（时间章）于 2026-07-08 完成**——脊＝真分野「它靠什么知道你不在」（CC 测量的信号·多门控 vs Hermes 语境注定 CLI/网关/cron 三态），四诉求（干得完/找得到我 Hero 双面板/送得到我/别乱来）+ verdict「注意力路由器 vs 无人值守规约」+ 反思「缝隙 vs 生效中的委托」；过四门（Codex 采纳 4 处必修·含 cron 反向纠偏 GA 非门控）并入合订本、置 done（结论见 `archive.md`）。**PM 已定（2026-07-08）：`CH-A2R-05` 立为 campaign 样板**（方法样板＝其六拍推演＋三层收尾＋防「默认→绝对」门纪律）；02/03/04 随即解锁可领（见「接下来」）。`CH-A2R-01` 继续做时间章、不再担样板 gate。**`CH-A2R-04`（自己·08）于 2026-07-09 完成**——PM 重定框架从「训练证伪」薄章转向**「自我进化＝控制回路问题」**（两家都闭合积累环、都缺运行时评估环；非对称=CC 把评估外包厂商真闭合但在会话外·Hermes 拥有模型造了最自主自改却改进回路最不闭合），过四门（Codex 额度挂→手动核载重制品；独立完整性门可放行无必修）并入合订本、置 done（结论见 `archive.md`）。**本 session PM 定新规矩**：标题/立论用专业术语（评估/控制回路/信用分配）非俏皮比喻（眼/手/尺子/机器）、禁夸张（0.5 秒）——已写进 `design-principles.md` Part 1 明线 + 记忆；据此重做 08 标题/thesis/重画 mermaid（积累环实线闭合/评估环虚线缺失）。**`DSN-04`（开篇导读范式·铺全书）于 2026-07-09 领取并推进**——PM 定 scope＝只铺 6 章（02/03/04/05/07/SYN①，06/08/SYN② 随各自改写吸收）、H1 全章统一「导航词：论断」句式；已把 `.problem`/`.thesis-tag` 迁入 `_design-system.html` 单一真相、6 章开篇全部改完（TL;DR 绿标＋`00·问题` 灰框＋砍 metrics/`.lead`）、build+自动 smoke 过（0 error·轴一轴二两 idiom 均正确）；**待 PM 设计门＋smoke 验收**。
 **环境**：CC `/Users/luohuibin/cursor_project/claude-code-main`｜Hermes `daf4f1a7a`（2026-07-01），工作区干净。
 **大顺序**：整条轴一 → 综合① → 整条轴二 → 综合②（不跳轴、不并轴；无依赖者可换 session 并行）。
 
@@ -13,50 +13,37 @@
 
 ## 🔴 在做
 
-### CH-A2R-04 · 自己(08)转控制回路章（gating · 四门已过+修正 · 等 PM 浏览器 smoke · 第 4 棒 · 2026-07-08）
-- **进度**：研究(双库 confirmed)→收敛→骨架(`skeleton.md`)→**PM 拍板通过**(反思收尾=保留·算实然诠释)→视觉脚本(`visual-script.md`·全序重量表覆盖两库全机制)→**渲染员已派**(出稿覆盖 `findings/08-outside-self-improvement.html`)。
-- **骨架三处必修(防以偏概全·已锁)**：①不写「只积累不选择」→两家都剪枝、只是**选整洁/闲置不选效用**；②不写「都没 fitness」→**CC 的真实但在厂商实验室/发版前**+A/B、Hermes 仓内运行时无·仓外 Honcho 未审；③最锋利=**非对称「手 vs 眼」错位**(CC 手留人/眼外包·HM 手自动/眼没造·拥有模型却回路最不闭合=最刺眼落差)。
-- **两句黄金制品**：HM curator「use=0 is not evidence a skill is valuable」+ review「a pass that does nothing is a missed learning opportunity」。
-- **thesis**：自我进化=控制回路问题；飞轮左半(积累)实线闭合、右半(评估/选择)虚线断——都在长大、没尺子量长得对不对。Hero=「断裂的飞轮」。verdict 双压=谁拥有模型(轴一)+谁假设有人盯(综合②)。立场只做实然·火墙 05=机制/08=回路。
-- **门进度（第 3 棒·2026-07-08）**：成稿已出 `findings/08-outside-self-improvement.html`（node --check PASS·本地 smoke 0 error·飞轮虚实线到位·5 制品逐字）。①**自审过**（实质扎实）；②**设计门自审过**（唯一重档=Hero 飞轮·梯度成立·裸文/粗体≤2/论断标题/语义配色/词条解码合规；观察：5 件 artifact 略密但均属黄金证据）；③**Codex 门失守**——跑到一半**额度耗尽 403 挂掉**（`用户额度不足·剩余 $-0.02`）、无裁决；**已用主 session 手动核替下**：全部载重逐字制品（HM curator use=0 / review 没写=错过机会 / 技能遥测只计数无评分 / memory add 349 跳防漂移 / batch 331·345；CC Eval-validated 192-193 / skillify 159·176-177 / 别浪费标注员 5130 / 记忆调查只落 logEvent / dream 55-57 卫生剪；无训练代码=各模式源码 0 真实命中·main.tsx RLHF 系 base64 噪音）**逐条对真实代码属实**；④**独立完整性门后台跑中**（管静默丢弃/以偏概全 + 有无被漏的评估机制）。
-- **⚠️ Codex 额度耗尽**：`newapi.ibot.ai` 余额负，**后续 02/03 章的 Codex soundness 门会同样失守**，需 PM 充值或改核验方式。
-- **四门已过（第 4 棒·2026-07-08）**：③Codex 额度挂→主 session 手动核替（全部载重逐字制品+无训练代码对真代码属实）；④独立完整性门**可放行·无推翻主论点必修**（最强反例 datagen `eval_every/eval_size` 经核=未实现示例+训练侧、不触运行时论点）。**已合并修正**：代码名 skillify/dream/curator/fork/verify→白话（7 处）；节4「每回合」→「定期·按回合节奏」（改事实错+消与页脚内部打架，我判升必修）；fitness 残余开放问补 datagen eval 旋钮 + CC confidenceRating（都挂「仓外/未审」堵口，不写绝对没有）；润色③(dream 删证伪=有效性判断)判 skip 保「按整洁不按效用」干净线。node --check PASS·div 39/39·节号 01-05·5 制品在。
-- **待办·恢复后第一步**：**PM 浏览器 smoke**（0 error + 深色 + 飞轮 mermaid 渲染；本章无 stepper）→ 通过 `python3 build.py`（08 旧已在 CHAPTERS·直接替换重生成 index.html）→ 置 done 迁档三处（backlog=done·删本块·结论沉 archive）；打回按意见改。
-- **阻塞**：**等 PM 浏览器 smoke**。与 CH-A2R-01（同等 PM 浏览器 smoke）并行、互不依赖。
+### CH-A2R-02 · 环境（06）改写（rendering·待门 · 第 2 棒 · 2026-07-13）
+- **仪器（PM 定）**：损失类型（5 行）× 防线阶段（事前拦/事中隔/事后兜）矩阵，替代 05 六拍（六拍预设手段分道·环境章要害恰是手段趋同；05 样板只继承纪律）。行为分类降级为事前列内部逻辑。脊＝矩阵「事后」列＋责任归属读数。问题定义＝「兜底不是让模型更聪明，是让『模型不聪明』不致命」；趋同当弹簧不当内容。**PM 拍板：两个共同盲区独立成节；「两套地板判据」做深潜脊（取代被证伪的生存前提假设）。E1 切片＝最新 `8e734810d`（worktree `hermes-agent-8e734810`）。**
+- **已完成（第 2 棒）**：双研究员补采（`research-cc.json` 17 机制／`research-hermes.json` 19 机制·A/B/D 全答）→ 综合归位 `docs/scratch/ch-a2r-02/fact-map.md`（矩阵落格+misfit+空格+3 条改写论断）→ 渲染 `findings/06-outside-environment.html`（论断式 H1+TL;DR 绿标+00·问题框；重档＝对角交叉图·中档＝覆盖网+双训诫+外泄自白·基线裸文）→ **build 过（10 章）+ 浏览器 smoke 过（0 console error·覆盖网/对角图真渲染·深色·本章无 stepper/mermaid）**。
+- **⭐三条被数据改写的论断（写进 fact-map §二）**：R1「事后全外包给 git」不成立＝两家都有原生撤销但只兜自己结构化编辑的文件（CC rewind 默认开/HM rollback 默认关）；**R2「生存前提」假设被证伪**＝改用「两套判据」（HM 按物理可逆性护机器·CC 按动没动治理层护规则）·渲染时**不得复活生存前提叙事**；R3 CC 护栏强度按 shell/治理层排非按可逆性排（PS 硬拒/Bash 软拦不对称）。两共同盲区＝行5 外部后果真空+护栏只在 shell 面。
+- **②Codex soundness＋③完整性门（合一执行·已过）**：独立 gate agent 读真代码逐条核，**0 必修·可放行**——R1/R2/R3 全靠 file:line 铁证坐实（R2 未复活生存前提）、所有「默认」措辞与逐字制品一字不差、两盲区未夸大成「零」、在场纪律守住。2 建议均已修：①§02 Hermes 地板注释补回 `chmod -R 777`（逐字制品口径）②§04 删「仓里无人启用」绝对断言→改「默认关（opt-in）·插件默认不加载」（自核到仓里确有自带插件注册 pre_tool_call·「无人启用」是"没找到→绝对没有"式坑）。修后 rebuild+复验 0 error。
+- **下一步**：④设计门+PM 浏览器 smoke（设计眼归 PM·记忆 [[design-iterate-on-rendered-comparisons]]）→ 认可后 done 迁档两处（backlog 置 done·删本块·一句话结论沉 archive）。
+- **阻塞**：仅剩 设计门+PM smoke 待 PM。
 
-### CH-A2R-03 · 其他 agent(07) 关系重构（rendering · 成稿已出+自审过·待余门+PM smoke · 第 7 棒 · 2026-07-08）
-- **指针**：成稿待覆盖 `findings/07-outside-multiagent.html`（旧稿=「消息网 vs 看板流水线」·七组对照＋反直觉收尾模板）｜依赖 CH-A2R-05=done。
-- **PM 方法纪律（2026-07-08 定）**：**事实先行、叙事后置**——先列问题 list 把双库事实采齐、再用一种视角组织事实、最后才想收口与可视化；**不预设「六拍/Hero/可视化」**（六拍叙事框架已被 PM 否掉）。
-- **本章定性**：**产品手段章**（single-agent 撞墙→逼出协作机制），全五章**最弱产品观信号**；分析仪器＝从 system prompt 对「**何时触发哪种协作**」的原文描述，读设计者「何时用什么协作」的意图。
-- **三条红线**：①委派层两家**趋同**、要诚实呈现（分歧在「协作重量/触发时机」不在「问题定义」）；②防「默认→绝对」——触发描述的**理想触发 vs 实际默认可达性**分两层（team 多灰度门控·kanban 需显式进入）；③**不碰「在场/人在不在环」**（综合②独占总变量），收口只落「对协作这个手段的定位」。
-- **代码基线（本机映射·不改 CLAUDE.md 路径——跨机项目 luohuibin 路径在另一台有效）**：CC=`/Users/bink/cc_project/claude-code-main`（真源码树·无 git）｜Hermes=`/Users/bink/.hermes/hermes-agent`@`8e734810d`（2026-07-08 最新·用户选定新基线）。
-- **研究已完成（第 2 棒·2026-07-08）**：双库真源码事实采齐→`docs/scratch/ch-a2r-03/research-cc.json`（11 机制·真 file:line）＋`research-hermes.json`（8 机制+async 专查·@8e734810d）。两条翻案：①Hermes `delegate_task` **顶层默认后台异步**（run_agent.py:5664 硬编码·模型不能选）、非旧结论「无异步委派」；②确认 Hermes **无 CC 那种继承父上下文的 fork**。
-- **待查证结果**：CC peer 跨会话/跨机器＝**impl-missing**（提示词+寻址层在·传输+注册表实现文件全树 grep 未命中·不可端到端闭环）→旧「存疑」证实未闭环、**别当既成能力写**；ACP：CC not-found／Hermes 仅出向 provider（驱动 Copilot 当子后端·非通用互通）；旁观/暂停/打断单分身两家都 closed。
-- **事实梳理已成（第 3 棒·2026-07-08）**：按调研脉络平铺→`docs/scratch/ch-a2r-03/fact-map.md`（每节标趋同/分岔）。骨架：**问题定义层趋同**；**三处真分岔**＝①委派同步/异步控制（模型选 vs 壳固化）②信任自报（默认信 vs 默认疑·接轴一）③成果重心（父中心 vs 共享 DB 黑板）；**两处非对称**＝CC 独有 fork／Hermes 独有 profiles-as-roster；peer 跨机=impl-missing 别当既成。
-- **收尾方向已定（第 4 棒·2026-07-08）**：PM 拍板——**弃统一轴**（候选轴「中心 vs 外化」经 adversarial 验证不成立：①基本是「在场」换皮·踩综合②红线②二分不干净·CC 团队层也用共享 TaskList）。定＝**三处分岔并列**（手段章·最弱产品观信号该有的样子），「成果与协调」层用具体分野**「分身互发消息的同事网 vs 分身不说话只读写共享状态板」**（旧稿对的那个·不碰在场）；统一变量留综合②。
-- **视觉脚本已成（第 5 棒·2026-07-08）**：`docs/scratch/ch-a2r-03/visual-script.md`（五问+全序重量表覆盖全机制·支线降 §07/页脚不丢）。唯一重档=§05 协调拓扑两图对比（消息网 vs 共享状态板）；安静基线=问题定义/成本/隔离/边界。节序=01 为何拆→02 范式(fork/profiles 非对称)→03 委派控制→04 信任→05 拓扑 Hero→06 取舍收尾→07 边界。
-- **成稿已出+自审过（第 7 棒·2026-07-08）**：`findings/07-outside-multiagent.html`（node --check PASS·div 69/69·节 01-07·两图差异高亮·mermaid 裹 MERMAID_OK·本地 smoke 0 error）。**自审已修四处**：①收掉回潮的「中心 vs 外化」统一轴（lead+§06 改中性/§05 口径·thesis 明写不拔统一轴）②修 background DEPRECATED 失真原文回逐字 schema 原文。
-- **下一步**：主 session 过 完整性门 + 设计门（Codex soundness 门额度耗尽→主 session 手动核替）→PM 浏览器 smoke→`python3 build.py`（07 已在 CHAPTERS·替换重生成 index.html）→done 迁档两处。
-- **阻塞**：余门（完整性/设计门）待主 session 过；PM 浏览器 smoke 待做（0 error+深色+两图 mermaid 渲染+data-tip 悬浮；本章无 stepper）。
+### DSN-04 · 开篇导读范式·铺全书（rendering · 第 1 棒 · 2026-07-09）
+- **指针**：pilot（01）已 done；本轮把范式铺到 **6 章＝02/03/04/05/07/SYN①**（PM 定 scope 2026-07-09；06/08/SYN② 排除，随各自 CH-A2R-02／CH-A2R-04 遗留／SYN2-R 改写时自然吸收范式）。
+- **范式三层**（design-principles 1C）：①**安全层**＝`.problem`/`.thesis-tag` 去 scope 迁入 `_design-system.html`（**已完成**）+ 每章 thesis 加 `TL;DR` 绿标；②**标题层**＝H1 全章统一「导航词：论断」句式（PM 定 2026-07-09·含重写已定稿论断式标题）；③**叙述层**＝每章补 `00·问题` house 框（叙述体·问题加粗·非摘要）+ 砍 metrics 条（反过度前置件）。
+- **现状红利**：6 章开篇**已都有** `.thesis`＋一个 `.story`/开篇叙事框——改造＝把已有叙事正式化为 `00·问题` 节，非从零写；防盒子疲劳＝thesis(绿) 与 problem(灰) 之间必插分节标题+`.body` 过渡（04/05/07/SYN① 的 story 现紧贴 thesis 无隔，须补隔）。
+- **07 协调**：07＝CH-A2R-03 **已 done（2026-07-10 报告化重构完成并入合订本）**；DSN-04 对 07 的开篇范式（H1「导航词：论断」/TL;DR 绿标/`00·问题` 框）已含在其成稿中随之落地，无需再单独铺。
+- **成稿已出+自动 smoke 过（第 1 棒·2026-07-09）**：6 章开篇全部改完（H1 加「导航词：」前缀／thesis 加 TL;DR 绿标／英文 eyebrow 或 story 开篇 → `00·问题` house 灰框·问题加粗答案挪框外／砍 02/03/SYN① 的 metrics 条＋05/07 thesis 前 `.lead` 罗盘·因与 TL;DR 冗余）。`python3 build.py` 过（含 stepper 守卫）；playwright 加载合订本 **0 console error**，evaluate+截图确认 **轴一（`.sec` 式，02）与轴二（编号式，05）两种 idiom 均正确**：TL;DR 绿标居绿框、`00·问题` 分节标题、灰 problem 框与绿 thesis 框 computed 配色区分（problem=`--surface`扁平/thesis=绿渐变+绿左框）、盒子疲劳解除（中间有分节标题隔）。
+- **遗留小账（交 PM 时告知）**：转换后 `.story`（04/05/07/SYN①）与砍掉的 `.metrics`（02/03/SYN①）CSS 规则成孤儿——**故意留着**（pre-existing·无害·删除风险>收益），非疏漏。
+- **下一步**：交 PM ①设计门（视觉判断·`docs/design-principles.md` Part 2.2）②浏览器 smoke 验收（0 error＋各章 stepper/mermaid 不塌＋绿/灰框区分观感）。PM 认可后 → done 迁档两处（backlog 置 done·删本块）。
+- **阻塞**：设计门＋PM smoke 待做——设计眼归 PM（记忆 [[design-iterate-on-rendered-comparisons]]）。
 
 ---
 
 ## 🟡 等谁
 
-### CH-A2R-01 · 时间章重构（gating · 三内容门+设计门已过 · 等 PM 浏览器 smoke · 第 4 棒 · 2026-07-08）
-- **指针**：成稿 `findings/04-outside-time-trigger.html`（已覆盖旧稿·未 build）｜骨架/视觉脚本/研究 JSON 同在 `docs/scratch/ch-a2r-01/`｜样板=05。
-- **成稿结构**（4 节+悬而未决）：01 让渡+四诉求 / 02 靠什么知道你不在（测量 vs 注定·王牌双制品 coming-back vs recap）/ 03 应答四诉求（3-a 干得完·3-b 找得到我=Hero 双面板·3-c 送得到我·3-d 别乱来）/ 04 矩阵+verdict（注意力路由器 vs 无人值守规约）+反思（缝隙 vs 生效中的委托）/ 05 防夸大红线。thesis=「它靠什么知道你不在」（测量 vs 注定）。
-- **门已过**：①自审（改：删与 thesis 重复的 lead 行 / 一段 3 粗体降 2）；②Codex soundness 14 条**采纳 4 处必修**——(a) 6 秒通知张冠李戴：那是权限弹窗阈值，「waiting for input」idle 通知实为 **60 秒**（REPL.tsx:3930-3939·config.ts:612）已改；(b)「只留警告日志」过强（旧路径）→删；(c) Hermes recap「按需拉取」核不实（只找到定义无调用）→收到「未见离开时主动推送」；(d) **cron 口径反了**→从「门控」改「默认开·可急停」（/loop 已 GA·GB 仅 kill switch）；其余属实。③独立完整性门放行（采纳 verdict 四联渠道补「多为门控」，驳回 3-d 单句加标，同意 busy三态/沉默过滤/at-most-times 不改）。④设计门自查过（唯一重档=Hero；梯度有第 1 名+安静基线；裸文/门控标注/论断标题合规）。机械关 node --check PASS·div 64/64·节号 01-05 连续。
-- **恢复后第一步**：收 PM 浏览器 smoke——通过→`python3 build.py`（CHAPTERS 已含 04·直接重生成 index.html）→置 done 迁档（backlog=done·删本块·结论沉 archive）；打回→按 smoke 意见改。
-- **阻塞**：等 PM 浏览器 smoke（0 error + 深色 + data-tip 悬浮可用；本章无 stepper 无 mermaid）。
+（空）
 
 ---
 
 ## ⚪ 接下来（未开工排队 · 每条 = ID + 解锁条件）
 
-1. **CH-A2R-02** 环境（06）— 样板已锁（05）→ **✅ 可领**（领取套 05 样板：六拍推演＋三层收尾＋防「默认→绝对」门；01/03/04 正并行推进、不阻塞）〔03 已于 2026-07-08 领取，见「在做」〕
-2. **EXT-01** 出错之后（切面专题）— 依赖 CH-SYN2 已 done → **可领**
+1. **EXT-01** 出错之后（切面专题）— 依赖 CH-SYN2 已 done → **可领**
 3. **ART-01** Harness 产品观（独立文章，非合订本章节）— 依赖无 → **可领**；初稿 `docs/harness-product-view.md`，PM 议是否入册
+4. **DSN-04** 开篇导读范式·铺全书 — 依赖无 → **可领**；**pilot（01 章）已 done 2026-07-09**（标题呼应导航 + 绿框 TL;DR + `00·问题`加框叙述节；范式已入 `design-principles.md` 1C）；待把 `.problem/thesis-tag` 迁入 `_design-system.html` 后逐章套其余 9 章
 4. **SYN2-R** 综合②重编 — 依赖升级为**全轴二章 done**（CH-A2R-01~05）→ 轴二整改收官后解锁
 5. **MEM-09** 记忆的一生（条件项）— 前提**已基本消解**：`CH-A2R-05` 第 2 节已把「一条记忆的一生」（时机/记什么/写入安全/召回/归属信任）完整落成三拍＋三层矩阵，独立成篇会双写 → **倾向不写**，留 PM 最终拍板（若写只能挑 Ch05 未覆盖的残余角度）
 
@@ -73,7 +60,7 @@
 
 ## 🟢 决策待 PM（非阻塞，不挡任何领活）
 
-- **CH-08 定名**：「Loop 与自己」待定名（推荐「Loop 与经验」；`CH-A2R-04` 收窄后偏「Loop 与变强/与下一代」）
+- ~~**CH-08 定名**~~ **已定（2026-07-10 PM）＝「Loop 的 self-improvement」**：同时把 DSN-04 开篇导读范式补铺到 08（H1 改论断式并呼应侧栏 label／thesis 加 TL;DR 绿标／插 `00·问题` 叙述框「进化的是变好还是变大」／砍冗余 `.hard` metrics 条·孤儿 CSS 已清）；`build.py` 侧栏 label 同步改名；node --check＋build＋PM smoke 均过、已并合订本。08 的 DSN-04「遗留」尾巴闭合（DSN-04 本轮 6 章批不含 08）。
 - **前 9 章排版**：是否按综合②新排版标杆回头提升（PM 看完综合②再定；DSN 已落地随各批手术自然承接）
 - **ART-01 入册**：Harness 产品观文章是否并入合订本
 - **Hermes 版本 gap（2026-07-08 提出）**：前 11 章基线＝`daf4f1a7a`（已不在当前 git 历史）·`CH-A2R-03` 起用最新 `8e734810d`（差 4778 commit·delegate/tui/profiles 大改+async_delegation 新增）。本章成稿显著标注切片；**是否把全书 Hermes 统一迁最新版重核**待 PM 定（不阻塞本章）。

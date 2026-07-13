@@ -1,0 +1,207 @@
+{
+  "slice": "hermes-agent @8e734810d（2026-07-08）",
+  "note_on_paths": "被研究代码根 = /Users/luohuibin/cursor_project/hermes-agent-8e734810。所有 file:line 相对此根。主审批入口是 tools/approval.py:check_all_command_guards（2537），由 tools/terminal_tool.py:256 调用；旧入口 check_dangerous_command（2231）仍在但非主路径。",
+  "mechanisms": [
+    {
+      "name": "硬禁地板（unconditional hardline blocklist，12 条）",
+      "what": "一小撮无恢复路径的灾难命令，在 yolo/mode=off/cron approve 之前就无条件拦死：删根/删系统目录/删家目录、mkfs 格盘、dd 或重定向写裸块设备、fork 炸弹、kill 全部进程(-1)、shutdown/reboot/halt/poweroff、init 0/6、systemctl poweroff/reboot、telinit 0/6。",
+      "default": "默认开（且不可关，是 yolo 之下的地板）",
+      "rows": [1, 4],
+      "column": "事前",
+      "evidence": ["tools/approval.py:366-403", "tools/approval.py:412-415", "tools/approval.py:452-463", "tools/approval.py:2559-2561", "tools/approval.py:513-526"],
+      "artifact": "块结果原文（_hardline_block_result, 513-526）：\"BLOCKED (hardline): {description}. This command is on the unconditional blocklist and cannot be executed via the agent — not even with --yolo, /yolo, approvals.mode=off, or cron approve mode. If you genuinely need to run it, run it yourself in a terminal outside the agent.\"  |  设计注释原文（301-306）：\"The list is deliberately tiny — only things with no recovery path: filesystem destruction rooted at /, raw block device overwrites, kernel shutdown/reboot, and denial-of-service commands that take the host down. Recoverable-but-costly operations (git reset --hard, rm -rf /tmp/x, chmod -R 777, curl|sh) stay in DANGEROUS_PATTERNS where yolo can pass them through — that's what yolo is for.\"  |  归属注释（308-309）：\"Inspired by Mercury Agent's permission-hardened blocklist\"。"
+    },
+    {
+      "name": "危险模式软清单（DANGEROUS_PATTERNS，47 条正则）",
+      "what": "常见破坏/失控命令的正则黑名单，命中就弹审批（交互）或走 gateway 往返；但可被 --yolo / approvals.mode=off / cron approve / 非交互无人会话（D1）绕过。覆盖：rm 递归、chmod 777、chown -R root、SQL DROP/DELETE/TRUNCATE、curl|sh 及各种解码后管道给 shell、写敏感文件（tee/重定向/cp/mv/sed -i 到 /etc、~/.ssh、~/.netrc、shell rc、~/.hermes/config.yaml|.env）、git reset --hard / push --force / clean -f / branch -D、sudo 提权标志、docker/gateway 生命周期、自杀命令等。",
+      "default": "默认开（但 yolo/mode=off/非交互均可绕）",
+      "rows": [1, 3, 4, 5],
+      "column": "事前",
+      "evidence": ["tools/approval.py:547-758", "tools/approval.py:762-765", "tools/approval.py:2711", "tools/approval.py:2732-2734"]
+    },
+    {
+      "name": "用户自定义 deny 清单（approvals.deny fnmatch globs）",
+      "what": "config.yaml 里用户手写的 glob 黑名单，和硬地板同级：在 yolo/mode=off 之前触发，用户版的『永不允许，哪怕 yolo』。空/缺省则空转。",
+      "default": "opt-in（用户在 config 里配才有）",
+      "rows": [1, 3, 4, 5],
+      "column": "事前",
+      "evidence": ["tools/approval.py:466-495", "tools/approval.py:498-510", "tools/approval.py:2262-2269"],
+      "artifact": "块结果原文（498-510）：\"BLOCKED: this command matches the user-defined deny rule '{pattern}' (approvals.deny in config.yaml). It cannot be executed via the agent — not even with --yolo, /yolo, or approvals.mode=off. Do NOT retry or rephrase this command; the user has explicitly forbidden it.\""
+    },
+    {
+      "name": "sudo 猜密码地板（sudo -S 无 SUDO_PASSWORD）",
+      "what": "当未配置 SUDO_PASSWORD 时，命令里显式出现 sudo -S（从 stdin 灌密码）被判为模型在暴力猜密码，无条件拦（在 yolo 之前）。",
+      "default": "默认开（无条件，yolo/smart/mode=off 都压不过）",
+      "rows": [3],
+      "column": "事前",
+      "evidence": ["tools/approval.py:428-449", "tools/approval.py:529-540", "tools/approval.py:2567-2572"],
+      "artifact": "块结果（529-540）：\"BLOCKED: {description}. Do not pipe passwords to 'sudo -S' — this is a brute-force attack vector. Set SUDO_PASSWORD in your .env file if the agent needs passwordless sudo, or run the sudo command manually in your own terminal.\""
+    },
+    {
+      "name": "防自尽/防自伤（kill hermes/gateway、docker/launchctl 生命周期、gateway 越管启动）",
+      "what": "阻止 agent 杀掉自己的常驻网关/CLI 进程或重启/停掉容器：pkill/killall hermes|gateway|cli.py、kill $(pgrep/pidof …)、hermes gateway stop/restart、hermes update、docker (compose) restart/stop/kill/down、launchctl stop/bootout ai.hermes、越过 systemd 起 gateway。注释理由：这些会『terminate all running agents mid-work』。",
+      "default": "默认开，但归在软清单——yolo/mode=off/非交互可绕（不是硬地板）",
+      "rows": [4],
+      "column": "事前",
+      "evidence": ["tools/approval.py:622-653"],
+      "artifact": "自杀模式注释（639-640）：\"# Self-termination protection: prevent agent from killing its own process\"，模式：(r'\\b(pkill|killall)\\b.*\\b(hermes|gateway|cli\\.py)\\b', \"kill hermes/gateway process (self-termination)\")。gateway 生命周期注释（622-626）：\"Gateway lifecycle protection: prevent the agent from killing its own gateway process. These commands trigger a gateway restart/stop that terminates all running agents mid-work.\"",
+      "misfit": "A1c 关键：防自尽属于软清单 DANGEROUS_PATTERNS，不是硬地板。硬地板里能沾边的只有 kill -1（杀全部进程）与 shutdown/reboot（间接杀自己）。所以在 yolo 下 agent 完全可以 pkill 自己的 gateway。"
+    },
+    {
+      "name": "被拒/超时训诫（consent contract 回给模型的措辞）",
+      "what": "命令被用户 deny 或审批超时后，回给模型一段明确『未获同意，别重试别改写别换法达成同一效果』的 BLOCKED 文本；超时额外追加『Silence is not consent』。",
+      "default": "默认开（随审批链）",
+      "rows": [1, 3, 4, 5],
+      "column": "事前",
+      "evidence": ["tools/approval.py:2819-2855", "tools/approval.py:2142-2163", "tools/approval.py:2195-2205"],
+      "artifact": "主路径（check_all_command_guards, gateway 分支 2839-2849）逐字：\"BLOCKED: Command {reason}.{reason_addendum} The user has NOT consented to this action. Do NOT retry this command, do NOT rephrase it, and do NOT attempt the same outcome via a different command. Stop the current workflow and wait for the user to respond before taking any further destructive or irreversible action.{timeout_addendum}\"  其中 timeout 时 reason=\"timed out without user response\"，timeout_addendum=\" Silence is not consent.\"；deny 时 reason=\"denied by user\"，若带理由则 reason_addendum=' Reason given by the user: \"{deny_reason}\".'（2825-2838）。CLI deny 短版（2195-2205）：\"BLOCKED: User denied this potentially dangerous action (matched '{description}'). Do NOT retry — the user has explicitly rejected it.\"  注释溯源（2820-2824）：\"Consent contract: silence is NOT consent … names the agent's most common evasion paths (retry, rephrase, achieve the same outcome via a different command). See issue #24912 for the original incident.\""
+    },
+    {
+      "name": "容器后端整链跳过（D6：backend 隔离即免审批）",
+      "what": "当 terminal 后端本身是隔离容器（singularity/modal/daytona，或 docker 且未挂宿主路径），整条审批链（含硬地板）直接跳过——因为命令碰不到真机。docker 一旦 bind-mount 宿主路径（has_host_access=True）审批复活。",
+      "default": "结构性（取决于后端选型；默认后端是 local=不跳过）",
+      "rows": [1, 3, 4, 5],
+      "column": "事中",
+      "evidence": ["tools/approval.py:2217-2228", "tools/approval.py:2249-2250", "tools/approval.py:2555-2557"],
+      "artifact": "注释（2217-2225）：\"Isolated container backends sandbox the agent away from the host, so their commands can't damage real files/services and we skip the approval layer. Docker is the exception once host paths are bind-mounted … a command like rm -rf /workspace reaches host files, so it must go through the normal approval flow.\"  硬地板注释同款（295-299）：\"Hardline only applies to environments that can actually damage the host (local, ssh, container-host cron). Containerized backends (docker, singularity, modal, daytona) already bypass the dangerous-command layer …\"",
+      "misfit": "D6 成立：隔离后端把整个事前闸（包括硬地板）短路，用『真隔离』替代『软拦截』——这正是 SECURITY.md 说的『唯一边界是 OS』的落地。"
+    },
+    {
+      "name": "凭据剥离（把密钥/网关令牌在传给子进程前剥掉）",
+      "what": "传给下层低信任组件（shell 子进程、MCP stdio 子进程、execute_code 子进程、浏览器子进程、cron 脚本）的环境变量做减法：先按机密子串（KEY/TOKEN/SECRET/PASSWORD/CREDENTIAL/AUTH/DSN/WEBHOOK/CREDS/BEARER/APIKEY）黑掉，再只放行安全前缀白名单 + 少数 HERMES_ 运行位置变量；GATEWAY_RELAY_*_SECRET/KEY/TOKEN、AUXILIARY_*_API_KEY、provider key、AWS 链『无条件』剥（不受 env_passthrough/inherit_credentials 影响）。",
+      "default": "默认开（deny-by-default 白名单式）",
+      "rows": [2],
+      "column": "事中",
+      "evidence": ["tools/code_execution_tool.py:78-207", "tools/environments/local.py:241-282", "tools/mcp_tool.py:426", "tools/browser_tool.py:91-93", "tools/env_passthrough.py:57-116"],
+      "artifact": "SECURITY.md §2.3 逐字定性（130-135）：\"This reduces casual exfiltration. It is not containment. Any component running inside the agent process (skills, plugins, hook handlers) can read whatever the agent itself can read, including in-memory credentials.\"",
+      "misfit": "只挡『子进程/shell 顺手带走』，挡不了进程内组件（skill/plugin/hook）——后者能读 agent 自己能读的一切，含内存里的密钥。CLAUDE_CODE_OAUTH_TOKEN 被故意保留不剥（local.py:214）。"
+    },
+    {
+      "name": "Tirith 内容安全扫描器（pre-exec）",
+      "what": "把命令交给外部 tirith 二进制子进程做内容级威胁扫描（同形字 URL、管道给解释器、终端注入等），退出码 0/1/2=allow/block/warn。block 与 warn 现在都走审批流让用户判读。",
+      "default": "默认开（tirith_enabled 默认 true），且默认 fail-OPEN（tirith_fail_open 默认 true）——扫描器缺失/装不上时默认放行",
+      "rows": [1, 2],
+      "column": "事前",
+      "evidence": ["tools/tirith_security.py:1-22", "tools/approval.py:2668-2708", "cli-config.yaml.example:355-358", "tools/approval.py:2724-2730"],
+      "artifact": "config 示例（355-358）：\"tirith_enabled: true  # Enable/disable tirith scanning … tirith_fail_open: true  # Allow commands if tirith unavailable\"。tirith 头注释（8-11）：\"Exit code is the verdict source of truth: 0 = allow, 1 = block, 2 = warn … Operational failures … respect the fail_open config setting.\""
+    },
+    {
+      "name": "输出脱敏（redact_sensitive_text）",
+      "what": "推送到 gateway（Discord/Slack 可截屏）的审批载荷里，把命令串与描述做机密脱敏——纯展示层，脱敏后原始命令仍照常执行。",
+      "default": "默认开（随 gateway 审批）",
+      "rows": [2],
+      "column": "事中",
+      "evidence": ["tools/approval.py:2120-2125", "tools/approval.py:2789-2804"],
+      "artifact": "SECURITY.md §2.4 定性（147-148）：\"Output redaction strips secret-like patterns from display. A motivated output producer will defeat it.\""
+    },
+    {
+      "name": "智能审批（辅助 LLM 风险评估，approvals.mode=smart）",
+      "what": "命中危险模式后，先问一个辅助 LLM 给 approve/deny/escalate 三判，approve 则自动放行并给该 session 授权，deny 直接拦，escalate 才落到人工弹窗。灵感注为 OpenAI Codex Smart Approvals。",
+      "default": "opt-in（approvals.mode 默认 manual；smart 需显式开）",
+      "rows": [1, 3, 4, 5],
+      "column": "事前",
+      "evidence": ["tools/approval.py:1921-1998", "tools/approval.py:2744-2764", "tools/approval.py:1786-1830"],
+      "artifact": "smart-deny 文案（2758-2762）：\"BLOCKED by smart approval: {…}. The command was assessed as genuinely dangerous. Do NOT retry.\""
+    },
+    {
+      "name": "文件快照 + /rollback（checkpoint 影子 git 库）★事后新增",
+      "what": "在文件写/patch/破坏性 terminal 命令执行前，把工作目录快照进一个共享影子 git 库（~/.hermes/checkpoints/store/，用 GIT_DIR/GIT_WORK_TREE 隔离，不污染用户自己的 .git），每轮对话去重一次。用户用 /rollback 恢复，恢复前还会先拍一张『反悔快照』。这是 Hermes 唯一真正的『事后』资产恢复机制。",
+      "default": "opt-in / 默认关（config v2 把默认从 True 翻成 False）",
+      "rows": [1],
+      "column": "事后",
+      "evidence": ["tools/checkpoint_manager.py:1-40", "hermes_cli/config.py:1298-1317", "agent/tool_executor.py:467-486", "agent/tool_executor.py:1109-1130", "tools/checkpoint_manager.py:794-849", "gateway/slash_commands.py:2537-2595"],
+      "artifact": "config 默认（config.py:1303-1304）：\"checkpoints\": {\"enabled\": False, …}；注释（1298-1302）明确 v2 把默认 True→False（『opt-in; most users never use /rollback』）。",
+      "misfit": "相较旧基线『纯预防、无保险』，本切片新增了事后恢复——但默认关，且只覆盖资产毁损（行1）的 repo 内/工作目录文件，不管 repo 外、格盘、外泄、外部世界。恢复粒度是工作目录级 git，排除 .git/node_modules/.venv/大二进制，跳过 / 与 $HOME（太宽）。"
+    },
+    {
+      "name": "写文件的原子替换（atomic temp+rename）",
+      "what": "文件写用临时文件+rename 原子替换，保证不会写出半截文件。",
+      "default": "默认开",
+      "rows": [1],
+      "column": "事中",
+      "evidence": ["tools/file_operations.py:965-1006", "tools/file_operations.py:1497"],
+      "misfit": "只是崩溃安全（不会半写），不是备份——旧内容被直接丢弃，不留 .bak/.orig。不算事后恢复。"
+    },
+    {
+      "name": "文件陈旧守卫（file_state 跨 agent 读写协调）",
+      "what": "多 agent 场景下，覆盖一个未读/陈旧的文件前先告警，防止踩掉别人的改动。",
+      "default": "默认开",
+      "rows": [1],
+      "column": "事前",
+      "evidence": ["tools/file_state.py:142-215"],
+      "misfit": "预防性守卫，不恢复任何东西。"
+    },
+    {
+      "name": "Skills Guard（安装期 skill 内容注入扫描）",
+      "what": "对可安装 skill 内容扫注入模式，是『安装前人工审阅』的辅助，不是边界。",
+      "default": "默认开（但定位为 review aid）",
+      "rows": [2, 3],
+      "column": "事前",
+      "evidence": ["tools/skills_guard.py:1-40", "SECURITY.md:149-153"],
+      "artifact": "SECURITY.md §2.4（149-153）：\"Skills Guard scans installable skill content for injection patterns. It is a review aid; the boundary for third-party skills is operator review before install. Reviewing a skill means reading its Python code and scripts, not just its SKILL.md description — skills execute arbitrary Python at import time.\""
+    },
+    {
+      "name": "MCP 服务器配置校验（spawn 期，非 per-call）",
+      "what": "在保存/启动 MCP 服务器条目时校验其 command/args/env 是否有外泄/持久化/IOC 形状，决定该服务器能否启动——治的是『服务器能不能起』，不是『某次工具调用能不能跑』。",
+      "default": "默认开（spawn 期）",
+      "rows": [2, 3],
+      "column": "事前",
+      "evidence": ["hermes_cli/mcp_security.py:1-25", "hermes_cli/mcp_security.py:121", "hermes_cli/mcp_security.py:180"],
+      "misfit": "不是 per-call 审批闸——见 B2c，MCP 工具调用本身不过环境审批。"
+    },
+    {
+      "name": "cron 审批模式（无人 cron 会话的默认拒绝）",
+      "what": "cron 触发的会话没有人在场应答审批：cron_mode 默认 deny——命中危险命令直接拦并训诫，要放行需显式配 approvals.cron_mode: approve。",
+      "default": "默认 deny（安全默认）",
+      "rows": [1, 3, 4, 5],
+      "column": "事前",
+      "evidence": ["tools/approval.py:1862-1867", "tools/approval.py:2601-2664"],
+      "artifact": "cron-deny 文案（2609-2615）：\"BLOCKED: Command flagged as dangerous ({description}) but cron jobs run without a user present to approve it. Find an alternative approach that avoids this command. To allow dangerous commands in cron jobs, set approvals.cron_mode: approve in config.yaml.\"",
+      "misfit": "注意反差：cron（无人）默认 deny，但普通『非交互、非 gateway、非 cron』无人会话却默认 fail-open 放行（见 D1）。两个无人路径处理不一致。"
+    },
+    {
+      "name": "外部面授权闸（gateway/HTTP 适配器 caller allowlist）",
+      "what": "每个网络暴露的适配器（Telegram/Discord/Slack/email/API server/dashboard）必须配 caller allowlist 才肯派活/解审批/回传输出；未配则应拒绝派活（fail-open 视为 bug）。session id 只是路由句柄不是授权。",
+      "default": "结构上要求 opt-in 配置（未配应拒绝）",
+      "rows": [5],
+      "column": "事前",
+      "evidence": ["SECURITY.md:192-219"],
+      "artifact": "SECURITY.md §2.6 规则2（202-206）：\"An allowlist is required for every enabled network-exposed adapter. Adapters must refuse to dispatch agent work, resolve approvals, or relay output until an allowlist is set. Code paths that fail open when no allowlist is configured are code bugs in scope under §3.1.\"",
+      "misfit": "这是『谁能驱动 agent』的入口授权，不是『agent 主动对外发消息』的出口闸——出口侧（B2b）无闸。"
+    },
+    {
+      "name": "非交互无人会话默认放行（D1 诚实漏洞：事前闸的缺口）",
+      "what": "主审批入口在『非交互 CLI、非 gateway、非 ask、非 cron』的无人会话下，软危险命令直接 return approved=True 放行——主路径（check_all_command_guards）甚至不打 warning，静默放行；旧入口 check_dangerous_command 会打一条 AUTO-APPROVED warning。硬地板/sudo 地板/deny 清单在此之前已拦，故缺口只对『可恢复的软危险命令』开。",
+      "default": "默认 fail-open（历史默认，dangerous-command 路径 fail_closed_when_no_human=False）",
+      "rows": [1, 3, 4, 5],
+      "column": "事前",
+      "evidence": ["tools/approval.py:2600-2664", "tools/approval.py:2070-2106", "tools/approval.py:2037-2044"],
+      "artifact": "主路径静默放行（2600-2664）：\"if not is_cli and not is_gateway and not is_ask: … return {\\\"approved\\\": True, \\\"message\\\": None}\"（非 cron 分支无 log）。旧路径 warning 前缀（2295-2297）：\"AUTO-APPROVED dangerous command in non-interactive non-gateway context\"。docstring 自白（2037-2044）：\"fail_closed_when_no_human: When True, a non-interactive non-gateway … BLOCKS instead of auto-approving. The dangerous-command path keeps its historical fail-open default (False); the plugin-escalation path opts in to fail-closed …\"",
+      "misfit": "这是缺口不是机制：矩阵事前列在无人非 cron 会话下对软危险命令是空的。"
+    }
+  ],
+  "questions": {
+    "A1c": "硬地板完整清单（12 条，approval.py:366-403）：①rm 递归删根（含 rm -rf \"/\"、${HOME} 花括号、$(rm -rf /) 命令替换变体）②rm 递归删系统目录（/home /root /etc /usr /var /bin /sbin /boot /lib）③rm 递归删家目录（~ / $HOME）④mkfs 格盘 ⑤dd of=/dev/sd|nvme|hd|mmcblk|vd|xvd 写裸块设备 ⑥重定向 > /dev/sd… 写裸块设备 ⑦fork 炸弹 :(){ :|:& };: ⑧kill -1 杀全部进程 ⑨shutdown/reboot/halt/poweroff ⑩init 0/6 ⑪systemctl poweroff/reboot/halt/kexec ⑫telinit 0/6。另有两条同级『无条件、yolo 压不过』但不在 HARDLINE_PATTERNS 数组里：sudo -S 猜密码地板（428-449，check_all_command_guards 里紧跟硬地板执行，2567）、用户 approvals.deny globs（466-510，2262）。★防自尽（不许杀常驻网关/CLI 进程）归在软清单 DANGEROUS_PATTERNS（622-653），不在硬地板。代码有明确注释解释归类理由：硬地板注释（301-306）说硬地板只收『no recovery path』的，而『Recoverable-but-costly operations … stay in DANGEROUS_PATTERNS where yolo can pass them through — that's what yolo is for』；自杀命令注释（622-626）说其后果是『terminate all running agents mid-work』（工作丢失，可重来），故按可恢复处理。★本切片没有把防自尽升格进硬地板——硬地板里只有 kill -1（杀全部）和 shutdown 类间接覆盖『机器/进程全死』，针对『专门杀 hermes/gateway』的规则仍在软层，yolo 下可执行。",
+    "A2": "可逆性标注反例分析：（1）硬地板 12 条全部为『无恢复路径或代价极高不可逆』——删根/删系统目录/删家目录（用户文件无 git 覆盖则不可恢复）、格盘、写裸块设备、fork 炸弹/kill -1/shutdown（机器失能）。归类自洽，无『可逆却进硬地板』的明显反例（rm -rf /home 等系统目录删除虽理论上有备份但代价极大，放硬地板合理）。（2）软清单里的『不可逆却只软拦』反例：★git push --force / -f（714-715，改写远端共享历史，对他人不可逆）★DROP TABLE/DATABASE、DELETE without WHERE、TRUNCATE（570-574，数据库数据不可逆）★防自尽 pkill hermes / gateway stop（622-653，杀掉正在干活的 agent，在制品丢失）——这三类都在软层，yolo/非交互可绕。（3）软清单里的『可逆但被拦』（保守拦截，合理）：git reset --hard（可从 reflog 恢复）、chmod 777（可改回）、docker restart（可再起）。（4）结论：Hermes 的地板/软层切分标准是『机器/磁盘级不可逆』进硬地板，『应用/数据/历史级不可逆』留软层交给 yolo 判断——所以最典型的对外不可逆动作（force push、DROP、发布）反而不在地板。",
+    "B1b": "有事后恢复机制，且是相较旧基线的新增：文件快照 + /rollback（tools/checkpoint_manager.py，影子 git 库 ~/.hermes/checkpoints/store/）。在 write_file/patch/破坏性 terminal 命令前拍工作目录快照，每轮去重，恢复前再拍一张反悔快照（794-849）。触发点 agent/tool_executor.py:467-486 与 1109-1130，用户命令 /rollback（gateway/slash_commands.py:2537）。★默认关/opt-in（hermes_cli/config.py:1303 \"enabled\": False，注释说 v2 从 True 翻成 False，『most users never use /rollback』）。局限：只覆盖工作目录内文件（排除 .git/node_modules/.venv/大二进制，跳过 / 与 $HOME），不管 repo 外、格盘、外泄、外部世界。除此之外文件写只有原子 rename（非备份，无 .bak/trash），无对用户 repo 的 auto-commit / git stash（stash 只用于 hermes 自更新）。另有『会话/状态』级快照（batch checkpoint.json、SQLite 会话恢复、hermes backup/snapshot 备份 ~/.hermes 配置态）——这些恢复的是聊天/配置，不是用户项目文件，不算资产事后恢复。",
+    "B2b": "危险模式清单里指向外部世界的只有 git push --force/-f（714-715）；无 npm/pip/twine/cargo publish、无 docker push、无发消息/发邮件的模式（docker 只拦生命周期 restart/stop/kill/down，不拦 push，634-635）。★agent 主动发消息不过审批闸：send_message_tool.py（Telegram/Discord/Slack/email/SMS 的 _handle_send）与 discord_tool.py 通篇无 approval/request_tool_approval/allowlist 调用，直接调平台适配器发送。网关的 caller allowlist（SECURITY.md §2.6）治的是『谁能驱动 agent』的入口，不治『agent 往外发』的出口。结论：出口侧（发消息、发布）基本无治理，只有 git force push 一条被 shell 模式偶然覆盖。",
+    "B2c": "MCP / 外部工具调用默认不过环境侧审批闸。MCP 工具作为普通注册工具走 handle_function_call 分发，其 handler（mcp_tool.py:3859-3943）只做断路/重连检查后直接 server.session.call_tool，无人工闸、无 per-call allowlist。存在一个『通用』能力：插件 pre_tool_call 钩子可 return {\"action\":\"approve\"} → resolve_pre_tool_block（hermes_cli/plugins.py:2226-2274）→ tools/approval.py:request_tool_approval（2301），复用同一套人工 [o/s/a/d] 闸且 fail-closed，对任意注册工具（含 MCP、含 send_message）都能生效。但它 opt-in 且默认关（plugins.enabled 默认空，plugins.py:241-268），且仓库内没有任何自带插件用 action:approve——所以默认形态下 MCP/发消息/发布这三类非 shell 面全部裸奔，只有 shell（terminal）被治。工具面覆盖不全本身是发现：治理集中在 shell 字符串，其它动作面靠一个默认休眠的通用钩子兜、实际无人接。",
+    "B3b": "剥密钥机制在本切片仍在且是多面覆盖的默认机制：execute_code 子进程（code_execution_tool.py:78-207 _scrub_child_env，机密子串黑名单 KEY/TOKEN/SECRET/PASSWORD/CREDENTIAL/AUTH/DSN/WEBHOOK/CREDS/BEARER/APIKEY + 安全前缀白名单 + HERMES_ 运行位置白名单，deny-by-default）、shell/terminal 子进程（environments/local.py:241-282 _is_hermes_internal_secret + _sanitize_subprocess_env，GATEWAY_RELAY_*_SECRET/KEY/TOKEN、AUXILIARY_*_API_KEY『无条件』剥，不受 env_passthrough/inherit_credentials 影响）、MCP stdio 子进程（mcp_tool.py:426）、浏览器子进程（browser_tool.py:91）、cron 脚本。除剥密钥 + Tirith 内容扫描器外，『机密传出』侧的其它闸：输出脱敏 redact_sensitive_text（推 gateway 展示层，approval.py:2120/2795）、软清单里对写敏感文件（~/.ssh、~/.netrc、shell rc、~/.hermes/.env）的审批（但那是防写/植入，不是防读）。★读密钥类文件『没有专门拦』（查过 approval.py 全部 DANGEROUS_PATTERNS/HARDLINE：敏感路径模式全是写向 tee/重定向/cp/mv/sed -i，无一条拦读；cat ~/.ssh/id_rsa、cat .env 在 terminal 里不触发审批）。对『读密钥文件』的检测只在内容/上下文注入扫描器 threat_patterns.py（read_secrets: cat .env|credentials|.netrc… ；exfil_curl/wget）里，而其消费者是 memory_tool.py / cronjob_tools.py / prompt_builder.py（扫的是被摄入的内容/记忆/skill/cron 文案），不是 agent 自己实时敲的 terminal 命令。所以『读+带走』的读那半步在 terminal 侧无闸。SECURITY.md §2.3 逐字自白剥密钥定性：『This reduces casual exfiltration. It is not containment.』",
+    "B3c": "网络外发的闸形态：裸主机（local 后端）下，出网请求（curl/wget 到任意 URL）不过任何环境侧闸——DANGEROUS_PATTERNS 里没有『纯 curl 出网』模式，只有 curl|sh（管道给 shell，590）与内容扫描器里的 exfil_curl（curl 带 $KEY/$TOKEN，threat_patterns.py:120，且只作用于被摄入内容非实时命令）。所以裸主机上 agent curl 把数据 POST 出去不过闸。真正的出网限制只存在于『整进程封装』姿态：SECURITY.md §2.2 指 NVIDIA OpenShell 提供 L7 egress 网络策略层、docker compose 的 network policy——即出网治理外包给 OS 级隔离，不在 in-process 层。查过 approval.py 全清单、website_policy.py（那是浏览器工具的站点策略，非 shell 出网）。",
+    "D1": "★诚实漏洞仍在，且主路径更安静。check_all_command_guards（主入口，terminal_tool.py:256 调用）在 approval.py:2600-2664：`if not is_cli and not is_gateway and not is_ask:` 且非 cron-deny 时，直接 `return {\"approved\": True, \"message\": None}`——非 cron 分支连 warning 都不打，静默放行软危险命令。旧入口 check_dangerous_command（2101-2106）仍会打一条 warning，前缀逐字：\"AUTO-APPROVED dangerous command in non-interactive non-gateway context\"（2295-2297）。主路径确实『先做危险检测』的顺序是：容器跳过→硬地板→sudo 地板→用户 deny→yolo/mode=off→永久白名单→（非交互无人则此处放行）→Tirith+危险检测→审批。所以硬地板/sudo/deny 在放行之前已拦，缺口只对『可恢复软危险命令』开。官方注释措辞（docstring 2037-2044，逐字）：\"fail_closed_when_no_human: When True, a non-interactive non-gateway approval context (no HERMES_INTERACTIVE, no gateway, HERMES_INTERACTIVE unset) BLOCKS instead of auto-approving. The dangerous-command path keeps its historical fail-open default (False); the plugin-escalation path opts in to fail-closed so a plugin-flagged action never runs ungated.\"——即 dangerous-command 路径明文保留历史 fail-open，只有插件升级路径 opt-in fail-closed。",
+    "D2": "Tirith（内容扫描器）默认开：tirith_enabled 默认 true（cli-config.yaml.example:355，代码 _sec.get(\"tirith_enabled\", True)）。默认 fail-OPEN：tirith_fail_open 默认 true（config 示例:358『Allow commands if tirith unavailable』，代码 _sec.get(\"tirith_fail_open\", True)，2687）——扫描器缺失/装不上/超时时默认放行；仅当操作者显式设 tirith_fail_open:false 才 fail-closed（合成一个 warn 结果走审批，2690-2707）。至于 smart/manual/off 三模式：那是 approvals.mode（不是 tirith），默认 manual（approval.py:1829 _get_approval_config().get(\"mode\",\"manual\")，_normalize_approval_mode 未知值也回退 manual，1786-1813）。manual=命中就弹人工审批；smart=先问辅助 LLM（opt-in）；off=全绕（=yolo 等价）。旧口径成立：默认 manual + Tirith 默认开且默认 fail-open。",
+    "D5": "命令被拒/超时训诫原文逐字（主路径 check_all_command_guards gateway 分支，approval.py:2839-2849）：\"BLOCKED: Command {reason}.{reason_addendum} The user has NOT consented to this action. Do NOT retry this command, do NOT rephrase it, and do NOT attempt the same outcome via a different command. Stop the current workflow and wait for the user to respond before taking any further destructive or irreversible action.{timeout_addendum}\" —— 超时时 reason=\"timed out without user response\"、timeout_addendum=\" Silence is not consent.\"（2825-2827）；deny 时 reason=\"denied by user\"、若带 /deny 理由则 reason_addendum=' Reason given by the user: \"{deny_reason}\".'（2830-2838）。相较旧基线，本切片措辞更长更强：旧版核心是『The user has NOT consented … Do NOT retry … do NOT rephrase …』+ 超时『Silence is not consent』——这些全保留，并新增了『do NOT attempt the same outcome via a different command』（堵『换命令达成同一效果』）与『Stop the current workflow and wait … before taking any further destructive or irreversible action』（要求停下等待）。注释溯源到 issue #24912（2824）。旧入口 check_dangerous_command 有一份稍短的平行版本（2152-2158）：\"…The user has NOT consented to this action. Do NOT retry it, do NOT rephrase it, and do NOT attempt the same outcome via a different path.{timeout_addendum}\"。CLI 交互 deny 短版（2195-2201）：\"BLOCKED: User denied this potentially dangerous action (matched '{description}'). Do NOT retry — the user has explicitly rejected it.\"",
+    "D6": "成立且有代码。_should_skip_container_guards（approval.py:2217-2228）：env_type 为 singularity/modal/daytona 时、或 docker 且未挂宿主路径（has_host_access=False）时返回 True → check_all_command_guards（2555-2557）与 check_dangerous_command（2249-2250）在最开头就 return approved=True，整条审批链（含硬地板）跳过。docker 一旦 bind-mount 宿主路径（has_host_access=True）→ 不跳过，审批复活（含硬地板）。注释逐字（2217-2225）：\"Isolated container backends sandbox the agent away from the host, so their commands can't damage real files/services and we skip the approval layer. Docker is the exception once host paths are bind-mounted … a command like rm -rf /workspace reaches host files, so it must go through the normal approval flow.\" 与硬地板段注释（295-299）一致。",
+    "HM-honesty": "SECURITY.md 逐字重取（行号）：①唯一边界（60-65，§2.2）：\"The only security boundary against an adversarial LLM is the operating system. Nothing inside the agent process constitutes containment — not the approval gate, not output redaction, not any pattern scanner, not any tool allowlist. Any in-process component that screens LLM output is a heuristic operating on an attacker-influenced string, and this policy treats it as such.\" ②两种 OS 级隔离均需显式选择（67-68）：\"Hermes Agent supports two OS-level isolation postures. They address different threats and an operator should choose deliberately.\"——两姿态：terminal-backend isolation（70-88）与 whole-process wrapping（91-114，Docker 或 NVIDIA OpenShell），均为操作者显式配置（默认 local 后端不隔离，116-119：\"Operators running the default local backend with untrusted input surfaces … are operating outside the supported security posture.\"）。③剥密钥只减少随手泄露、不算隔离（130-135，§2.3）：\"This reduces casual exfiltration. It is not containment. Any component running inside the agent process (skills, plugins, hook handlers) can read whatever the agent itself can read, including in-memory credentials. The mitigation against a compromised in-process component is operator review before install …\" ④in-process 启发式非边界（137-153，§2.4）：\"The following components screen or warn about LLM behavior. They are useful. They are not boundaries.\" 含 approval gate『Shell is Turing-complete; a denylist over shell strings is structurally incomplete. The gate catches cooperative-mode mistakes, not adversarial output.』⑤闯祸后果归运维、无厂商接盘：分散在 §3.2『Documented break-glass settings』（276-279，--insecure/disabled approvals/local backend in production 等『that's the flag's job』）、§2.5 插件（166-169）『A malicious or buggy plugin is not a vulnerability in Hermes Agent itself.』、§2.6 规则5（215-219）本地面绑非环回口是『break-glass operator decision』使公开暴露加固成为『the operator's responsibility』、§4（298-321）部署加固全部列为操作者动作，并注『Hermes Agent does not operate a bug bounty program』（11-12）。本切片相较旧基线：核心自白（唯一边界=OS、剥密钥非隔离、启发式非边界）全部保留并结构化为 §2.1-2.6 + §3 scope，新增了 §2.6 External Surfaces（外部面统一授权规则）与对 NVIDIA OpenShell 的具名引用（102-107，L7 egress + Provider store 注入凭据不落沙箱盘）。"
+  },
+  "empty_cells": "矩阵近乎空白的格：①【事后】列整体几乎空——只有『文件快照/rollback』填了行1（资产毁损）一格，且默认关；行2（机密外泄，天然不可逆）、行3（治理层被改）、行4（机器失能，机器死=无从恢复）、行5（外部世界，祸已落他人头上）事后全空。②【行5 外部世界 × 事前】近乎空——出口侧只有 git push --force 一条被 shell 模式偶然覆盖；agent 发消息/发邮件、npm/pip/docker publish、MCP 对外调用均无 in-process 闸（网关 allowlist 只管入口不管出口）。③【行2 机密外泄 × 事前】薄——只有 Tirith（默认 fail-open）+ 读密钥文件在 terminal 侧完全无拦；剥密钥是事中不是事前。④非交互无人（非 cron）会话下【事前】列对软危险命令整体塌陷为空（D1 fail-open）。",
+  "not_found": [
+    "MCP 工具调用的 per-call 环境审批闸（查过 tools/mcp_tool.py:3859-3943 handler、hermes_cli/mcp_security.py、model_tools.py 分发、agent/tool_executor.py：只有 spawn 期服务器校验和一个默认关的通用 pre_tool_call 钩子，无自带插件启用）",
+    "agent 主动发消息/发邮件的审批闸（查过 tools/send_message_tool.py 全文、tools/discord_tool.py、gateway/delivery.py：零 approval 调用）",
+    "npm/pip/twine/cargo publish、docker push 的专门拦截（查过 approval.py 全部 HARDLINE/DANGEROUS_PATTERNS、tools/threat_patterns.py、全仓 grep：无）",
+    "裸主机（local 后端）下纯 curl/wget 出网的环境审批闸（查过 approval.py 全清单：只有 curl|sh 与内容扫描器的 exfil_curl；出网治理只在 OpenShell/docker network policy 的 OS 级封装层）",
+    "terminal 侧『读密钥类文件』（cat .env / cat ~/.ssh/id_rsa）的审批拦截（查过 approval.py 全部敏感路径模式：全为写向 tee/重定向/cp/mv/sed -i，无读拦；读检测仅在 threat_patterns.py，消费者是 memory_tool/cronjob_tools/prompt_builder 的内容扫描，非实时命令）",
+    "对用户自己 git repo 的 auto-commit / git stash 安全网（查过：git stash 仅用于 hermes 自更新 hermes_cli/main.py:6408-6542，破坏性 agent 操作前不 stash 用户 repo）",
+    "写文件的 .bak/.orig/回收站备份（查过 tools/file_tools.py、file_operations.py、patch_parser.py、write_approval.py：只有原子 temp+rename，旧内容直接丢弃）"
+  ]
+}

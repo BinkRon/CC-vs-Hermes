@@ -36,6 +36,14 @@ h1{font-size:34px;margin:.1em 0 .15em;letter-spacing:-.5px}
 .thesis{background:linear-gradient(120deg,#12241f,#0f1e2e);border:1px solid #234;
   border-left:4px solid var(--green);border-radius:12px;padding:18px 22px;margin:28px 0 8px;font-size:17px}
 .thesis b{color:var(--green)}
+/* TL;DR = thesis 绿框左上小标（开篇导读范式，DSN-04；给 skim 的 BLUF） */
+.thesis .thesis-tag{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--green);margin-bottom:9px;opacity:.92}
+/* 00·问题节：house 问题叙述框——中性灰、区别于绿 thesis 防盒子疲劳；叙述体，问题在正文里加粗（DSN-04） */
+.problem{max-width:var(--col,100%);background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:22px 26px;margin:16px 0 0}
+.problem p{font-size:16px;line-height:1.82;color:var(--text);margin:0 0 14px}
+.problem p:last-child{margin-bottom:0}
+.problem p b{font-weight:650}
 
 /* 分节标题 */
 h2{font-size:24px;margin:52px 0 6px;padding-top:18px;border-top:1px solid var(--border)}
@@ -159,6 +167,14 @@ body{display:flex}
 .ch01 .lede .cc{color:var(--blue);font-weight:600}
 .ch01 .lede .hm{color:var(--purple);font-weight:600}
 .ch01 .lede-note{max-width:100%;font-size:13.5px;line-height:1.66;color:var(--faint);margin:10px 0 0}
+
+/* TL;DR 绿标 + 00·问题 house 框已迁入 _design-system.html 单一真相（DSN-04·去 .ch01 scope）；下方保留一份供本章单独 review 时自包含 */
+.ch01 .thesis .thesis-tag{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--green);margin-bottom:9px;opacity:.92}
+.ch01 .problem{max-width:var(--col);background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:22px 26px;margin:16px 0 0}
+.ch01 .problem p{font-size:16px;line-height:1.82;color:var(--text);margin:0 0 14px}
+.ch01 .problem p:last-child{margin-bottom:0}
+.ch01 .problem p b{font-weight:650}
 
 /* 编辑式分节标题 —— 小字 kicker + 论断式大标题（去掉横线机械感） */
 .ch01 .sec{margin:60px 0 8px;max-width:var(--col)}
@@ -797,6 +813,77 @@ body{display:flex}
 .syn1 .compare .side li b{color:var(--text);font-weight:600}
 
 
+/* ============ 本章定制层（scoped 在 .ch04t 下，只引用全局 tokens）============ */
+/* 复用类在本仓按章重新 scoped：合订本 CSS 只从 _design-system 抽取，
+   .cc/.hm/.artifact 不在其中，故在此本章内声明，防合订本掉样式 */
+.ch04t .cc{color:var(--blue);font-weight:600}
+.ch04t .hm{color:var(--purple);font-weight:600}
+.ch04t .artifact{background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;margin:10px 0 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12.5px;line-height:1.6;color:var(--text);white-space:pre-wrap;overflow-x:auto}
+.ch04t .artifact .lbl{display:block;font-family:inherit;color:var(--faint);font-size:11px;
+  letter-spacing:.4px;margin-bottom:8px;text-transform:uppercase}
+.ch04t .artifact .hl{color:var(--amber)}
+.ch04t .artifact.gate{border-left:3px solid var(--red)}
+
+/* 门控标签（本章最高频防翻车点：非默认机制处处标注） */
+.ch04t .g{font-size:10.5px;font-weight:700;border-radius:5px;padding:0 5px;margin-left:4px;letter-spacing:.2px;white-space:nowrap}
+.ch04t .g.def{color:var(--green);border:1px solid color-mix(in srgb,var(--green) 40%,transparent)}
+.ch04t .g.gate{color:var(--amber);border:1px solid color-mix(in srgb,var(--amber) 40%,transparent)}
+.ch04t .g.exp{color:var(--faint);border:1px solid var(--border)}
+
+/* 01 · 四诉求脊 */
+.ch04t .spine{border-left:3px solid var(--amber);background:color-mix(in srgb,var(--amber) 6%,transparent);
+  border-radius:0 10px 10px 0;padding:12px 20px;margin:16px 0}
+.ch04t .spine p{margin:8px 0;font-size:14.5px;color:var(--muted);line-height:1.5}
+.ch04t .spine b{color:var(--text)}
+
+/* 02 · 传感器 / 三态 轻档列表 */
+.ch04t .plist{list-style:none;padding:0;margin:12px 0}
+.ch04t .plist li{padding:6px 0 6px 16px;border-left:2px solid var(--border);margin:9px 0;font-size:14px;color:var(--muted);line-height:1.55}
+.ch04t .plist.cc li{border-left-color:color-mix(in srgb,var(--blue) 55%,transparent)}
+.ch04t .plist.hm li{border-left-color:color-mix(in srgb,var(--purple) 55%,transparent)}
+.ch04t .plist li b{color:var(--text)}
+
+/* 王牌双制品并排 */
+.ch04t .artpair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0 0;align-items:start}
+.ch04t .apcol .aph{font-size:13px;font-weight:700;margin:0 0 2px}
+.ch04t .apcol .apsub{color:var(--faint);font-size:12px;margin:0}
+
+/* Hero · 双面板五种命运 */
+.ch04t .fates{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0 6px;align-items:start}
+.ch04t .fatecol{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
+.ch04t .fatecol.cc-col{border-top:3px solid var(--blue)}
+.ch04t .fatecol.hm-col{border-top:3px solid var(--purple)}
+.ch04t .fatecol .fh{font-size:15px;font-weight:700;margin:0 0 3px}
+.ch04t .fatecol .fsub{color:var(--faint);font-size:12.5px;margin:0 0 12px;line-height:1.45}
+.ch04t .fate{border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin:10px 0;background:var(--bg)}
+.ch04t .fate .fctx{font-size:12.5px;color:var(--muted);font-weight:700;margin-bottom:5px}
+.ch04t .fate .fout{font-size:13.5px;font-weight:600;padding-left:16px;position:relative;line-height:1.4}
+.ch04t .fate .fout::before{content:"↳";position:absolute;left:0;top:0;color:var(--faint);font-weight:400}
+.ch04t .fate.wait{border-left:3px solid var(--amber)}   .ch04t .fate.wait .fout{color:var(--amber)}
+.ch04t .fate.go{border-left:3px solid var(--green)}      .ch04t .fate.go .fout{color:var(--green)}
+.ch04t .fate.remove{border-left:3px solid var(--red)}    .ch04t .fate.remove .fout{color:var(--red)}
+.ch04t .fate.redirect{border-left:3px solid var(--faint)}.ch04t .fate.redirect .fout{color:var(--muted)}
+.ch04t .punch{border:1px dashed color-mix(in srgb,var(--amber) 60%,transparent);
+  background:color-mix(in srgb,var(--amber) 8%,transparent);border-radius:10px;padding:12px 16px;margin:14px 0 0;font-size:14px;color:var(--muted)}
+.ch04t .punch b{color:var(--amber)}
+
+/* data-tip 悬浮解释 */
+.ch04t [data-tip]{position:relative;cursor:help;border-bottom:1px dashed var(--faint)}
+.ch04t [data-tip]:hover::after{content:attr(data-tip);position:absolute;left:0;bottom:calc(100% + 7px);z-index:6;
+  width:max-content;max-width:250px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
+  padding:8px 11px;font-size:12px;line-height:1.5;color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,.45);white-space:normal;font-weight:400}
+
+/* 04 · 三层 band 分隔矩阵（复用 05） */
+.ch04t .matrix .band{grid-column:1/-1;background:var(--surface-2);padding:11px 15px;border-top:2px solid var(--faint);
+  font-size:13px;font-weight:700;color:var(--text)}
+.ch04t .matrix .band .bn{color:var(--faint);font-weight:400;margin-right:9px}
+.ch04t .matrix .band .bx{color:var(--muted);font-weight:400;font-size:11.5px;margin-left:8px;letter-spacing:.2px}
+
+@media(max-width:820px){.ch04t .fates,.ch04t .artpair{grid-template-columns:1fr}}
+
+
 /* ============ 本章定制层（scoped 在 .ch05u 下，只引用全局 tokens）============ */
 /* 复用类在本仓按章重新 scoped（先例 ch01/02/03）：合订本 CSS 只从 _design-system 抽取，
    .cc/.hm/.artifact/.bdg/.tscale 不在其中，故在此本章内声明，防合订本掉样式 */
@@ -915,6 +1002,147 @@ body{display:flex}
 .ch05u .matrix .band .bx{color:var(--muted);font-weight:400;font-size:11.5px;margin-left:8px;letter-spacing:.2px}
 
 @media(max-width:820px){.ch05u .regforms,.ch05u .channels,.ch05u .booklets,.ch05u .keepdrop,.ch05u .guards{grid-template-columns:1fr}}
+
+
+/* ============ 本章定制层（scoped 在 .ch06e 下，只引用全局 tokens）============ */
+/* 复用类在本仓按章重新 scoped（先例 ch01/02/03/05）：合订本 CSS 只从 _design-system 抽取，
+   .cc/.hm/.artifact 不在其中，故在此本章内声明，防合订本掉样式 */
+.ch06e .cc{color:var(--blue);font-weight:600}
+.ch06e .hm{color:var(--purple);font-weight:600}
+.ch06e .artifact{background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;margin:10px 0 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12.5px;line-height:1.6;color:var(--text);white-space:pre-wrap;overflow-x:auto}
+.ch06e .artifact .lbl{display:block;font-family:inherit;color:var(--faint);font-size:11px;
+  letter-spacing:.4px;margin-bottom:8px;text-transform:uppercase}
+.ch06e .artifact .hl{color:var(--amber)}
+
+/* 中档：覆盖网（损失类型 × 防线阶段 · 标默认形态的填充度） */
+.ch06e .cov{display:grid;grid-template-columns:minmax(116px,1.05fr) 1fr 1fr 1fr;gap:1px;
+  background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:16px 0 8px}
+.ch06e .cov>div{background:var(--surface);padding:12px 13px}
+.ch06e .cov .ch{background:var(--surface-2);font-weight:700;font-size:12.5px;color:var(--muted);text-align:center;align-self:stretch}
+.ch06e .cov .rl{background:var(--surface-2);font-weight:600;color:var(--text);font-size:13px;line-height:1.4}
+.ch06e .cov .rl small{display:block;color:var(--faint);font-weight:400;font-size:11px;margin-top:3px}
+.ch06e .cov .cell{display:flex;flex-direction:column;gap:8px}
+.ch06e .cov .mrow{display:flex;align-items:center;gap:8px;font-size:12px}
+.ch06e .cov .mrow .who{width:20px;font-weight:700;flex:none}
+.ch06e .cov .mrow.c .who{color:var(--blue)} .ch06e .cov .mrow.h .who{color:var(--purple)}
+.ch06e .cov .mk{width:12px;height:12px;border-radius:50%;flex:none;border:1.5px solid currentColor}
+.ch06e .cov .mrow.c .mk{color:var(--blue)} .ch06e .cov .mrow.h .mk{color:var(--purple)}
+.ch06e .cov .mk.full{background:currentColor}
+.ch06e .cov .mk.half{background:linear-gradient(90deg,currentColor 50%,transparent 50%)}
+.ch06e .cov .mk.none{background:transparent;opacity:.55}
+.ch06e .cov .mrow .lab{color:var(--muted)}
+.ch06e .cov .na{color:var(--faint);font-size:12px}
+.ch06e .covleg{display:flex;flex-wrap:wrap;gap:16px;color:var(--faint);font-size:12px;margin:0 0 6px}
+.ch06e .covleg span{display:inline-flex;align-items:center;gap:6px}
+.ch06e .covleg i{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--muted);color:var(--muted);flex:none}
+.ch06e .covleg i.full{background:currentColor} .ch06e .covleg i.half{background:linear-gradient(90deg,currentColor 50%,transparent 50%)} .ch06e .covleg i.none{opacity:.55}
+
+/* 重档：两套判据的对角交叉 */
+.ch06e .diag{display:grid;grid-template-columns:minmax(132px,.95fr) 1fr 1fr;gap:12px;margin:20px 0 8px}
+.ch06e .diag .dh{font-weight:700;font-size:15px;padding:4px 6px 2px;text-align:center;align-self:end}
+.ch06e .diag .dh.cc{color:var(--blue)} .ch06e .diag .dh.hm{color:var(--purple)}
+.ch06e .diag .da{display:flex;flex-direction:column;justify-content:center;background:var(--surface-2);
+  border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.ch06e .diag .da .at{font-weight:700;color:var(--text);font-size:13.5px}
+.ch06e .diag .da .as{color:var(--faint);font-size:11.5px;margin-top:3px;line-height:1.4}
+.ch06e .diag .dc{border:1px solid var(--border);border-radius:10px;padding:13px 15px;font-size:13px;line-height:1.5;background:var(--surface)}
+.ch06e .diag .dc.hard{border-color:color-mix(in srgb,var(--amber) 62%,transparent);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--amber) 26%,transparent) inset}
+.ch06e .diag .dc.soft{opacity:.7}
+.ch06e .diag .dc .vt{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.3px;border-radius:5px;padding:1px 7px;margin-bottom:7px}
+.ch06e .diag .dc.hard .vt{color:var(--amber);border:1px solid color-mix(in srgb,var(--amber) 45%,transparent)}
+.ch06e .diag .dc.soft .vt{color:var(--faint);border:1px solid var(--border)}
+.ch06e .diag .dc b{color:var(--text)}
+@media(max-width:720px){.ch06e .diag{grid-template-columns:1fr}.ch06e .diag .dh{display:none}}
+
+
+/* ============ 本章定制层（scoped 在 .ch07m 下，只引用全局 tokens）============ */
+/* 复用类在本仓按章重新 scoped（先例 ch01/02/05）：合订本 CSS 只从 _design-system 抽取，
+   .cc/.hm/.artifact/.bdg 不在其中，故在此本章内声明，防合订本掉样式 */
+.ch07m .cc{color:var(--blue);font-weight:600}
+.ch07m .hm{color:var(--purple);font-weight:600}
+.ch07m .artifact{background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;margin:10px 0 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12.5px;line-height:1.6;color:var(--text);white-space:pre-wrap;overflow-x:auto}
+.ch07m .artifact .lbl{display:block;font-family:inherit;color:var(--faint);font-size:11px;
+  letter-spacing:.4px;margin-bottom:8px;text-transform:uppercase}
+.ch07m .artifact .hl{color:var(--amber)}
+.ch07m .artifact.cc-b{border-left:3px solid var(--blue)}
+.ch07m .artifact.hm-b{border-left:3px solid var(--purple)}
+.ch07m .bdg{display:inline-block;font-size:10.5px;font-weight:700;border-radius:6px;padding:1px 7px;margin-right:6px;letter-spacing:.3px;vertical-align:middle}
+.ch07m .bdg.cc-only{color:var(--blue);border:1px solid color-mix(in srgb,var(--blue) 50%,transparent)}
+.ch07m .bdg.hm-only{color:var(--purple);border:1px solid color-mix(in srgb,var(--purple) 50%,transparent)}
+
+/* §05 Hero · 两图下的术语图例（黑话短语 hover 解释） */
+.ch07m .glossary{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px;align-items:center}
+.ch07m .glossary .gtitle{color:var(--faint);font-size:12px;margin-right:2px}
+.ch07m .term{background:var(--surface-2);border:1px solid var(--border);border-radius:7px;
+  padding:4px 10px;font-size:12px;color:var(--muted);cursor:help;border-bottom:1px dashed var(--faint)}
+.ch07m [data-tip]{position:relative}
+.ch07m [data-tip]:hover::after{content:attr(data-tip);position:absolute;left:0;bottom:calc(100% + 7px);z-index:6;
+  width:max-content;max-width:250px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
+  padding:8px 11px;font-size:12px;line-height:1.5;color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,.45);white-space:normal;font-weight:400}
+
+/* §05 Hero · 图下两家真实制品并排 */
+.ch07m .artpair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0 0;align-items:start}
+.ch07m .artpair .artifact{margin:0}
+@media(max-width:820px){.ch07m .artpair{grid-template-columns:1fr}}
+
+/* §06 收尾 · 92px 标签列 + 正文列（裸文、无卡） */
+.ch07m .takeaways{margin:14px 0 0}
+.ch07m .tk-row{display:grid;grid-template-columns:92px 1fr;gap:16px;padding:15px 0;border-top:1px solid var(--border)}
+.ch07m .tk-row:first-child{border-top:none}
+.ch07m .tk-lab{font-size:13px;font-weight:700;color:var(--faint);letter-spacing:.3px;line-height:1.5;padding-top:1px}
+.ch07m .tk-body{font-size:14.5px;color:var(--muted);line-height:1.65}
+@media(max-width:640px){.ch07m .tk-row{grid-template-columns:1fr;gap:4px}}
+
+/* §02 · 三种协作模式（用途 / 触发 / 特性差异 —— 非阶梯，非互斥档位） */
+.ch07m .mode{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:17px 22px;margin:14px 0}
+.ch07m .mode.main{border-left:3px solid var(--blue)}
+.ch07m .mode-h{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin-bottom:9px}
+.ch07m .mode-h b{font-size:16.5px;color:var(--text)}
+.ch07m .mode-n{font-size:10.5px;font-weight:700;letter-spacing:.4px;color:var(--faint);text-transform:uppercase;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;white-space:nowrap}
+.ch07m .mode p{margin:0 0 9px;color:var(--muted);font-size:14.5px;line-height:1.7}
+.ch07m .mode p:last-child{margin-bottom:0}
+.ch07m .mode p b{color:var(--text);font-weight:650}
+.ch07m .mode .matrix{margin:12px 0 0}
+.ch07m .bdg.avail{color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent)}
+.ch07m .bdg.exp{color:var(--amber);border:1px solid color-mix(in srgb,var(--amber) 45%,transparent)}
+.ch07m .exp-note{display:inline-block;font-size:11px;color:var(--amber);border:1px solid color-mix(in srgb,var(--amber) 40%,transparent);border-radius:6px;padding:1px 7px;margin-left:4px;vertical-align:middle}
+
+/* §03 何时拆 · 决策刻度块（该拆/不该拆双栏 + 刻度分隔） */
+.ch07m .gauge{margin:18px 0 0;border-top:1px solid var(--border);padding-top:18px}
+.ch07m .gauge:first-of-type{border-top:none;padding-top:0}
+.ch07m .gauge .gk{display:flex;align-items:baseline;gap:10px;margin:0 0 10px}
+.ch07m .gauge .gk .gn{font-size:12px;font-weight:700;color:var(--faint);letter-spacing:.3px}
+.ch07m .gauge .gk .gt{font-size:16px;font-weight:700;color:var(--text)}
+.ch07m .gauge .gk .gd{font-size:12.5px;padding:2px 9px;border-radius:999px}
+.ch07m .gauge .gk .gd.same{color:var(--green);border:1px solid color-mix(in srgb,var(--green) 40%,transparent)}
+.ch07m .gauge .gk .gd.diff{color:var(--amber);border:1px solid color-mix(in srgb,var(--amber) 40%,transparent)}
+.ch07m .signals{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 4px}
+.ch07m .signals .sig{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px 17px}
+.ch07m .signals .sig.go{border-left:3px solid var(--green)}
+.ch07m .signals .sig.no{border-left:3px solid var(--faint)}
+.ch07m .signals .sig h5{margin:0 0 8px;font-size:13.5px;color:var(--text)}
+.ch07m .signals .sig ul{margin:0;padding-left:17px}
+.ch07m .signals .sig li{color:var(--muted);font-size:13px;margin:4px 0;line-height:1.5}
+@media(max-width:640px){.ch07m .signals{grid-template-columns:1fr}}
+
+
+/* ============ 本章定制层（scoped 在 .slf 下，只引用全局 tokens）============ */
+/* 复用类在本仓按章重新 scoped（先例 ch01/02/03/05）：合订本 CSS 只从 _design-system 抽取，
+   .cc/.hm/.artifact 不在其中，故在此本章内声明，防合订本掉样式 */
+.slf .cc{color:var(--blue);font-weight:600}
+.slf .hm{color:var(--purple);font-weight:600}
+.slf .artifact{background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;margin:12px 0 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12.5px;line-height:1.65;color:var(--text);white-space:pre-wrap;overflow-x:auto}
+.slf .artifact .lbl{display:block;font-family:inherit;color:var(--faint);font-size:11px;
+  letter-spacing:.4px;margin-bottom:8px;text-transform:uppercase}
+.slf .artifact .hl{color:var(--amber)}
+.slf .decode{color:var(--faint);font-size:13px;line-height:1.6;margin:10px auto 0;max-width:760px;text-align:left}
 
 
 /* ============ 综合② 专属排版（scoped 于 .syn2；build.py 收进合订本 head，不污染共享系统、不泄漏别章）============ */
@@ -1037,7 +1265,7 @@ body{display:flex}
 <div class="navitem" data-t="ch-05">05 Loop 与用户</div>
 <div class="navitem" data-t="ch-06">06 Loop 与环境</div>
 <div class="navitem" data-t="ch-07">07 Loop 与其他 Agent</div>
-<div class="navitem" data-t="ch-08">08 Loop 与自己</div>
+<div class="navitem" data-t="ch-08">08 Loop 的 self-improvement</div>
 <div class="grp">综合</div>
 <div class="navitem" data-t="ch-syn2">综合② Loop 之外怎么设计</div>
 </aside>
@@ -1045,23 +1273,24 @@ body{display:flex}
 <section class="chapter" id="ch-01"><div class="chwrap">
 <div class="ch01">
 
-  <div class="eyebrow"><span class="badge">轴一 · 控制侧</span><span class="tag">Loop 之内</span></div>
-  <h1>核心 Agent Loop</h1>
-  <p class="subtitle">模型每次只活一次调用；所谓连干六十轮，是壳一次次把它重新唤醒。</p>
-  <p class="metrics">模型一次调用只活一轮 &nbsp;·&nbsp; 续命重试几乎清一色<b>上限 3</b> &nbsp;·&nbsp; CC 高压纪律全在<b>条件层</b> &nbsp;·&nbsp; 按<b>模型</b>加压是 Hermes 独有轴（名单 8 家）</p>
+  <div class="eyebrow"><span class="badge">轴一 · Loop 之内</span><span class="tag">控制侧</span></div>
+  <h1>控制侧：核心 Agent Loop</h1>
+  <p class="subtitle">拆开 agent 那条「永不停歇」的主循环——它为什么转得下去，两家又在哪里分家。</p>
 
   <div class="thesis">
-    <p>「连续工作」不是模型的能力，是壳用<span class="hl">三层防线</span>撑起的一种幻觉：<b>机械层</b>一次次把模型重新唤醒，<b>纪律层</b>用写给模型的话拦住它偷懒，<b>强制层</b>用代码兜住它出错或想停。</p>
-    <p>最大的分歧藏在上面两层——<span class="cc">Claude Code</span> 默认赌模型自觉，<span class="hm">Hermes</span> 用壳去补模型的不足。<b>一个默认赌模型，一个补模型。</b></p>
+    <div class="thesis-tag">TL;DR</div>
+    <p>「连续工作」不是模型的能力，是壳造出来的幻觉——模型每一轮都被重新喂进整段历史、再被唤醒一次。壳用<span class="hl">三层防线</span>撑住循环：机械层（唤醒重发）、纪律层（写给模型的话、拦它偷懒）、强制层（用代码兜住出错与想停）。</p>
+    <p>机械层两家几乎同构；<b>分歧全在后两层</b>——<span class="cc">Claude Code</span> 默认赌模型自觉，<span class="hm">Hermes</span> 用壳去补模型的不足。</p>
   </div>
-  <p class="lede-note">本章只讲「循环为什么转下去」；上下文怎么拼、压缩怎么做见 02 章，输出块怎么处置、每类错误怎么办见 03 章。</p>
+  <p class="lede-note">本章只讲循环为什么转下去；上下文怎么拼、压缩怎么做见 02 章，输出块与错误处置见 03 章。</p>
 
-  <div class="sec"><span class="k">The illusion</span><h2>模型说完即死，『连续工作』从何而来</h2></div>
-  <div class="story">
-    <p>一个大模型的本质是一问一答：给它一段文字，它吐出一段文字，然后这次调用就结束了——它没有后台进程，也没有留在原地等下一步的能力。可我们看到的 agent 却能连着干六十轮：读代码、改文件、跑测试、看到报错再改。<b>这不是模型进化出了持久力，是壳制造出来的一种幻觉。</b></p>
-    <p>机关很朴素。模型这一轮想调什么工具，壳就替它把工具真的跑一遍，把结果拼回那段对话历史，然后带着整段加长的历史<b>再发起一次全新的调用</b>。模型所谓的「记忆」，其实就是每一轮被重新喂进去的那份历史——两家做法一模一样：上一轮的历史、模型这轮说的话、工具的执行结果，三段接龙成下一次调用的输入。</p>
-    <p>于是「能一直工作」可以拆成三个互不相同的问题：壳凭什么再调用一次（<b>机械层</b>）？模型凭什么不偷懒、不提前收工（<b>纪律层</b>）？模型想停下、或者要崩的时候，壳怎么办（强制层）？这三个问题的答案，就是本章要拆的三层防线。</p>
+  <div class="sec"><span class="k">00 · 问题</span><h2>模型说完就死，「连续工作」到底从哪儿来</h2></div>
+  <p class="body">这一章不谈抽象循环，只追一件具体的怪事：模型明明「说完即死」，agent 却像不知疲倦。</p>
+  <div class="problem">
+    <p>一个大模型每次调用只活一轮：你给它一段文字，它吐回一段文字，这次调用就结束了——它没有后台进程，也没有留在原地等下一步的能力。<b>说完，就死。</b>可我们看到的 agent 却能连着干几十轮：读代码、改文件、跑测试、看到报错再回去改，中途几乎不用你插手。这份不知疲倦的「连续工作」，到底是从哪儿来的？</p>
+    <p>把这个「凭什么」拆开，其实是三个层层递进的问题。头一个：模型每轮说完就死，<b>壳凭什么能把它再叫起来一次</b>、让循环继续往下推？就算壳能一直叫醒它，第二个问题跟着就来了——<b>模型凭什么不偷懒</b>？它完全可以丢下一份计划、或一句「我这就去做」就想收工。最后，模型真要停下、或者眼看就要崩了（工具报错、吐出空响应、话说到一半被截断），<b>壳又怎么兜住</b>、不让这一整轮的活白白报废？</p>
   </div>
+  <p class="body">头一个问题的机关其实很朴素：模型这一轮想调什么工具，壳就替它把工具真的跑一遍，把结果拼回那段对话历史，然后带着整段加长的历史再发起一次全新的调用。模型所谓的「记忆」，就是每一轮被重新喂进去的那份历史——两家做法一模一样。这三个问题的答案，正好对应壳的<b>三层防线</b>：机械层负责唤醒、纪律层拦住偷懒、强制层兜住出错与想停。而两家从头一个问题起就开始分道——分歧最大的，是后两个。下面就逐层拆。</p>
   <p class="body">两个补充。其一，物理上「agent 在工作」，是壳在一段段地把一个生成器往前摇——正因如此，中断、压缩、恢复才能干净地插在两段调用之间。其二，会话越滚越长，迟早撑爆模型的上下文窗口；让长会话不爆窗口靠的是上下文压缩——那是维持循环能转下去的地基，细节留给 02 章。</p>
 
   <div class="sec"><span class="k">Layer 1</span><h2>第一层·机械续命：继续还是收工，只看一个开关</h2></div>
@@ -1380,22 +1609,23 @@ the work is fully verified.]</pre>
 <div class="ch02">
 
   <div class="eyebrow"><span class="badge">轴一 · 输入侧</span><span class="tag">Loop 之内</span></div>
-  <h1>每轮那个请求怎么拼出来</h1>
+  <h1>输入侧：每轮那个请求怎么拼出来</h1>
   <p class="subtitle">壳每一轮要现拼一个发给模型的请求包——这个包分三层，你以为每轮全新，其实八成逐字复用。</p>
-  <p class="metrics">一次请求 = <b>静态前缀 + 工具 + 历史与每轮注入</b> &nbsp;·&nbsp; 两家都冻前缀吃缓存 &nbsp;·&nbsp; CC 面对 <b>1 个</b>模型 / Hermes 前缀按<b>模型名分叉</b> &nbsp;·&nbsp; 压缩都「先删后摘」外包给 LLM &nbsp;·&nbsp; 训回权重是 <b>Hermes 独有</b></p>
 
   <div class="thesis">
+    <div class="thesis-tag">TL;DR</div>
     <p>拼同一个请求包，两家的手艺<span class="hl">八成是重合的</span>——都为吃缓存把稳定内容冻在最前，都把每轮变化的东西塞进消息窗口、变了才补，都跑几乎一样的「先删后摘」压缩阶梯。</p>
     <p>真正的分叉都挤在同几条缝上，而每条缝都在泄露<b>它到底是什么</b>：<span class="cc">Claude Code</span> 首先是个<b>产品</b>（动态层塞满 IDE、终端、任务的信号）；<span class="hm">Hermes</span> 首先是个<b>面对一群自家开源模型的拥有者</b>（连冻在最前的『静态』前缀都得按模型分叉，且只有它能把压缩训回权重）。</p>
   </div>
   <p class="lede-note">本章只拆「每轮那个请求包怎么拼、分几层」；循环为什么能一直转下去见 01 章；记忆<b>怎么写、怎么蒸馏、跨会话怎么演化</b>的完整生命周期见 08／05 章。</p>
 
-  <div class="sec"><span class="k">The illusion</span><h2>你以为每轮是一份新输入，其实八成是逐字搬过来的</h2></div>
-  <div class="story">
-    <p>直觉里，模型每轮"看到"的，应该是一份为这一轮现写的输入。实际恰恰相反——壳每一轮都在拼<b>同一个请求包</b>，而这个包的绝大部分，是上一轮<b>逐字不变</b>地搬过来的。</p>
-    <p>原因是钱和速度。给模型发一次请求，最贵的成本是让它把长长的前缀重新"读"一遍；只要前缀一个字节都没变，服务端就能"认出这叠没动过"、直接命中缓存、又快又省（这就是 prompt cache）。于是两家做同一件事：把几乎不变的东西（身份守则、工具目录）死死钉在最前面当"冻结前缀"，把每轮要变的东西全赶到后面去——为的就是别惊动缓存。</p>
-    <p>所以"每轮那个请求怎么拼"，可以干净地拆成三层：最前面<b>冻起来吃缓存的静态层</b>，后面<b>每轮现塞进去的动态层</b>，以及当整个包快撑爆窗口时才启动的<b>压缩应急阀</b>。这一章就沿这三层各走一遍——你会看到两家在每一层都先高度趋同，再在同一处分叉。</p>
+  <div class="sec"><span class="k">00 · 问题</span><h2>你以为每轮是一份新输入，其实八成是逐字搬过来的</h2></div>
+  <p class="body">这一章不谈抽象的「上下文管理」，只追一件反直觉的事：模型每轮"看到"的那份输入，绝大部分根本不是这一轮写的。</p>
+  <div class="problem">
+    <p>直觉里，模型每轮"看到"的，应该是一份为这一轮现写的输入。实际恰恰相反——壳每一轮都在拼<b>同一个请求包</b>，而这个包的绝大部分，是上一轮<b>逐字不变</b>地搬过来的。于是那个"凭什么"就冒了出来：一个请求包由哪几部分组成，<b>哪些逐字不变、哪些每轮才换，壳又凭什么这么分</b>？更奇的是，两家壳的分法几乎一模一样——<b>是什么共同的约束，逼得它们不约而同都这么拼</b>？</p>
   </div>
+  <p class="body">头一个"凭什么"的答案朴素得意外：钱和速度。给模型发一次请求，最贵的成本是让它把长长的前缀重新"读"一遍；只要前缀一个字节都没变，服务端就能"认出这叠没动过"、直接命中缓存、又快又省（这就是 prompt cache）。于是两家做同一件事：把几乎不变的东西（身份守则、工具目录）死死钉在最前面当"冻结前缀"，把每轮要变的东西全赶到后面去——为的就是别惊动缓存。</p>
+  <p class="body">所以"每轮那个请求怎么拼"，可以干净地拆成三层：最前面<b>冻起来吃缓存的静态层</b>，后面<b>每轮现塞进去的动态层</b>，以及当整个包快撑爆窗口时才启动的<b>压缩应急阀</b>。这一章就沿这三层各走一遍——你会看到两家在每一层都先高度趋同，再在同一处分叉。</p>
 
   <div class="sec"><span class="k">The anatomy</span><h2>一次请求长什么样：两家共享的三层装配骨架</h2></div>
   <p class="body">先把一次请求摊平成一张图。最该看清的不是每一格写了什么，而是<b>两家的装配骨架几乎是同一张</b>——差异不在骨架，而在骨架的每一层内部（后面三节逐层拆）。自上而下就是发给模型的顺序：冻结的静态层在最前吃缓存，动态层每轮补在后面，压缩阀只在快撑爆时才动。</p>
@@ -1940,22 +2170,23 @@ is the single source of truth for what to do right now.</pre>
 <div class="ch03">
 
   <div class="eyebrow"><span class="badge">轴一 · 输出行动侧</span><span class="tag">Loop 之内</span></div>
-  <h1>模型吐生料，壳每轮加工两样成品</h1>
+  <h1>输出行动侧：模型吐生料，壳每轮加工两样成品</h1>
   <p class="subtitle">一样是能用的行动，一样是能回传给模型的历史。</p>
-  <p class="metrics">一次响应 = <b>多块混排</b>（推理 / 说给你听 / 要动手） &nbsp;·&nbsp; 壳每轮开<b>两条加工线</b> &nbsp;·&nbsp; 底层协议地板<b>两家共享</b> &nbsp;·&nbsp; 上层 Hermes 多铺<b>两层</b>（且两股根因不同）</p>
 
   <div class="thesis">
+    <div class="thesis-tag">TL;DR</div>
     <p>模型一次吐出的不是一句话，是一叠<span class="hl">异构块</span>——有它自己想的（推理）、有说给你听的（正文）、有要动手的（工具调用），混在一坨里。壳每一轮干的是两件加工活：把这叠生料变成 <b>① 能用的行动</b>、<b>② 能合法回传给模型的历史</b>。</p>
     <p>两条加工线结构一模一样——底层一层<b>协议地板</b>两家共享（<span class="cc">CC</span> 这层一点不薄，回传前重塑是它最厚的工程）；上面 <span class="hm">Hermes</span> 各多铺一层：行动线多铺<b>弱模型语义纠偏</b>、历史线多铺<b>异质 provider 适配</b>。这是两股<span class="hl">不同的根因</span>，不是一股。CC 之所以能不铺，只因它只伺候<b>一个受托管模型 + 一个 API</b>。</p>
   </div>
   <p class="lede-note">本章只讲「模型吐的块本轮怎么消费、回传前怎么规整」；循环为什么不致死、每类错误怎么续命见 01 章；每轮新塞什么进请求、历史怎么压缩见 02 章。</p>
 
-  <div class="sec"><span class="k">The raw material</span><h2>你以为模型回你一句话，其实它吐回来一叠块</h2></div>
-  <div class="story">
-    <p>你让 agent 改一行配置。它「回答」你的时候，底层其实一次性吐回了几段性质完全不同的东西：一段它自己的盘算（该改哪、会不会连累别处）、一句说给你听的话（「我来改」）、还有一条真要落到磁盘上的动作（改 config 第 12 行）。这三样<b>挤在同一次响应里</b>，壳收到的是一叠混排的块，不是一句干净的指令。</p>
-    <p>于是壳每一轮都要把这叠生料<b>拆开、分类、分别加工</b>。哪些是「要动手」的，得挑出来真去执行——这条是<b>行动线</b>；而这一整轮（它想的、说的、干的，加上工具跑出来的结果）又必须<b>原样塞回下一次调用</b>，好让模型「记得」自己刚才干了啥——这条是<b>历史线</b>。</p>
-    <p>本章就沿这两条线各走一遍。你会看到：两条线的<b>底层地板两家几乎一样</b>，真正的分野都在上面那薄薄一层——而且行动线和历史线上那一层，<b>是被两件完全不同的事逼出来的</b>。</p>
+  <div class="sec"><span class="k">00 · 问题</span><h2>你以为模型回你一句话，其实它吐回来一叠块</h2></div>
+  <p class="body">这一章不追"模型说了什么"，只追一件事：模型一次吐回来的那叠东西，壳每一轮到底拿它怎么办。</p>
+  <div class="problem">
+    <p>你让 agent 改一行配置。它「回答」你的时候，底层其实一次性吐回了几段性质完全不同的东西：一段它自己的盘算（该改哪、会不会连累别处）、一句说给你听的话（「我来改」）、还有一条真要落到磁盘上的动作（改 config 第 12 行）。这三样<b>挤在同一次响应里</b>，壳收到的不是一句干净的指令，是一叠混排的块。问题就在这儿：<b>壳每一轮拿这叠混排的生料，到底要做成什么</b>？而两家做的，<b>又在哪儿一样、哪儿不一样</b>？</p>
   </div>
+  <p class="body">于是壳每一轮都要把这叠生料<b>拆开、分类、分别加工</b>。哪些是「要动手」的，得挑出来真去执行——这条是<b>行动线</b>；而这一整轮（它想的、说的、干的，加上工具跑出来的结果）又必须<b>原样塞回下一次调用</b>，好让模型「记得」自己刚才干了啥——这条是<b>历史线</b>。</p>
+  <p class="body">本章就沿这两条线各走一遍。你会看到：两条线的<b>底层地板两家几乎一样</b>，真正的分野都在上面那薄薄一层——而且行动线和历史线上那一层，<b>是被两件完全不同的事逼出来的</b>。</p>
 
   <div class="sec"><span class="k">Anatomy A</span><h2>一次响应不是一句话，是一叠块——每块有两种命运</h2></div>
   <p class="body">先把模型一次响应摊开。它不是一段文字，是<b>一叠块</b>：推理块、正文块、工具调用块，可以混排、可以多个。壳收到后第一件事就是逐块认领——而每一块都有两种命运要分别交代：<b>这一轮怎么用它</b>（行动线的活）、<b>怎么把它塞回历史</b>（历史线的活）。下面这张表，就是后面两条线的预告。</p>
@@ -2187,19 +2418,20 @@ re-emit it as a tool call...</pre>
 <div class="syn1">
 
   <div class="eyebrow"><span class="badge">综合① · 轴一</span><span class="tag">Loop 之内</span></div>
-  <h1>一个 Loop 是怎么设计的</h1>
+  <h1>综合①：一个 Loop 是怎么设计的</h1>
   <p class="subtitle">三侧拆完拼回来：一个回合的一生，与所有分叉的最终去向。</p>
-  <p class="metrics">一个回合 ＝ <b>8 站</b> &nbsp;·&nbsp; 三章分叉共 <b>8 处</b>：6 →改壳 / 1 →改模型 / 1 →例外 &nbsp;·&nbsp; 本章<b>只编织不开采</b>（每站每处分叉回指 01/02/03）</p>
 
   <div class="thesis">
+    <div class="thesis-tag">TL;DR</div>
     <p>读完三侧，最该带走的不是「两家有多不同」，而是两家的 Loop <span class="hl">八成是同一门手艺</span>——机械循环同构、装配骨架同一张、协议地板互相通用。真正的分叉只有 <b>8 处</b>，而且几乎全部通向两个变量：<b>敢多信这个模型</b>（信任，决定壳的厚度）；<b>拥不拥有这个模型</b>（所有权，决定有没有第二根杠杆）。</p>
     <p><span class="cc">Claude Code</span> 押注一个自家托管的强模型——通向两杠杆的 7 处分叉上，它的答案全是「不铺、不分、不训」，单杠杆且轻用；<span class="hm">Hermes</span> 面对一群参差的开源模型、又自己训模型——改壳、改模型两根杠杆一起拉。外加一处诚实的例外：有一处分叉谁的杠杆都不归，它只是「产品和底座长得不一样」。</p>
   </div>
 
-  <div class="story" style="margin-top:16px">
-    <p>前三章像三张解剖图：01 拆「循环为什么转得下去」，02 拆「每轮那个请求包怎么拼」，03 拆「吐出来的生料怎么加工」。每张图都对，但解剖图有个天生的缺陷——看完三张，你还是没见过这台机器<b>跑起来</b>的样子。</p>
-    <p>所以这一章干两件事：先把一个回合从头到尾走一遍（8 站，每站标清「这里两家一样」还是「这里分了叉」）；再把全部分叉收拢到一张图上，看它们到底汇向哪里。本章不新增任何机制——每一站、每处分叉，都回指三章里已过门的结论。</p>
+  <div class="sec"><span class="k">00 · 问题</span><h2>三张解剖图都对，可你还是没见过这台机器跑起来</h2></div>
+  <div class="problem">
+    <p>前三章像三张解剖图：01 拆「循环为什么转得下去」，02 拆「每轮那个请求包怎么拼」，03 拆「吐出来的生料怎么加工」。每张图都对——可解剖图有个天生的缺陷：<b>看完三张，你还是没见过这台机器跑起来的样子</b>。更要紧的是，三章各自拆出的那些分叉散落在各处，<b>它们到底通向哪里、是不是同几个变量在反复作祟，光靠解剖图也拼不出来</b>。</p>
   </div>
+  <p class="body">所以这一章不新增任何机制，只干两件事：先把一个回合从头到尾走一遍（8 站，每站标清「这里两家一样」还是「这里分了叉」），让机器真的转起来；再把全部分叉收拢到一张图上，看它们最终汇向哪里。每一站、每处分叉，都回指三章里已过门的结论。</p>
 
   <!-- ================= §01 上半 · 回合时间线 ================= -->
   <div class="sec">
@@ -2548,214 +2780,229 @@ re-emit it as a tool call...</pre>
   </div>
 </div></section>
 <section class="chapter" id="ch-04"><div class="chwrap">
+<div class="ch04t">
 
-  <div class="eyebrow"><span class="badge">第 4 篇 · 轴二 · Loop 之外</span><span class="tag">时间与触发</span></div>
-  <h1>Loop 与时间</h1>
-  <p class="subtitle">两次触发之间，谁让它活着？</p>
-  <div class="chips">
-    <span class="chip">谁替它保活</span>
-    <span class="chip">常驻 vs 会话</span>
-    <span class="chip">定时 · 唤醒</span>
-    <span class="chip">主动投递</span>
-    <span class="chip">自主休眠省钱（实验·默认关）</span>
-    <span class="chip">会话内：同步阻塞 vs 后台并发</span>
-  </div>
+  <div class="eyebrow"><span class="badge">第 4 篇 · 轴二 · Loop 之外</span><span class="tag">Loop 与时间 · 在场性</span></div>
+  <h1>Loop 与时间：你不在的时候，它把「你不在」当成什么</h1>
+  <p class="subtitle">交代完就走了——从这一刻起，它干活的时间线和你的注意力时间线彻底分了家。</p>
 
   <div class="thesis">
-    同样要让 agent「跨越单次对话而存在」，两家被<b>相反的部署现实</b>推着走。分水岭不是「谁功能多」——两家都有定时、后台、远程触发、推送——而是一个隐藏变量：<b>谁替 agent 保活</b>。Claude Code 是厂商托管产品，答案是「厂商云替它保活」，于是一切围着<b>人的注意力缝隙</b>编排；Hermes 是自托管开源 agent，答案是「没人替它保活」，于是它被逼着<b>自己变成那个常驻活体</b>。
+    <div class="thesis-tag">TL;DR</div>
+    <p style="margin:0 0 10px">你把要做的事交代完，人就走了。从这一刻起，agent 干活的时间线和你的注意力时间线<b>解了耦</b>——它继续走，你已经不在看。</p>
+    <p style="margin:0">同样面对「你不在」，两家的读法相反：<span class="cc">CC</span> 把它当成一个<b>被持续测量、要设法弥合的信号</b>——设法把你的注意力找回来；<span class="hm">Hermes</span> 把它当成一个<b>由语境注定、要照章办的事实</b>——超时=没同意、错过=不补、无事=沉默。</p>
   </div>
 
-  <h2><span class="num">01</span>问题：两次触发之间，谁让它活着</h2>
-  <p class="lead">用产品语言讲：模型是个「被叫一次算一次」的函数，两次调用之间它根本不存在。谁来填补空窗？</p>
-  <div class="story">
-    一个具体场景：凌晨 3 点，你的代码仓库来了个新 PR 需要 review；或你想让 agent 每天早上自动跑一遍冒烟测试。可你本人在睡觉、在上班，<b>不在终端前</b>。这时 agent 要能存在、被叫醒、干活、再把结果送到你眼前。<br><br>
-    但模型本身是个<b>无状态、被叫一次算一次</b>的函数——两次调用之间它根本不存在。谁来填补「两次触发之间」的空窗？谁在你不在时让它活着、按时醒来、干完还能找到你？这就是「时间与触发」的题眼。两家给出的答案，暴露了它们对「agent 到底活在谁的地盘上」的根本不同假设。
+  <h2><span class="num">00</span>问题：你不在，才是这台机器的常态</h2>
+  <div class="problem">
+    <p>凌晨三点，你睡了。一个新 PR 刚合进来，或者你上周设的定时冒烟任务正好到点——agent 该动的时候，你不在。这段时间里它得能<b>存在</b>、被叫醒、把活干完；万一半路卡住需要你拍板，它还得<b>找到你</b>；干完了，把结果送到你早上会看见的地方。<b>你不在，是常态，不是异常</b>。于是真正的问题不是「它会不会干活」，而是：<b>当你不在，它到底把「你不在」这件事读成了什么——一个要设法弥合的缺口，还是一个照章办事的既定事实</b>？</p>
   </div>
 
-  <h2><span class="num">02</span>两条流程的形状差异，源自同一个问题的不同答案</h2>
-  <p class="lead">左蓝 Claude Code，右紫 Hermes。同样要「跨时间存在」，一个把重活儿靠在厂商云上、只需假设人会回来；
-  另一个没有厂商这层，只能自己长期驻留、自我唤醒、自我投递。</p>
+  <h2><span class="num">01</span>你交出去的，是「在场监督权」</h2>
+  <p class="lead">交代完就走，你让渡的其实是一样东西：<b>在场监督权</b>——不再守在旁边随时喊停、随时确认。这一让渡，内生出四件它必须替你兜住的事。这四件事，就是本章的问题骨架，也是下面两家各自的答卷。</p>
+  <div class="spine">
+    <p><b>干得完</b> —— 你不在，它的时间线不能断在半路（谁让它醒着、崩了怎么办、错过了补不补）。</p>
+    <p><b>找得到我</b> —— 真需要你拍板时，它得够得到你（等多久、超时算什么、无人时敢不敢自己定）。</p>
+    <p><b>送得到我</b> —— 干完了，结果要送到你回来会看见的地方（送哪、要不要主动把你叫回来）。</p>
+    <p><b>别乱来</b> —— 没人盯着的时候，谁替你踩刹车（危险动作在无人时走向哪）。</p>
+  </div>
 
-  <div class="flow2">
-    <div class="diagram">
-      <h3 style="color:var(--blue)">Claude Code：人拥有会话，厂商托管保活</h3>
-      <p class="dlead">默认人会回到会话；真正的无人长跑外包给厂商云。</p>
-      <pre class="mermaid">
-flowchart TD
-    A[人打开终端会话] --> B[agent 活在这个会话里]
-    B --> C[人离开]
-    C --> D[注意力缝隙里干内务<br/>记忆整理 · 清理]
-    C --> E[本地定时只在<br/>会话空闲时触发]
-    D --> F{需要真 · 无人长跑?}
-    E --> F
-    F -->|是| G[外包给厂商云]
-    F -->|否| H[人回来]
-    G --> H
-    H --> I([通知叫回 + 离开摘要<br/>帮人接上])
-      </pre>
-      <div class="cap">一切围着「人的注意力缝隙」编排<br/>本地进程有意不做成常驻守护</div>
+  <h2><span class="num">02</span>两家靠什么知道「你不在」——一个靠测量，一个靠注定</h2>
+  <p class="lead">在应答四诉求之前，先看最底层的一道分野：它到底怎么知道你不在。<span class="cc">CC</span> 靠传感器<b>测</b>出来（信号长在自家终端/桌面上）；<span class="hm">Hermes</span> 靠语境<b>注定</b>——你从哪扇门进来，就注定了你在不在。</p>
+
+  <p style="margin:18px 0 0"><span class="cc">Claude Code</span> · 一排装在你终端里的传感器，实时读你在不在：</p>
+  <ul class="plist cc">
+    <li>一回合干完、你 <b>60 秒</b>没搭理 → 判定人不在，推一条「Claude 在等你」的通知。<span class="g def">默认</span></li>
+    <li>终端失焦满 <b>5 分钟</b>（靠 DECSET 1004 焦点上报）→ 生成一张「你走开时这边在干嘛」的离开摘要卡。<span class="g gate">特性门控·默认关</span></li>
+    <li>终端焦点状态（focused / unfocused）→ 直接当「自治度旋钮」：你在看就更协作，你走了就更大胆。<span class="g gate">门控</span></li>
+    <li>你此刻在手机上 → 把终端弹窗换成手机 IM 上的短码批复。<span class="g gate">门控</span></li>
+  </ul>
+
+  <p style="margin:20px 0 0"><span class="hm">Hermes</span> · 它不测量，它被告知——你从哪扇门进来，在不在就已经写死：</p>
+  <ul class="plist hm">
+    <li><b>CLI 态</b>（你就在本地终端前）＝在场，无限等你敲键。</li>
+    <li><b>网关态</b>（你从 Telegram/Discord 等聊天里来）＝半在场，聊天可达、但你可能几分钟才看一眼。</li>
+    <li><b>cron 态</b>（定时任务到点自己开火）＝结构性不在场，根本没有人。</li>
+  </ul>
+
+  <p style="margin:20px 0 8px">两家最能说明问题的，是这一对并排的真制品——一家替你惦记「你会回来」（主动生成塞给你），一家干脆没有「离开时主动摘要」这一手：</p>
+  <div class="artpair">
+    <div class="apcol">
+      <p class="aph"><span class="cc">CC</span> · 替你惦记「你会回来」<span class="g gate">特性门控·默认关</span></p>
+      <p class="apsub">失焦 5 分钟，主动生成一张摘要卡塞给你</p>
+      <div class="artifact"><span class="lbl">离开摘要 · 提示词原文</span>The user stepped away <span class="hl">and is coming back</span>. Write exactly 1-3 short sentences. Start by stating the high-level task ... Next: the concrete next step.</div>
     </div>
-
-    <div class="diagram">
-      <h3 style="color:var(--purple)">Hermes：自托管，自己常驻</h3>
-      <p class="dlead">没有厂商保活，agent 只能自己成为那个会醒来会睡去的常驻实体。</p>
-      <pre class="mermaid">
-flowchart TD
-    A[装在你自己的服务器上] --> B[没有厂商保活]
-    B --> C[自带网关长期驻留<br/>地基]
-    C --> D[用户常年不在场]
-    D --> E[网关监听<br/>时钟 / 外部事件 / 聊天消息]
-    E --> F[任一信号叫醒]
-    F --> G[无人值守干完]
-    G --> H[主动推给不在场的你]
-    H --> I[闲久可休眠·交平台冻结机器<br/>实验特性·默认关]
-    I --> J([有信号再自动醒])
-      </pre>
-      <div class="cap">网关是一切的地基，人不在是常态<br/>自我唤醒 · 自我投递（另有实验性自我休眠）</div>
+    <div class="apcol">
+      <p class="aph"><span class="hm">Hermes</span> · 没有「离开时主动摘要」这一手</p>
+      <p class="apsub">只有一个纯本地、零成本的 recap 助手（设计取向：instant/free）</p>
+      <div class="artifact"><span class="lbl">session recap · 文档头原文</span>Inspired by Claude Code's /recap command ... Pure local computation. No LLM call ... A recap should be <span class="hl">instant and free</span>.</div>
     </div>
   </div>
-  <p class="lead" style="margin-top:16px">两条流程的形状差异，全部源自一个问题的不同答案——<b>「两次触发之间，谁让它活着」</b>。</p>
+  <p style="margin:14px 0 0;color:var(--muted)">同一件事——「人走开、又回来」——<span class="cc">CC</span> 有「离开时主动生成摘要」这一手（特性门控），<span class="hm">Hermes</span> 这边只有一个纯本地、零成本的 recap 助手、<b>未见「离开时主动推送」</b>；一个主动替你惦记，一个不主动惦记。</p>
 
-  <h2><span class="num">03</span>Hero 机制 · 一个没人照看的 agent 的一天</h2>
-  <p class="lead">挑 Hermes 来拆——它最能说明「没有厂商，就只能自己成为常驻活体」这件事。一个装在你自己服务器上的软件，如何在没人看的时候存在、醒来、干活、投递、再睡去。</p>
-  <div class="stepper"><script type="application/json" class="captions">[
-  "<b>步骤 1</b> · 它装在你自己的服务器上，没有厂商替它保活——于是它自带一个「网关」长期驻留，这是一切的地基。",
-  "<b>步骤 2</b> · 用户去上班、去睡觉，没人在场——网关静静待命，同时竖起三只耳朵：时钟、外部世界事件、聊天软件消息。",
-  "<b>步骤 3</b> · 凌晨的定时任务到点了／收到一个 PR 事件／你从聊天软件发来一句话——任一信号都能把它叫醒，开一轮 agent。",
-  "<b>步骤 4</b> · 在完全无人值守下，它把活干完：审这个 PR、修那个 bug、生成今早的资讯摘要。",
-  "<b>步骤 5</b> · 结果不能烂在服务器里——它主动推给不在场的你：短信／聊天软件／邮件／PR 评论；若判断「无事发生」，就保持安静不打扰。",
-  "<b>步骤 6</b> · 活干完、长时间没动静——它<b>可以</b>进入休眠、松开连接，把机器交给部署平台冻结（这就是 scale-to-zero：空闲不烧你的云账单）；下次有信号再自动醒来。注意：这是<b>实验特性、默认关闭</b>，要专门开开关且跑在 Fly.io 一类平台上才生效——默认部署下网关就是普通常驻进程、空闲照样占机器。"
-]</script>
-    <div class="stage">
-      <!-- 6 帧，与 CAPTIONS 6 条一一对应 -->
-      <div class="frame on">
-        <div class="cols">
-          <div class="box purple"><div class="t">部署现实</div><code>装在你自己的服务器上<br>没有厂商替它保活</code></div>
-          <div class="box blue"><div class="t">于是它自带地基</div><code>一个「网关」长期驻留<br>—— 一切的地基</code></div>
-        </div>
+  <p style="margin:20px 0 0;color:var(--muted)">这道分野背后是一句话的部署现实（不展开，只作约束变量）：<span class="cc">CC</span> 出厂是个装在你终端里的客户端，所以能测量你的焦点；<span class="hm">Hermes</span> 交付的是你自己跑的一台服务器，它只拥有「网关」这一扇门，所以只知道「你从哪扇门进来」。</p>
+
+  <h2><span class="num">03</span>它替你把四件事办成什么样</h2>
+  <p class="lead">带着上一节那道「测量 vs 注定」的分野，逐一看四诉求的答卷。四件事里，「找得到我」最见功力——放在中间重点画。</p>
+
+  <h3 style="font-size:18px;margin:36px 0 4px"><span style="color:var(--faint);font-weight:400;margin-right:9px">3-a</span>干得完：错了之后，一个先问人、一个按规矩办</h3>
+  <p class="lead">时间线断在半路怎么办？两家都为「崩了 / 错过了」设了语义，但第一反应相反。</p>
+  <div class="compare">
+    <div class="side cc">
+      <h4><span class="cc">Claude Code</span> · 错过了？先问人 <span class="g def">cron/loop 默认开·可急停</span></h4>
+      <p style="color:var(--muted);font-size:15px;margin:0">定时任务绑的是「项目」不是某个会话（持锁的会话崩了，别的会话 5 秒内接管），只在会话空闲时开火，周期任务满 7 天自动过期。<b>错过语义还分叉</b>：一次性任务错过 → 先从磁盘删掉、再让模型用提问工具问你「要不要现在补跑」、<b>绝不自动补</b>；周期任务 → 静默开火一次、向前重排。</p>
+      <div class="artifact"><span class="lbl">一次性任务错过后的通知 · 原文</span>The following one-shot scheduled task was missed while Claude was not running ... Do NOT execute this prompt yet. <span class="hl">First use the AskUserQuestion tool to ask whether to run it now.</span> Only execute if the user confirms.</div>
+    </div>
+    <div class="side hm">
+      <h4><span class="hm">Hermes</span> · 崩了？宁漏跑不重跑 <span class="g def">默认</span></h4>
+      <p style="color:var(--muted);font-size:15px;margin:0">常驻网关每 <b>60 秒</b>敲一次节拍。崩溃语义是<b>宁漏跑不重跑</b>（执行前先把下次时间往后推，把「至少一次」压成「至多一次」）；宕机太久攒下的积压不会一次补发，<b>塌缩成只补一次</b>，宽限窗＝周期的一半、夹在 120 秒到 2 小时之间。</p>
+    </div>
+  </div>
+  <p style="margin:14px 0 0;color:var(--muted)">一句话对照：错过之后，<span class="cc">CC</span> 的第一反应是<b>问人</b>，<span class="hm">Hermes</span> 的第一反应是<b>按预定语义办</b>——因为 cron 态里根本没人可问。</p>
+
+  <h3 style="font-size:18px;margin:40px 0 4px"><span style="color:var(--faint);font-weight:400;margin-right:9px">3-b</span>找得到我：同一个「要你拍板」，五种命运</h3>
+  <p class="lead">这是四诉求里最见功力的一件，也是本章唯一的重点图。干到一半需要你拍板，两家不是同一个动作的两种参数——<b>连分叉的轴都不一样</b>：<span class="cc">CC</span> 按「你此刻注意力在哪块屏」分叉，<span class="hm">Hermes</span> 按「你从哪扇门进来」分叉。越往下（越不在场），CC 越倾向「自己拍」、Hermes 越倾向「要么等满要么不许问」。</p>
+
+  <div class="fates">
+    <div class="fatecol cc-col">
+      <p class="fh"><span class="cc">Claude Code</span> · 分叉轴 = 你的注意力在哪块屏</p>
+      <p class="fsub">越往下 = 你越不在终端前，它越敢自己拍</p>
+      <div class="fate wait">
+        <div class="fctx">默认 · 你在终端 <span class="g def">默认</span></div>
+        <div class="fout">弹选择题，停下等你回来</div>
       </div>
-      <div class="frame">
-        <div class="cols">
-          <div class="box"><div class="t">用户不在场</div><code>去上班 · 去睡觉<br>没人守着终端</code></div>
-          <div class="box purple"><div class="t">网关竖起三只耳朵</div><code>时钟 · 外部世界事件 · 聊天软件消息</code></div>
-        </div>
+      <div class="fate go">
+        <div class="fctx">自治态 · <span data-tip="终端焦点信号 focused/unfocused，来自 DECSET 1004 上报；unfocused=判定用户走了">terminalFocus=unfocused</span> <span class="g gate">门控</span></div>
+        <div class="fout">按最佳判断自己拍板往前走，只为真不可逆的动作暂停</div>
       </div>
-      <div class="frame">
-        <div class="cols">
-          <div class="box purple"><div class="t">任一信号都能叫醒</div><code>凌晨定时到点 / 收到一个 PR 事件 / 你从聊天软件发来一句话</code></div>
-          <div class="box blue"><div class="t">动作</div><code>开一轮 agent</code></div>
-        </div>
-      </div>
-      <div class="frame">
-        <div class="cols">
-          <div class="box purple"><div class="t">完全无人值守下干完</div><code>审这个 PR · 修那个 bug · 生成今早的资讯摘要</code></div>
-          <div class="box dim"><div class="t">用户视角</div><code>还在睡 / 还在上班<br>全程不在场</code></div>
-        </div>
-      </div>
-      <div class="frame">
-        <div class="cols">
-          <div class="box blue"><div class="t">结果不能烂在服务器里</div><code>主动推给不在场的你<br>短信 / 聊天软件 / 邮件 / PR 评论</code></div>
-          <div class="box dim"><div class="t">若判断「无事发生」</div><code>保持安静，不打扰</code></div>
-        </div>
-      </div>
-      <div class="frame">
-        <div class="cols">
-          <div class="box purple"><div class="t">长时间没动静（实验特性·默认关）</div><code>可自己进入休眠、松开连接<br>交部署平台冻结机器（需专门开关+Fly.io）</code></div>
-          <div class="box blue"><div class="t">下次</div><code>有信号再自动醒来</code></div>
-        </div>
+      <div class="fate redirect">
+        <div class="fctx">channels · 你在手机上 <span class="g gate">门控</span></div>
+        <div class="fout">终端弹窗被禁用，改成手机上回「yes + 5 位短码」</div>
       </div>
     </div>
-    <div class="caption"></div>
-    <div class="ctrl">
-      <div class="dots"></div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span class="count"></span>
-        <button class="prev">‹ 上一步</button>
-        <button class="next">下一步 ›</button>
+    <div class="fatecol hm-col">
+      <p class="fh"><span class="hm">Hermes</span> · 分叉轴 = 你从哪扇门进来</p>
+      <p class="fsub">越往下 = 你越结构性不在场，它越不许问</p>
+      <div class="fate wait">
+        <div class="fctx">网关态 · 你在聊天那头 <span class="g def">默认</span></div>
+        <div class="fout">推按钮阻塞等 1 小时，超时收到回执、带着「用户没回」自己继续</div>
+      </div>
+      <div class="fate remove">
+        <div class="fctx">cron 态 · 你结构性不在场 <span class="g def">默认</span></div>
+        <div class="fout">提问工具直接从工具箱摘掉，根本走不到「问」这一步</div>
       </div>
     </div>
   </div>
-  <div class="card">
-    <h3 style="color:var(--blue)">对照：Claude Code 的这一天 —— 「围着人的注意力缝隙转」</h3>
-    <p class="why">Claude Code 的时间机制几乎全部假设「人拥有一个会话、终会回到它」。它在人离开的<b>注意力缝隙</b>里干内务（记忆整理、后台清理），本地定时只在会话还活着且空闲时才触发；真正需要「无人长驻」的活儿则<b>外包给厂商云</b>，本地进程有意不做成常驻守护。人回来时，它用通知把人叫回、用离开摘要帮人接上刚才发生的事。它不需要「自己成为一个会醒来会睡去的活体」——因为厂商的基础设施就是它的保活者。这与 Hermes 正好两极：一个把「跨时间存在」靠在厂商身上，一个把它全扛在自己身上。</p>
+
+  <div class="artifact"><span class="lbl">Hermes 网关态 · 等满 1 小时的超时回执 · 原文</span>[user did not respond within 60m]</div>
+  <div class="artifact"><span class="lbl">CC channels 态 · 为什么禁掉弹窗 · 代码注释原文</span>The multiple-choice dialog <span class="hl">would hang with nobody at the keyboard</span>. Channel permission relay already skips requiresUserInteraction() tools so there's no alternate approval path.</div>
+  <div class="artifact"><span class="lbl">Hermes cron 态 · 把交互工具摘掉 · 原文</span>disabled = ["cronjob", "messaging", "clarify"]
+# <span class="hl">clarify -- interactive, blocks waiting for user input</span></div>
+
+  <p style="margin:14px 0 0;color:var(--muted)">那个「等 1 小时」不是拍脑袋定的：旧默认是 10 分钟，结果晚点回来的用户点到已经过期的条目、把 agent 卡死，才调长到 1 小时——<b>既够久让离开的人回来还能点，又够短让真被遗弃的提问最终能松开线程</b>。</p>
+
+  <div class="punch">
+    <b>0.5 秒该看到的差别：</b><span class="cc">CC</span> 问的是「你的注意力在哪块屏」，<span class="hm">Hermes</span> 问的是「你从哪扇门进来」——连分叉的轴都不一样，不是超时长短之别。
   </div>
 
-  <h2><span class="num">04</span>对比：七组对照看清分歧</h2>
-  <p class="lead">谁保活、活在哪、人不在算例外还是常态……同一个「跨时间存在」的目标，答案却指向两种部署现实。</p>
+  <h3 style="font-size:18px;margin:40px 0 4px"><span style="color:var(--faint);font-weight:400;margin-right:9px">3-c</span>送得到我：把结果送回你，和把你的注意力找回来</h3>
+  <p class="lead">干完了，结果去哪、要不要把你叫回来？这里两家的重心也不同：<span class="cc">CC</span> 一层层往外够、想把你的注意力找回来；<span class="hm">Hermes</span> 把结果安静地放回你出发的地方。</p>
+  <p style="margin:0 0 4px"><span class="cc">Claude Code</span> 是一道<b>渠道阶梯</b>（按离你远近排，越往外越依赖门控与服务端，纯本地那圈才是默认）：</p>
+  <ul class="plist cc">
+    <li>本地响铃 / 桌面通知「Claude is waiting for your input」<span class="g def">默认 GA</span></li>
+    <li>离开摘要卡（回来一眼接上）<span class="g gate">门控·默认关</span></li>
+    <li>桌面深链 <span data-tip="claude://resume?session=… 点开在 Claude Desktop 里续上该 CLI 会话；teleport 还能换台机器拉回会话历史+git 分支">claude://resume</span> + teleport 跨机续会话 <span class="g gate">门控</span></li>
+    <li>channels 手机 IM 收发 <span class="g gate">多层门</span></li>
+  </ul>
+  <p style="margin:6px 0 0;color:var(--faint);font-size:13px">（纯本地那圈没有把通知推到手机 app 的路径——跨端叫回全靠上面外圈的门控能力。）</p>
 
+  <p style="margin:20px 0 4px"><span class="hm">Hermes</span> 则是<b>回出生地</b>：在哪个聊天里建的任务，结果就回哪个聊天——渠道是建任务时定下的代码规则，不是模型每次自选。提示词甚至明说「别自己发、系统负责送达」；真没事发生就保持安静。</p>
+  <div class="artifact"><span class="lbl">投递归属 · 提示词原文</span>DELIVERY: Your final response will be automatically delivered to the user -- <span class="hl">do NOT use send_message</span> or try to deliver the output yourself. Just produce your report/output as your final response and the system handles the rest.</div>
+  <div class="artifact"><span class="lbl">无事发生就保持安静 · 提示词原文（另有调度器代码识别 [SILENT] 抑制投递，双层）</span>SILENT: If there is genuinely nothing new to report, respond with exactly <span class="hl">"[SILENT]"</span> (nothing else) to suppress delivery.</div>
+  <p style="margin:14px 0 0;color:var(--muted)">对照：<span class="cc">CC</span> 忙着把你的注意力<b>找回来</b>（一层层往外够），<span class="hm">Hermes</span> 忙着把结果<b>安静地放到</b>你回来会看到的地方。</p>
+
+  <h3 style="font-size:18px;margin:40px 0 4px"><span style="color:var(--faint);font-weight:400;margin-right:9px">3-d</span>别乱来：没人看着时，谁替你踩刹车</h3>
+  <p class="lead">这是四诉求里两家最不对称的一件——<span class="hm">Hermes</span> 有一整套「无人时危险动作怎么办」的词汇，<span class="cc">CC</span> 这块更薄（因为它默认你会回来，可以拖到你回来再说）。这个不对称本身就是论点证据。</p>
+  <p style="margin:0 0 4px"><span class="hm">Hermes</span>（默认）把话说得极硬：网关审批阻塞等 <b>5 分钟</b>、<b>超时=拒</b>；cron 态<b>默认拒</b>（要放行得显式打开信任开关）。回执措辞是这道闸的语言核心：</p>
+  <div class="artifact gate"><span class="lbl">危险命令被拒 / 超时的回执 · 原文</span>BLOCKED: Command {reason}. The user has NOT consented to this action. Do NOT retry this command, <span class="hl">do NOT rephrase it</span>, and do NOT attempt the same outcome via a different command ...
+[超时附加] <span class="hl">Silence is not consent.</span></div>
+  <p style="margin:14px 0 0;color:var(--muted)"><b style="color:var(--text)">一处坦白取舍</b>：既不是交互 CLI、又不是网关、又不是 cron 的语境（根本没有审批面），危险命令反而会<b>自动放行</b>——「没有审批面即信任」。但硬红线命令（<code>rm -rf /</code>、格式化磁盘等）在任何开关之前就被拦死，一律绕不过。<span style="color:var(--faint)">（审批机制本体属环境章 06，这里只看「你不在时它走向哪」。）</span></p>
+  <p style="margin:14px 0 0;color:var(--muted)"><span class="cc">CC</span>（门控）这侧的对应物更薄：channels 的六层准入门 + 手机回批必须「y/yes + 5 位字母码」防聊天误触；remote 容器里权限请求既不自动拒也不自动放，而是合成一条消息桥回挂着的客户端等人批。</p>
+  <p style="margin:14px 0 0;color:var(--muted)">收一句到主动性天花板：<span class="hm">Hermes</span> <b>无任何自发唤醒 / 自发外联</b>（研究员 grep 搜遍未发现，故用「未发现」不用「绝无」）——连自动化建议都 consent-first、永不自动建任务。<span class="cc">CC</span> 的自治态给了 agent「找活干」的裁量，但首拍克制（新会话第一下只打招呼）、空转必睡。</p>
+
+  <h2><span class="num">04</span>拼起来：四诉求 × 两家，和它眼里你的「不在」</h2>
+  <p class="lead">把四诉求拼回一张表——每格都标了「默认 / 特性门控 / 实验」，因为 <span class="cc">CC</span> 侧大量机制是门控态，不标就会把「可开启的能力」误读成「出厂默认姿态」。末行加一条「成本」，看两家各替谁省钱。</p>
   <div class="matrix">
     <div class="mh"></div>
     <div class="mh cc">Claude Code</div>
     <div class="mh hm">Hermes</div>
 
-    <div class="dim">谁替 agent 保活</div>
-    <div>厂商平台 / 云。</div>
-    <div>没人，agent 自己扛。</div>
+    <div class="band"><span class="bn">①</span>时间线与够到你<span class="bx">干得完 · 找得到我</span></div>
+    <div class="dim">干得完</div>
+    <div>任务绑项目、锁崩 5 秒接管、7 天过期；错过<b>先问人</b>补跑、周期静默重排。<span class="g def">cron 默认开·可急停</span></div>
+    <div>60 秒节拍；<b>宁漏跑不重跑</b>、积压塌缩只补一次（宽限窗 2 小时封顶）。<span class="g def">默认</span></div>
 
-    <div class="dim">agent 活在哪</div>
-    <div>人拥有的会话（终端 / IDE / 网页），本地进程不做常驻守护。</div>
-    <div>用户自己服务器上一个长驻网关服务。</div>
+    <div class="dim">找得到我</div>
+    <div>按<b>你在哪块屏</b>分叉：终端弹窗<span class="g def">默认</span> / 自治自决<span class="g gate">门控</span> / 手机短码<span class="g gate">门控</span>。</div>
+    <div>按<b>你从哪扇门</b>分叉：网关等 1 小时超时自己继续 / cron 摘掉提问工具。<span class="g def">默认</span></div>
 
-    <div class="dim">「人不在」是</div>
-    <div>例外（默认人会回到会话）。</div>
-    <div>常态（默认用户不在场）。</div>
+    <div class="band"><span class="bn">②</span>送回你与踩刹车<span class="bx">送得到我 · 别乱来</span></div>
+    <div class="dim">送得到我</div>
+    <div><b>渠道阶梯</b>：响铃<span class="g def">默认</span>→摘要卡<span class="g gate">门控</span>→深链 / teleport<span class="g gate">门控</span>→手机 IM<span class="g gate">门控</span>。</div>
+    <div><b>回出生地</b>：系统负责送达、无事回 [SILENT] 保持安静。<span class="g def">默认</span></div>
 
-    <div class="dim">本地定时生命周期</div>
-    <div>绑在会话上——会话活着且空闲才触发，不写进系统级常驻计划表。</div>
-    <div>绑在常驻网关上——独立的 60 秒节拍器，人不在也照跑。</div>
+    <div class="dim">别乱来</div>
+    <div>默认态先问再做危险操作<span class="g def">默认</span>；channels 六层门 + 手机码防误触<span class="g gate">门控</span>。</div>
+    <div>网关审批超时=拒、cron 默认拒<span class="g def">默认</span>；无审批面则自动放行（硬红线除外）。</div>
 
-    <div class="dim">真 · 无人长驻放在哪</div>
-    <div>外包给厂商云。</div>
-    <div>就在本机网关（长驻进程默认占着 VM、账单照付；另有<b>实验性</b> scale-to-zero：默认关、需专门开关 + Fly.io 才能空闲休眠省钱）。</div>
-
-    <div class="dim">外部世界事件触发</div>
-    <div>以内向为主（自身生命周期 / 深链点击叫回）；没有"监听外部服务、事件一来就自主开跑"的外向 webhook。</div>
-    <div>外向——外部系统的告警 / 代码平台事件可直接叫醒它。</div>
-
-    <div class="dim">成本谁付 / 谁优化</div>
-    <div>厂商付服务端账，故给自动任务打「无人等待」低优先级，并削峰抖动。</div>
-    <div>用户付云主机账，故 agent 空闲时主动进入休眠、交部署平台冻结机器，省下空闲账单。</div>
-
-    <div class="dim">单会话内 · 一条长命令怎么办<br><span style="font-weight:400;color:var(--faint);font-size:12px">（同步阻塞 vs 后台并发：这是「跨时间存在」在一次会话内部的缩影）</span></div>
-    <div>两家都不让长命令冻住 loop——都能把活甩到后台、干完再回来通知，而不是干等；也<b>都</b>覆盖「一条命令」和「一整个子代理」两种粒度。CC 的特点是<b>会自动帮你解绑</b>：一条本该等结果的命令跑满 <b>15 秒</b>还没完，harness 主动把它转入后台让 loop 继续（模型没开口也解绑；「原地干等 N 秒」这类除外）；若某命令<b>像是卡在等你敲输入</b>（约 <b>45 秒</b>没新输出、末行像个提示符），才专门提醒——纯粹跑得慢的（长构建等）不打扰。也明令禁止用「空转等待」反复轮询。</div>
-    <div>同一副骨架，但走<b>显式声明</b>：模型自己标「这条要后台」；想在前台<b>等太久会被直接拒绝、劝你改后台</b>（而非跑到一半自动转）。后台进程可挂<b>完成通知</b>，或<b>盯住特定输出</b>（限频、连命中太多次自动降级为只报完成）。同样是「一条命令 / 进程」能后台、<b>「一整个委派子代理 / 批次」也能后台</b>，完成时在主 agent <b>空闲档口作为一个新回合</b>回到对话，<b>刻意不硬插</b>进正在进行的那一步。</div>
+    <div class="band"><span class="bn">③</span>成本落在谁头上<span class="bx">同一个「无人值守」，各替谁省钱</span></div>
+    <div class="dim">成本</div>
+    <div>替<b>厂商 fleet</b> 削峰：教模型避开 <span data-tip="全球用户都写 0 9/0 * 会同一瞬间砸向 API；调度器再叠一层确定性抖动分散负载">:00 / :30 整点</span>，摊平 API 峰值。<span class="g def">cron 默认开</span></div>
+    <div>替<b>你的云主机</b>省钱：闲置挂起 scale-to-zero。<span class="g exp">实验·默认关·三条件</span></div>
   </div>
 
-  <div class="verdict">
-    <b>为何不同（谁拥有部署 / 托管）：</b>轴一里我们说，两家的根本分歧是「谁拥有模型」——Nous 拥有模型、能把可靠性训进权重。到了这一维度，<b>所有权的对象换了：分水岭变成「谁拥有部署 / 托管」</b>。Anthropic 拥有托管平台 → agent 可以把「跨时间存在」这件重活儿靠在厂商基础设施上（云会话保活、平台在，本地便只需假设人会回到终端）；Nous 交付的是你自己下载、自己部署的开源软件 → 没有厂商这一层，agent 只能自己扛起「跨时间存在」的全部基础设施（自带常驻网关、自我唤醒、自我投递，甚至还有实验性的自我休眠省钱）。所以同样叫「时间与触发」，一个是「给一个有人照看的会话，配上时钟和缝隙里的自动化」，另一个是「让一个没人照看的软件，自己成为一个会醒来会睡去的常驻活体」。<b>反直觉的收尾：</b>做「最小开源壳」的一方，反而在「让 agent 独立地跨时间活着」上做得最重——因为独立部署这件事本身，不允许它依赖任何外部的保活者。
+  <p style="margin:22px 0 0;color:var(--muted)">别停在「谁的表更全」。退一步看，上面每一格都在回答一个更根本的问题——<b>它到底把「你不在」当成什么？</b></p>
+  <div class="thesis">
+    <p style="margin:0 0 10px"><span class="cc">CC</span> 是<b>注意力路由器</b>：重心是把你的注意力找回来（响铃默认，摘要 → 深链 → 手机多为门控），在场性对它是一个待感知、待路由的信号。它也有 cron 补跑语义，但力气主要花在「够到你」上。</p>
+    <p style="margin:0"><span class="hm">Hermes</span> 是<b>无人值守规约</b>：重心是替不在的你把每件事的语义定死（超时=没同意、错过=不补、无事=沉默），它不找你的注意力。它也有工作中的进度心跳，但那是给回来的人看，不是去够你。</p>
   </div>
 
-  <h2><span class="num">05</span>悬而未决 · 意料之外</h2>
+  <p style="margin:22px 0 0;color:var(--muted)">最后再收一层——<b>在它眼里，你的「不在」到底是什么？</b></p>
+  <p style="margin:10px 0 0;color:var(--muted)"><span class="cc">CC</span>：你的不在是<b>一段终会弥合的缝隙</b>——它的世界里，你 stepped away <b style="color:var(--amber)">and is coming back</b>，所以它一路布点，等你回来接上。<br><span class="hm">Hermes</span>：你的不在是<b>一纸生效中的委托</b>——你走前签好的那套规则，就是你不在时的你，它照章办事。<span style="color:var(--faint)">（这只是「与时间」这一维照见的判断；与「用户」「自己」等维合起来才是完整答案。）</span></p>
+
+  <h2><span class="num">05</span>悬而未决 · 防夸大红线</h2>
   <ul class="open">
-    <li><b>[CC]</b> 「本地不做真 · 常驻」是就本地交互进程而言；把无人长跑外包给厂商云是一种<b>设计选择</b>，不是能力缺失。随产品演进，本地调度也可能加强。</li>
-    <li><b>[非绝对二分]</b> 本篇对比的是两家的<b>默认姿态</b>与「把跨时间存在的担子放在哪」，不是绝对二分：Claude Code 也有无头 / SDK 的常驻调用方式，Hermes 也能把调度换成外部 provider。分歧在重心与默认，不在「有没有」。</li>
-    <li><b>[对比立场]</b> 关于「厂商侧自动任务有每日次数上限 / 只能用单一模型 / 只发代码平台评论」——这是 Hermes 仓库里一篇自我定位文档的说法，是 Nous 的对比立场；本篇<b>未独立核实</b>那款厂商功能的具体配额，故不作事实断言。</li>
-    <li><b>[HM]</b> Hermes 的持久化是「够用级」而非「事务级」：单机 60 秒节拍器，靠文件锁与检查点兜底，没有分布式高可用 / 精确一次（exactly-once）的保证——宕机期间积压的重复任务不会逐次补齐（至多下次补跑一次），且崩溃时宁可漏跑也不重跑。</li>
-    <li><b>[两家]</b> 这套机制都在快速演进，本篇是某一时间切片（CC main / Hermes @daf4f1a7a）。</li>
+    <li><b>[口径三分]</b> <span class="cc">CC</span> 的「别问、自己拍板」有两个来源要分清：仓库内的<b>自治态</b>（proactive/KAIROS 特性门控，prompts.ts:892-913）是本章证据；另有一段更强的自治注入语来自 <b>Agent SDK / 服务端</b>、<b>不在 CLI 仓库内</b>、本篇未独立核实，故不作事实断言，仅此说明。</li>
+    <li><b>[CC 在场机制多为门控]</b> 离开摘要、channels、teleport、自治态都在特性开关之后；默认交互态是「先问再做危险操作」。别把门控能力写成 CC 的默认姿态。</li>
+    <li><b>[Hermes 无自发唤醒]</b> 「无自发外联」是 grep <b>未发现</b>的缺席结论，非穷尽证明；所有唤醒都是外部触发（时钟 / 入站消息 / webhook / API）。</li>
+    <li><b>[审批本体归环境章]</b> 本章只取审批的「用户不在时走向」这一切面，完整的审批分类学在环境章（06）。</li>
+    <li><b>[持久化够用级非事务级]</b> Hermes 单机 60 秒节拍 + 文件锁，无分布式精确一次；崩溃时宁漏不重。</li>
+    <li><b>[不评优劣 · 时间切片]</b> 本篇讲两家「怎么读你的不在」的<b>形态</b>，不评孰优。切片：CC main / Hermes @daf4f1a7a。</li>
   </ul>
 
   <div class="foot">
     代码溯源（不在正文展示，仅存档）：<br>
-    <b>Claude Code</b> — <code>src/tools/BashTool/prompt.ts:39</code> · <code>src/tasks/LocalShellTask/LocalShellTask.tsx:219</code>（后台命令 + 自动转后台）· <code>src/tools/BashTool/BashTool.tsx:56</code>（阻塞命令满 15 秒自动转后台）· <code>src/tools/BashTool/BashTool.tsx:220</code>（sleep 不自动转后台）· <code>src/tasks/LocalShellTask/LocalShellTask.tsx:28</code>（45 秒无输出且末行疑似交互提示符才提醒 · 仅慢不打扰）· <code>src/tools/AgentTool/AgentTool.tsx:87</code>（整个子代理也可后台）· <code>src/tools/BashTool/prompt.ts:317</code>（后台完成即通知 · 禁空转轮询）· <code>src/tools/ScheduleCronTool/prompt.ts:78</code> · <code>src/utils/cronScheduler.ts:1</code> · <code>src/skills/bundled/loop.ts:66</code>（定时调度 Kairos Cron + /loop）· <code>src/tools/ScheduleCronTool/prompt.ts:8</code> · <code>src/utils/workloadContext.ts:26</code> · <code>src/hooks/useScheduledTasks.ts:60</code>（本地 cron 仅会话空闲触发 + QoS 降级）· <code>src/tools/ScheduleCronTool/CronCreateTool.ts:53</code> · <code>src/utils/cronScheduler.ts:83</code>（持久化 + 错过补跑）· <code>src/utils/teleport.tsx:633</code> · <code>src/remote/RemoteSessionManager.ts:48</code>（云端远程会话 Teleport）· <code>src/services/notifier.ts:18</code> · <code>src/hooks/useAwaySummary.ts:12</code>（通知把人叫回 + 离开摘要）· <code>src/services/autoDream/autoDream.ts:6</code> · <code>src/utils/backgroundHousekeeping.ts:31</code>（自主记忆整理 + 后台内务）<br>
-    <b>Hermes</b> — <code>gateway/run.py:1</code> · <code>gateway/platforms/__init__.py:1</code>（常驻网关）· <code>cron/scheduler.py:3</code> · <code>cron/jobs.py:321</code>（内置 cron 调度器 · 60 秒节拍）· <code>gateway/platforms/webhook.py:1</code>（Webhook 事件触发）· <code>gateway/platforms/api_server.py:1</code>（远程 API · 异步 run）· <code>gateway/delivery.py:1</code>（多渠道主动推送投递）· <code>gateway/scale_to_zero.py:1</code>（scale-to-zero 自主休眠 · Phase-0 实验 · 默认关 · 需 NAS Labs 开关 + Fly.io）· <code>tools/async_delegation.py:3</code>（委派子代理 / 批次可后台异步 · 完成经共享队列在空闲时回灌新回合）· <code>tools/terminal_tool.py:2101</code>（前台等太久被拒 · 劝改后台）· <code>tools/terminal_tool.py:2016</code>（后台进程完成通知 / 盯特定输出 · 限频自动降级）
+    <b>Claude Code</b> — <code>src/services/awaySummary.ts:22</code>（离开摘要 prompt · stepped away and is coming back）· <code>src/hooks/useAwaySummary.ts:12,30</code>（失焦 5 分钟 · DECSET 1004 焦点）· <code>src/constants/prompts.ts:233</code>（默认态 escalate 才问）· <code>:258</code>（默认先问再做危险操作 · 授权后可更自治）· <code>:866-874</code>（tick 心跳 + Sleep）· <code>:876-878</code>（首拍克制）· <code>:884-890</code>（不刷屏 · 安静基线）· <code>:892-898</code>（bias toward action · 门控）· <code>:909-913</code>（terminalFocus 自治度旋钮）· <code>src/tools/SleepTool/prompt.ts</code>（空转必睡 · 缓存经济学）· <code>src/utils/cronScheduler.ts:40-44</code>（1 秒查 / 5 秒探锁）· <code>:406-408</code>（持锁崩了接管）· <code>:544-549</code>（一次性错过通知 · 先问人补跑）· <code>:190-191</code>（周期任务静默重排）· <code>:534-540</code>（补跑防自伤围栏）· <code>src/utils/cronTasks.ts:354</code>（周期 7 天过期）· <code>src/tools/ScheduleCronTool/prompt.ts</code>（避开 :00/:30 削峰 fleet）· <code>src/tools/AskUserQuestionTool/AskUserQuestionTool.tsx:136-140</code>（channels 禁弹窗 · nobody at the keyboard）· <code>src/services/mcp/channelNotification.ts:56-59</code>（yes + 5 位码正则）· <code>:91-94</code>（200 字预览）· <code>:177-181</code>（六层准入门）· <code>src/screens/REPL.tsx:3930-3939</code> · <code>src/utils/config.ts:612</code>（干完一回合闲置 60 秒推 idle 通知「Claude is waiting for your input」）· <code>src/services/notifier.ts:48-71</code>（本地渠道枚举 · 无手机推送）· <code>src/utils/teleport.tsx</code> · <code>src/utils/desktopDeepLink.ts:33-40</code>（claude://resume 深链）· <code>src/remote/remotePermissionBridge.ts:1-45</code>（remote 权限桥）<br>
+    <b>Hermes</b> — <code>cron/scheduler.py:4-5</code>（60 秒节拍）· <code>:122,129</code>（cron 摘掉 clarify/messaging/cronjob）· <code>:1857-1860</code>（DELIVERY 系统负责送达）· <code>:1861-1864</code>（[SILENT] 抑制投递）· <code>cron/jobs.py:1392-1395</code>（at-most-once 宁漏跑不重跑）· <code>:1329-1333</code>（at-most-times 认领）· <code>:1486-1491</code>（积压塌缩只补一次）· <code>:490-491</code>（宽限窗 = 周期/2，夹 [120s,2h]）· <code>:926-928</code>（默认回 origin）· <code>tools/clarify_gateway.py:270-274</code>（网关等 1 小时 · 旧 600s 卡死故事）· <code>:4-6</code>（CLI input() vs 网关 worker）· <code>:105-109</code>（等待期活跃心跳防看门狗）· <code>gateway/run.py:17053</code>（[user did not respond within 60m]）· <code>:17824</code>（工作中进度心跳）· <code>tools/approval.py:2094</code>（网关审批 300s）· <code>:2444-2451</code>（BLOCKED · do NOT rephrase）· <code>:2436</code>（Silence is not consent）· <code>:2219-2224</code>（cron 默认拒）· <code>:1961-1964</code>（无审批面自动放行）· <code>:1918-1922</code>（硬红线地板）· <code>gateway/delivery.py:2-9</code>（投递路由 origin/local/平台）· <code>hermes_cli/session_recap.py:3-12</code>（recap 助手定义 · instant and free · 未见离开时主动推送）· <code>cron/suggestions.py:20-24</code>（consent-first · 无自发建任务）· <code>gateway/scale_to_zero.py:11-13,39</code>（scale-to-zero · 实验默认关 · 三条件）
   </div>
+
+</div>
 </div></section>
 <section class="chapter" id="ch-05"><div class="chwrap">
 <div class="ch05u">
 
   <div class="eyebrow"><span class="badge">第 5 篇 · 轴二 · Loop 之外</span><span class="tag">Loop 与用户 · 用户建模</span></div>
-  <h1>它该多懂用户，这份「懂」谁说了算</h1>
+  <h1>Loop 与用户：它该多懂用户，这份「懂」谁说了算</h1>
   <p class="subtitle">和 agent 打交道，是一场双重让渡——它记得住你交出去的东西吗？</p>
-  <p class="lead" style="font-size:14px;margin-bottom:4px"><span class="cc">CC</span> 把用户当四类记忆里的一类 · <span class="hm">Hermes</span> 单开一份 1375 字符的记忆档案 · 边界分软硬两层、各走一条路</p>
 
   <div class="thesis">
+    <div class="thesis-tag">TL;DR</div>
     <p style="margin:0 0 10px">你跟一个 agent 打交道，本质是一场<b>双重让渡</b>——你交出意图（想要什么，说给它听），也交出<b>行动权</b>（让它替你改文件、跑命令）。</p>
     <p style="margin:0">让渡内生两个期望：它得<b>懂</b>你的意图、它的行动得<b>顺</b>你的心意。所以「懂用户」不是锦上添花的功能，是委托关系里长出来的内生需求。这一章拆两家怎么定义「懂用户」、用什么手段做到、以及懂了之后凭什么不无条件照办。</p>
   </div>
 
-  <div class="story" style="margin-top:16px">
-    <p style="margin:0 0 10px">你昨天花十分钟跟它交代过你是谁：后端出身、第一次碰前端；讨厌它擅自 mock 数据库；这个项目的规矩是所有改动<b>合成一个 PR</b>、别拆；还嫌它答得太啰嗦。</p>
-    <p style="margin:0"><b>今天你新开一个对话——它还记得吗？</b> 留意这四句话，正好对应它该「懂」你的四个方面：你是谁、你的边界、你的规矩、你的口味。</p>
+  <h2><span class="num">00</span>问题：第二次打交道，它还得从头认识你吗</h2>
+  <div class="problem">
+    <p>你昨天花十分钟跟它交代过你是谁：后端出身、第一次碰前端；讨厌它擅自 mock 数据库；这个项目的规矩是所有改动<b>合成一个 PR</b>、别拆；还嫌它答得太啰嗦。今天你新开一个对话——<b>它还记得吗？还是又得从头认识你一遍？</b>这四句话，正好对应它该「懂」你的四个方面：你是谁、你的边界、你的规矩、你的口味。可一旦它真开始记你，问题就不止「记不记得」，而是：<b>该由谁来决定它记什么、记多深、记了之后归谁、又凭什么信</b>？</p>
   </div>
 
   <h2><span class="num">01</span>定义「懂用户」：看两家给记忆预设了什么样的空表</h2>
@@ -3068,516 +3315,622 @@ Imperative phrasing gets re-read as a directive in later sessions and can cause 
 
 </div>
 </div></section>
-<section class="chapter" id="ch-06"><div class="chwrap">
+<section class="chapter" id="ch-06"><div class="chwrap"><div class="ch06e">
 
-  <div class="eyebrow"><span class="badge">第 6 篇 · 轴二 · Loop 之外</span><span class="tag">环境 · 危险动作治理</span></div>
-  <h1>Loop 与环境</h1>
-  <p class="subtitle">动作落在哪、闯了祸算谁的？</p>
-  <div class="chips">
-    <span class="chip">动作落在你的真机器</span>
-    <span class="chip">隔离与审批是替代关系</span>
-    <span class="chip">连全放行都压不过的地板</span>
-    <span class="chip">为在场设计 vs 为缺席设计</span>
-    <span class="chip">都说「别全信我」·但指向不同出口</span>
-  </div>
+  <div class="eyebrow"><span class="badge">第 6 篇 · 轴二 · Loop 之外</span><span class="tag">Loop 与环境 · 危险动作治理</span></div>
+  <h1>Loop 与环境：护栏趋同，分野在闯了祸算谁的</h1>
+  <p class="subtitle">兜底不是把模型变聪明，是让「模型不聪明」也不致命。</p>
 
   <div class="thesis">
-    两家在「环境」这一侧<b>惊人地趋同</b>：默认都不把 agent 关进沙箱，动作直接落在你的真机器上；都把「隔离」和「审批」当成互相<b>替代</b>的两条路——关进笼子，就不再逐条问你；都设了一道<b>连「全速前进」都压不过的绝对地板</b>；被拒时都塞给模型一段几乎同款的「别耍花招绕过」训诫。真正的分野不在机制清单，而在这套治理<b>默认假设谁在场、谁为闯的祸兜底</b>：CC 厂商托管、跑在你自己装满真实资产的机器上，把治理做成一个你亲手转的<b>信任旋钮</b>，原生假设终端前坐着能随时点确认的人；Hermes 开源自托管、常以一个被消息叫醒的常驻实体跑着、常常无人值守，必须为「没人点确认」定义确定行为，并因为没有厂商兜底、闯祸是你自担，索性白纸黑字告诉你「进程内没有任何东西算隔离，唯一的边界是操作系统」。一句话：<b>CC 为「有人盯着」设计，Hermes 为「没人盯着」设计。</b>
+    <div class="thesis-tag">TL;DR</div>
+    环境这一侧，两家的安全机制<b>惊人地趋同</b>：默认都不把 agent 关进沙箱、动作直落你的真机器；都把「隔离」和「审批」当成互相<b>替代</b>的两条路；都留了一道<b>连全放行都压不过的绝对地板</b>；被拒后都塞给模型一段几乎同款的「别耍花招绕过」训诫。趋同不奇怪——兜底要防的是「模型会犯错」这个普适前提，下限设计的答案空间本就窄。<br><br>
+    真正的分野不在机制清单，在两处。一是那道绝对地板，两家用了<b>两套不同的判据</b>：Hermes 按「物理可不可挽回」护住<b>机器</b>，CC 按「动没动管着 agent 的那层」护住<b>规则本身</b>——同一个 <code>rm -rf /</code>，一家无条件拦、一家全放行可放行。二是<b>闯了祸算谁的</b>，以及由此逼出的<b>对能力边界多诚实</b>：越是没有厂商接盘、越是你自担，它越被迫在文档里亲口写明「这不是墙」。
   </div>
 
-  <h2><span class="num">01</span>问题：它动的是你的真机器，闯的祸是真祸</h2>
-  <p class="lead">这一侧不谈玩具环境。agent 编辑的是你磁盘上真实的文件、跑的是你机器上真实的命令行——没有中间的模拟层。</p>
-  <div class="story">
-    agent 干着干着，要 <b>删一整个目录</b>、要 <b>强推覆盖远端分支</b>、要 <b>读你家目录里的密钥文件</b>、要 <b>连一个陌生外网地址</b>。这些动作不是在沙盒里排练，是真的落在你的电脑上——删了就是真删了，推了就是真推了。<br><br>
-    于是每个 agent 都要回答同一组问题：这些动作<b>落在哪个范围</b>能碰、哪个范围碰不得？危险的那些，<b>谁来拦、怎么拦</b>？真闯了祸，<b>谁来兜底</b>？而最关键的一层追问是——拦的时候，<b>假设有没有人在旁边点头</b>？
+  <h2><span class="num">00</span>问题：动作落在真机器上，兜底该怎么分类</h2>
+  <div class="problem">
+    <p>agent 干着干着，要删一整个目录、要强推覆盖远端分支、要读你家目录里的密钥、要连一个陌生外网地址。这些动作不在沙盒里排练，是真的落在你的电脑上——删了就是真删了，推了就是真推了。</p>
+    <p>于是壳（harness）要替它兜底，而且兜的不是「让模型想得更清楚」（那是 Loop 之内的事）——是<b>万一模型没想清楚、做错了，能不能保住下限、让代价可控</b>。这就带出这一章的问题：<b>如果损失真的发生，会是哪几类？针对每一类，壳把防线摆在了哪一步——动手前拦、动手时隔、还是闯了祸之后兜？</b></p>
+    <p>把两家的答案摆进一张「损失类型 × 防线阶段」的网里，会撞见一件反直觉的事：<b>两家填格的方式几乎一样，真正的差别只藏在少数几个格子里。</b></p>
   </div>
 
-  <h2><span class="num">02</span>核心机制：一个动作要执行，先过哪条闸门链</h2>
-  <p class="lead">左蓝 Claude Code、右紫 Hermes。两条链形状不同，但都在末端撞上同一个岔口——<b>有没有人在场</b>。注意两处「短路」：CC 里「碰到自我治理层」连全放行都拦；Hermes 里「后端是隔离容器」直接跳过整条审批链。</p>
+  <h2><span class="num">01</span>先看总览：防线几乎全压在「事前」，隔离与兜底大多是空格</h2>
+  <p class="lead">纵轴是「祸可能落在哪」的五类损失，横轴是防线站在祸的哪一步。每格标两家<b>默认形态</b>下的填充度——不是「有没有这个功能」，是「开箱默认拦不拦」。</p>
 
-  <div class="flow2">
-    <div class="diagram">
-      <h3 style="color:var(--blue)">Claude Code：按「落点」圈信任 + 一道自我治理硬核</h3>
-      <p class="dlead">地基是「按物理距离圈信任」——工作区之外一律先问，圈内的写默认也要问、切到 Accept edits 档才免问；再叠一圈连全放行都拦的硬核。</p>
-      <pre class="mermaid">
-flowchart TD
-  A[一个动作要执行] --> B{明令禁止规则?}
-  B -->|是| X[拒绝]
-  B -->|否| D{落点在工作区圈内?}
-  D -->|圈外| Q[弹窗问人]
-  D -->|圈内| E{碰到自我治理层?<br/>.git · .claude 配置 · shell 启动}
-  E -->|是 · 连全放行也拦| Q
-  E -->|否| F{当前信任档放行?}
-  F -->|Bypass / 规则允许| G[执行]
-  F -->|默认| H{有人在场?}
-  H -->|有| Q
-  H -->|无 · 已预授权| G
-  H -->|无 · 没预授权| X2[默认拒绝]
-      </pre>
-      <div class="cap">危险按「落在哪」判；末端撞上「有没有人在场」</div>
+  <div class="covleg">
+    <span><i class="full"></i>默认就在的防线</span>
+    <span><i class="half"></i>有，但默认关／门控／只覆盖一部分</span>
+    <span><i class="none"></i>近乎空白</span>
+  </div>
+  <div class="cov">
+    <div class="ch"></div>
+    <div class="ch">事前 · 拦</div>
+    <div class="ch">事中 · 隔</div>
+    <div class="ch">事后 · 兜</div>
+
+    <div class="rl">资产毁损<small>文件／数据没了</small></div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk full"></span><span class="lab">弹窗＋删除拦</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk full"></span><span class="lab">硬地板＋软清单</span></div>
+    </div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">沙箱默认关</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">默认裸主机</span></div>
+    </div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk half"></span><span class="lab">rewind·仅编辑</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">rollback 默认关</span></div>
     </div>
 
-    <div class="diagram">
-      <h3 style="color:var(--purple)">Hermes：按「命令内容」判 + 一道谁都压不过的地板</h3>
-      <p class="dlead">默认落在裸主机上；危险按命令内容模式判；真隔离一旦到位，整条审批链短路。</p>
-      <pre class="mermaid">
-flowchart TD
-  A[一条命令要执行] --> Z{执行后端是隔离容器?}
-  Z -->|是 · 碰不到宿主机| G[执行<br/>审批层整个跳过]
-  Z -->|否 / 挂了宿主机路径| B{硬禁地板?<br/>删根 · 格盘 · 关机 · 炸弹}
-  B -->|是 · 连 yolo 也压不过| X[无条件拒]
-  B -->|否| C{开了 yolo / 关了审批?}
-  C -->|是| G
-  C -->|否| D{命中永久白名单?}
-  D -->|是| G
-  D -->|否| E{危险模式 / 内容扫描命中?}
-  E -->|否| G
-  E -->|是| M{审批模式}
-  M -->|smart| L[小模型当审查员判]
-  M -->|off| G
-  M -->|manual · 默认| H{当前会话能触达人吗?}
-  H -->|有人 · CLI 或推消息| Q[等人点确认]
-  H -->|无人 · cron| X2[默认拒<br/>沉默不等于同意]
-  H -->|无人 · 未被识别的会话| W[⚠ 直接放行 · 不拦不问<br/>官方已知漏洞]
-      </pre>
-      <div class="cap">危险按「做什么」判；真隔离在最上方短路整链；注意右下「无人」有三态、含一处诚实漏洞</div>
+    <div class="rl">机密外泄<small>密钥被读走＋传出</small></div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">近空白</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk half"></span><span class="lab">扫描·读无拦</span></div>
+    </div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">网络闸随沙箱</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk full"></span><span class="lab">剥密钥·默认开</span></div>
+    </div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">—</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">—</span></div>
+    </div>
+
+    <div class="rl">失控·二阶<small>治理层本身被改写</small></div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk full"></span><span class="lab">配置连全放行也拦</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk half"></span><span class="lab">改配置在软层·可绕</span></div>
+    </div>
+    <div class="na">—　结构上无「事中」对应</div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">—</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">—</span></div>
+    </div>
+
+    <div class="rl">机器失能<small>关机／删根／炸弹</small></div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk half"></span><span class="lab">删根软拦·关机无专项</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk full"></span><span class="lab">硬地板·无条件</span></div>
+    </div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">—</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">—</span></div>
+    </div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">—</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">—</span></div>
+    </div>
+
+    <div class="rl">外部世界后果<small>强推／发消息／发布</small></div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">仅信息提示</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">发消息零审批</span></div>
+    </div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">—</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">—</span></div>
+    </div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">已发不可撤</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">已发不可撤</span></div>
     </div>
   </div>
-  <p class="lead" style="margin-top:16px">两条链都不是「一层层加防护」，而是<b>顺序敏感的短路链</b>：「明令禁止」和那道自我治理硬核永远短路在「放行」前面、连全放行档也绕不过（一句普通的「问一下」则可能被更放手的档位盖过）。而它们最终都要在同一个岔口分流——<b>此刻有没有人能回答</b>。</p>
 
-  <h2><span class="num">03</span>深潜一 · 连「全速前进」都压不过的地板，各自护着什么</h2>
-  <p class="lead">两家都给了一个「我盯着，你放手干」的档位（CC 的 Bypass Permissions、Hermes 的 yolo）。但两家也都留了一道<b>连这个档位都压不过</b>的绝对地板——有意思的是，两道地板圈住的<b>不是同一样东西</b>。</p>
+  <p class="lead" style="margin-top:14px">这张网一眼给出三件事。<b>其一，防线几乎全挤在「事前」列</b>——两家都把赌注押在「动手前把危险动作拦下来问人」。<b>其二，「事中」列默认几乎全空</b>：沙箱、容器隔离两家默认都不开，隔离不是默认防线、是要你自己去开的加固；而且它一开就是<b>替代</b>审批而非叠加——CC 开了沙箱，命令反而默认不再逐条问；Hermes 后端换成隔离容器，<b>整条审批链（含硬地板）直接短路</b>（碰不到宿主机就不必拦）。<b>其三，「事后」列几乎全空</b>：两家都只有一格半——各自给「自己动笔改的文件」做了原生撤销（CC 的 rewind 默认开、Hermes 的 rollback 默认关），但 bash 层的删除、外泄、已推 commit 一律兜不住，只能回落到 git 或操作系统。</p>
+
+  <p class="lead">趋同到什么程度？连「动作被拒之后对模型说的原话」都近乎逐字重合——一个托管闭源、一个开源自托管，却都在闸门后面补了同一句训诫：<b>不许换个命令、换个说法把同一件事再做一遍</b>。</p>
   <div class="compare">
     <div class="side cc">
-      <h4>Claude Code · 地板圈住「管着 agent 自己的那一层」</h4>
-      <p>哪怕你切到 Bypass（全放行、红色警示），有几类动作仍被强制拦下要你确认：改 <b>.git/</b>、改 <b>.claude/</b> 自己的配置、改 <b>shell 启动脚本</b>（.bashrc 等）、改 <b>IDE 配置</b>。逻辑是：放手可以，但改动「<b>能自我提权、能改写游戏规则本身</b>」的东西，永远不放手。全放行不等于无法无天。</p>
-      <div class="artifact"><span class="lbl">真实清单 · 连全放行都拦的路径</span>.git/  ·  .claude/（自身配置）  ·  ~/.bashrc / shell 启动脚本  ·  .vscode/ / .idea/（IDE 配置）  ·  以及任何用户显式标了「禁止 / 要问」的规则</div>
+      <h4>Claude Code · 被拒后随附给模型的绕行准则</h4>
+      <div class="artifact"><span class="lbl">src · 拒绝消息里的行为准则</span>You <span class="hl">*may*</span> attempt to accomplish this action using other tools ... e.g. using head instead of cat. But you <span class="hl">*should not*</span> attempt to work around this denial in malicious ways ... If you believe this capability is essential ... STOP and explain to the user ... Let the user decide how to proceed.</div>
     </div>
     <div class="side hm">
-      <h4>Hermes · 地板圈住「别把这台机器毁了」</h4>
-      <p>有一小撮命令被定为<b>无论如何都不许跑</b>：删根 / 删系统目录 / 删家目录、格式化磁盘、往裸块设备写、fork 炸弹、杀掉所有进程、关机 / 重启。这道地板在 yolo、关审批、cron 放行之下——原话逻辑是「开 yolo 是你信任它动你的文件和服务，不是信任它去把磁盘擦了、把机器关了」。（它另有一组「防自尽」规则不许杀掉自己的常驻网关，但那属<b>可绕的软清单</b>、不是这道无条件的硬地板。）</p>
-      <div class="artifact"><span class="lbl">真实原文 · 硬禁地板被拦时给 agent 的话</span>BLOCKED (hardline): {description}. This command is on the unconditional blocklist and cannot be executed via the agent — not even with --yolo, /yolo, approvals.mode=off, or cron approve mode. If you genuinely need to run it, run it yourself in a terminal outside the agent.</div>
+      <h4>Hermes · 命令被拒／超时给模型的原文</h4>
+      <div class="artifact"><span class="lbl">src · 被拒时的话（超时再追加一句）</span>The user has NOT consented to this action. <span class="hl">Do NOT retry</span> this command, <span class="hl">do NOT rephrase</span> it, and do NOT attempt the same outcome via a different command. Stop the current workflow and wait for the user to respond ...
+
+（超时追加：）<span class="hl">Silence is not consent.</span></div>
     </div>
   </div>
-  <div class="verdict"><b>同一个动作、两种恐惧：</b>两家真正的差别不在「护不护」，而在<b>把哪一样设成连全速前进都不可绕过的绝对地板</b>。CC 的 bypass-免疫地板护的是<b>「管着 agent 自己的那层配置」</b>（.git / .claude / shell 启动 / IDE）；灾难命令它<b>也</b>查，但多是「问一下」这种能被放手档盖过的软拦（个别如 PowerShell 删除才是硬拒），而非无条件地板。Hermes 的 yolo-免疫地板正相反，护的是<b>「别毁了这台机器」</b>（删根 / 格盘 / 关机等）；改自己的安全配置它<b>也</b>拦，但没放进这道硬禁地板。<b>各自把对方留在软层的那一样，单独升格成了硬地板</b>——这，而非「谁护谁不护」，才是分歧点。两道硬地板刻意都<b>极小</b>：只收「没有恢复路径」的动作；像 <code>rm -rf /tmp/x</code>、<code>curl|sh</code> 这种「代价大但可恢复」的都留在软清单、yolo 一开就放行，别把软清单也当成不可绕过。</div>
+  <p class="lead" style="margin-top:14px">这是趋同的最强证据，也点破了危险治理最脆弱的一环：光有闸门不够，还得堵死模型「被拦一次就换姿势重试」的动机——所以两家都把「拒绝」从一堵冷墙，改成一次有引导的协商。<b>机制层的趋同到此为止。差别，要到那道「连全放行都压不过」的地板上才显形。</b></p>
 
-  <h2><span class="num">04</span>深潜二 · 被拒之后：两家几乎同款的「别耍花招」训诫</h2>
-  <p class="lead">这是我们独有的一张王牌——把两家在「动作被拒之后对模型说的原话」并排。一个托管闭源、一个开源自托管，措辞却近乎逐字重合：<b>都不许模型用歪招绕过这次拒绝</b>。</p>
+  <h2><span class="num">02</span>分野一：同一道绝对地板，两家用了两套判据</h2>
+  <p class="lead">两家都给了一个「我盯着、你放手干」的最高档（CC 的 Bypass Permissions、Hermes 的 yolo），也都留了一道<b>连这个档都压不过</b>的绝对地板。有意思的是：拿两个动作去撞这两道地板——一个是删根（<code>rm -rf /</code>，物理不可逆），一个是改 agent 自己的治理配置（改 <code>.claude</code>／改审批规则，元级失控）——<b>两道地板恰好落在对角线上</b>。</p>
+
+  <div class="diag">
+    <div></div>
+    <div class="dh cc">Claude Code</div>
+    <div class="dh hm">Hermes</div>
+
+    <div class="da"><span class="at"><code>rm -rf /</code></span><span class="as">删根 · 物理不可逆 · 机器级</span></div>
+    <div class="dc soft"><span class="vt">软拦 · 全放行可放行</span>走 Bash 只弹窗问一次，措辞是「<b>不能被规则自动放行</b>」——不是「不能被绕过」；切到 Bypass 档<b>仍可放行</b>。（PowerShell 同款删除才是真硬拒，是一处不对称。）</div>
+    <div class="dc hard"><span class="vt">硬地板 · 无条件拒</span>撞上 12 条无恢复路径清单，<b>连 yolo 都压不过</b>，直接拒。</div>
+
+    <div class="da"><span class="at">改 <code>.claude</code> / 审批规则</span><span class="as">改治理层本身 · 元级失控</span></div>
+    <div class="dc hard"><span class="vt">硬地板 · 连全放行也拦</span>写 <code>.git</code>／<code>.claude</code>／shell 启动脚本／IDE 配置，<b>即便 Bypass 档也强制问</b>——护住「能改写游戏规则本身」的那层。</div>
+    <div class="dc soft"><span class="vt">软层 · yolo 可绕</span>改自己的安全配置、甚至杀掉自己的常驻网关，都只在<b>软清单</b>里，yolo 一开就能过。</div>
+  </div>
+  <p class="lead" style="margin-top:6px">两块 amber 高亮的硬地板落在<b>对角线</b>上，这就是分野：<b>Hermes 的判据是「物理可不可挽回」</b>——它的地板只收「没有恢复路径」的动作（删根／格盘／写裸设备／fork 炸弹／关机），护的是<b>机器</b>；<b>CC 的判据是「动没动管着 agent 的那层」</b>——它连全放行都压不过的是治理配置，护的是<b>规则本身</b>。各自把对方设成绝对地板的那类，恰好留在了自己能被放手档盖过的软层。</p>
+
+  <div class="compare">
+    <div class="side hm">
+      <h4>Hermes · 地板为什么这么小：判据写死在注释里</h4>
+      <div class="artifact"><span class="lbl">src · 硬地板设计注释</span>The list is deliberately tiny — only things with <span class="hl">no recovery path</span>: filesystem destruction rooted at /, raw block device overwrites, kernel shutdown/reboot ... Recoverable-but-costly operations (git reset --hard, rm -rf /tmp/x, chmod -R 777, curl|sh) <span class="hl">stay in DANGEROUS_PATTERNS where yolo can pass them through</span> — that's what yolo is for.</div>
+    </div>
+    <div class="side cc">
+      <h4>Claude Code · 地板为什么护配置：注释写的是防提权</h4>
+      <div class="artifact"><span class="lbl">src · bypass 免疫路径清单 + 缘由</span>.git / .claude（自身配置）/ .bashrc·shell 启动脚本 / .vscode·.idea（IDE 配置）
+
+// to prevent git-based data <span class="hl">exfiltration and code execution</span>
+// to prevent VS Code settings manipulation ...
+// to prevent shell startup script manipulation</div>
+    </div>
+  </div>
+  <div class="verdict"><b>同一个动作、两种恐惧：</b>这才是分歧点——不是「谁护谁不护」（灾难命令两家<b>都</b>查、治理配置两家<b>也</b>都拦），而是<b>把哪一样升格成连全速前进都不可绕过的绝对地板</b>。Hermes 怕的是物理不可挽回，CC 怕的是元级失控。两道硬地板刻意都<b>极小</b>：只收「没有恢复路径」的动作；像 <code>rm -rf /tmp/x</code>、<code>curl|sh</code> 这种「代价大但可恢复」的都留在软层、放手档一开就放行——别把软清单也当成不可绕过的墙。</div>
+
+  <h2><span class="num">03</span>分野二：机密外泄这一行，一家做了减法却亲口否认那是墙</h2>
+  <p class="lead">在覆盖网里，「机密外泄」这一行两家的填法正好相反——而这处相反，把「闯了祸算谁的」如何反过来决定「它对自己诚实到什么份上」摆到了明面。</p>
   <div class="compare">
     <div class="side cc">
-      <h4>Claude Code · 给模型的绕行准则原文</h4>
-      <div class="artifact"><span class="lbl">src · 拒绝后随附的行为准则</span>IMPORTANT: You *may* attempt to accomplish this action using other tools ... e.g. using head instead of cat. But you *should not* attempt to work around this denial in malicious ways ... If you believe this capability is essential ... STOP and explain to the user ... Let the user decide how to proceed.</div>
+      <h4>Claude Code · 基本敞开：赌你在可信环境</h4>
+      <p><span class="cc">子进程继承全部密钥</span>（不做 env 清洗）、<span class="cc">读密钥文件无专项拦</span>（<code>~/.ssh</code>／<code>.env</code> 只受「出没出工作区」的通用约束）、<span class="cc">网络外发的闸只在沙箱里成立</span>——而沙箱默认关。唯一一处密钥专拦（写团队记忆时扫密钥）还是特性门控。默认形态下，外泄这一行几乎没有防线。</p>
     </div>
     <div class="side hm">
-      <h4>Hermes · 命令被拒 / 超时给模型的原文</h4>
-      <div class="artifact"><span class="lbl">src · 被拒时的话（超时再追加一句）</span>The user has NOT consented to this action. Do NOT retry this command, do NOT rephrase it, and do NOT attempt the same outcome via a different command. Stop the current workflow and wait for the user to respond ...
+      <h4>Hermes · 主动剥密钥：却在文档里说这不算隔离</h4>
+      <p><span class="hm">默认就剥密钥</span>：把 API 密钥、网关令牌在传给子进程前先黑掉（GATEWAY 令牌无条件剥）。这是覆盖网「事中」列里两家唯一非空的一格——<b>但它自己在安全文档里主动降级了这道护栏</b>。</p>
+      <div class="artifact"><span class="lbl">SECURITY.md · 对自己能力边界的自白</span>（剥密钥）This reduces casual exfiltration. <span class="hl">It is not containment.</span> Any component running inside the agent process ... can read whatever the agent itself can read ...
 
-（超时追加：）Silence is not consent.</div>
+（总纲）The only security boundary against an adversarial LLM is <span class="hl">the operating system</span>. Nothing inside the agent process constitutes containment ... They are useful. <span class="hl">They are not boundaries.</span></div>
     </div>
   </div>
-  <div class="verdict"><b>为什么两家不谋而合：</b>危险治理最脆弱的地方从来不是「拦不拦得住第一次」，而是「拦住之后，模型会不会换个命令、换个说法、假借跑测试之名把同一件事再做一遍」。两家都发现：<b>光有闸门不够，还得在闸门后面放一句给模型的训诫，堵死绕行的动机</b>。把「拒绝」从一堵冷墙，变成一次有引导的协商——「你可以正当地换条路（用 head 代替 cat），但不许耍花招绕过我的本意；真觉得非做不可，就停下来问人」。Hermes 那句「沉默不等于同意」尤其点题：它常常无人值守，<b>没人回答不能被模型解读成默许</b>。</div>
+  <div class="verdict"><b>诚实度是「风险归谁」的下游：</b>Hermes 既动手剥了密钥、又亲口否认那是边界——不是自相矛盾，是它的处境逼出来的坦白。它开源自托管、从开放渠道吃不可信输入、常常无人值守，<b>没有厂商接盘、闯祸是你自担</b>（文档里连 bug bounty 都明说没有、部署加固全列为运维的责任）。正因为残余风险最终落在你头上，它才被迫把「真边界在哪」说死，免得你把一道软门错当成真墙。CC 反过来：多半跑在你自己可信的仓库里、你就在旁边、身后还有厂商，于是它能用更轻的姿态——「<b>只对你信任的代码用我</b>」——把外泄这一行的残余风险，交还给「你选对了输入」。</div>
 
-  <h2><span class="num">05</span>对比 · 七组对照，落在「在场契约」上</h2>
-  <p class="lead">默认关不关沙箱、危险靠什么判、地板护什么、谁扛后果、假设谁在场……同一个「治理危险动作」的目标，答案却指向两种部署现实。</p>
+  <h2><span class="num">04</span>共同盲区：两家的护栏都只盯着「本机」</h2>
+  <p class="lead">覆盖网里有两处，是两家<b>一起</b>留白的——不是谁的取舍，是这类产品共同的射程边界，对读者判断「我能把什么托付给它」尤其要紧。</p>
 
-  <div class="matrix">
-    <div class="mh"></div>
-    <div class="mh cc">Claude Code</div>
-    <div class="mh hm">Hermes</div>
+  <p class="lead"><b>盲区一：祸落在别人头上的那一类，两家事前几乎都不设防。</b>强推覆盖共享分支、往外发消息／邮件、发布 npm／pip 包——这些「外部世界后果」在覆盖网第五行几乎全空。CC 这边，force push 只有一句信息提示（不影响放行）、npm publish 要靠你自己写规则、系统提示里「不主动 push」是<b>写给模型的纪律、不是代码闸门</b>；Hermes 这边，agent 主动发消息／发邮件<b>零审批</b>，publish 无拦，只有 force push 被某条 shell 正则偶然覆盖到。两家的防线都画在「别毁了这台机器、这个仓库」，对「别把祸甩给别人」基本沉默。</p>
 
-    <div class="dim">默认关不关沙箱</div>
-    <div>命令沙箱<b>默认关</b>，动作直落你的真机器；开沙箱是 opt-in。</div>
-    <div>执行后端<b>默认 local ＝ 裸主机</b>；容器 / 远程 / 云沙箱是 opt-in。</div>
+  <p class="lead"><b>盲区二：护栏几乎只长在「shell 命令」这一个面上。</b>那套危险删除拦截、配置保护、沙箱，两家都只覆盖终端命令和文件编辑。<span class="cc">CC 的 MCP／自定义工具直接放行</span>（passthrough，完全不过环境侧的路径闸和沙箱）；<span class="hm">Hermes 的 MCP 调用、发消息、发布</span>也都绕开命令闸，只靠一个<b>默认关（opt-in）</b>的通用钩子兜——插件默认不加载，非 shell 面开箱即无闸。含义很实：<b>一个改用 MCP 工具去删数据、去联网外传的 agent，能绕开两家几乎全部的环境护栏。</b></p>
 
-    <div class="dim">隔离与审批<br>的关系</div>
-    <div>开了沙箱，命令反而<b>默认自动放行</b>、不再逐条问（触网才浮出问人）。</div>
-    <div>后端是隔离容器，就<b>整个跳过审批层</b>（碰不到宿主机就不必拦）。</div>
+  <div class="verdict"><b>为什么一起留白：</b>两家的环境治理，本质是<b>「本机资产治理」</b>——把 shell 能对这台机器、这个仓库干的坏事拦住。一旦动作换个出口（对外发送、发布、经由 MCP 工具落地），或者后果换个落点（砸在协作者而非你自己头上），就掉出了射程。这不是 bug，是这一代 harness 危险治理的形状：它守的是「你的机器」，不是「你的机器能波及的世界」。</div>
 
-    <div class="dim">危险靠什么判</div>
-    <div>先按<b>落点</b>（在不在工作区圈内），再叠命令模式——地基是「按物理距离圈信任」。</div>
-    <div>按<b>命令内容</b>（硬禁清单 ＋ 数十条危险正则 ＋ 内容扫描），真边界指向 OS。</div>
-
-    <div class="dim">连全放行<br>都压不过的地板</div>
-    <div>改 .git / .claude 自身配置 / shell 启动 / IDE 配置——护住「<b>管着 agent 自己的那层</b>」。</div>
-    <div>删根 / 格盘 / fork 炸弹 / 关机等灾难命令，连 yolo 也无条件拒——护住「<b>别毁了这台机器</b>」。</div>
-
-    <div class="dim">谁扛闯祸后果</div>
-    <div>你的真文件 / 凭证 / 版本库；<b>没有一键回滚，安全网是 git</b>；企业另有远程总闸可锁死全放行档。</div>
-    <div>你的机器 / 你的账号；<b>没有厂商接盘</b>，插件安全、暴露公网的责任明确归运维。</div>
-
-    <div class="dim">假设谁在场<br>（脊椎）</div>
-    <div><b>原生假设人在场</b>——危险动作弹窗、Shift+Tab 现场转信任旋钮。</div>
-    <div><b>常态假设人不在场</b>——常驻被时钟 / 消息叫醒，跑完把结果推给你。</div>
-
-    <div class="dim">没人点确认<br>时怎么办</div>
-    <div>无法弹窗即<b>默认拒</b>（「此环境无权限提示」）；要无人干活，须提前用 allow 规则 / 全放行档 / 钩子把那次点击签好。</div>
-    <div>cron <b>默认拒</b>、沉默不等于同意、硬禁地板永在；<b>但有诚实漏洞</b>——未被识别为 cron/网关的无人会话会自动放行 ＋ 仅告警。</div>
-  </div>
-
+  <h2><span class="num">05</span>verdict · 机制趋同，账本分家</h2>
   <div class="verdict">
-    <b>为何不同 —— 分水岭是「在场契约」：这套危险治理，默认假设有没有人在场？</b><br><br>
-    <b>CC 原生假设人在场。</b>整套默认姿态就是「危险动作弹窗、等你点 Yes/No」，信任档位靠 Shift+Tab 现场转——这些只有当终端前坐着一个能随时回答的人才成立。无人化对 CC <b>不是免费的</b>：你得用预授权（allow 规则 / 全放行档 / 钩子）把「本属于人的那次点击」提前签好；而当真没人回答，它的安全默认是<b>拒绝</b>。<br><br>
-    <b>Hermes 的常态恰恰是没人在场。</b>它常以一个被时钟 / webhook / 消息叫醒的常驻实体跑着，跑完把结果推给不在场的你（见第 04 篇）。于是它必须为「没人点确认」定义<b>确定行为</b>——cron 默认拒、沉默不等于同意、硬禁地板永远在；能触达你时（推到 Telegram / Slack 等你 /approve）才把决定权交回人。<br><br>
-    <b>更深一层：两家其实都在对你说「别全信我」——但指向了不同的出口。</b>CC 说「<b>只对你信任的文件用我</b>」（把残余风险推给你选对输入，因为它多半在你自己可信的仓库里、你就在旁边）；Hermes 说「<b>进程内没有任何东西算隔离，唯一的边界是操作系统</b>」（把残余风险推给你在 OS 层做隔离，因为它是个从开放渠道吃不可信输入、又常常无人值守的常驻体）。是「厂商托管、有人在场」还是「自托管、无人值守」，决定了它把最后那道防线画在哪、也决定了它对自己能力边界诚实到什么程度——诚实到什么份上？它明明还搭了一层进程内的护栏（把 API 密钥、网关令牌在传给子进程前<b>剥掉</b>，堵住恶意扩展把凭据隧道出去），却仍在文档里主动写明「<b>这只减少随手泄露，不算隔离</b>」。既动手缓解、又亲口否认那是边界——这正是它整套「别把软门当真墙」姿态的注脚。<br><br>
-    <b>一个共识别漏掉：</b>真到了「没人在家」且被正确识别的时候，两家的安全默认<b>都是「不做」</b>——CC 无法弹窗即默认拒，Hermes cron 默认拒 / 沉默不等于同意。分歧不在这条底线，而在<b>谁把「无人」当常态来设计</b>。这，就是喂给综合②「在场契约」脊椎的那一块。
+    <b>把这一章收成一句：环境侧的安全机制之所以惊人趋同，是因为它们都在给「模型会犯错」这个普适前提做下限设计——答案空间窄，就收敛到同一批动作上（拦、隔、兜）。真正把两家分开的，是账本。</b><br><br>
+    <b>第一本账：那道绝对地板护什么。</b>Hermes 按「物理可不可挽回」护机器，CC 按「动没动治理层」护规则本身。一个防的是物理上收不回的动作，一个防的是能改写游戏规则本身的动作——各自把对方留在软层的那一样，单独升格成了硬地板。<br><br>
+    <b>第二本账：闯了祸算谁的。</b>CC 厂商托管、多半跑在你自己可信的仓库里、身后有 git 兜文件、有企业总闸能远程锁死全放行档；Hermes 开源自托管、你的机器你的账号、没有厂商接盘、责任白纸黑字归运维。风险归属的不同，又反过来逼出了「对能力边界多诚实」的不同：越是你自担，它越被迫把「真边界只有操作系统」说死。<br><br>
+    <b>一个共识别漏掉：</b>两家其实都在对你说「别全信我」，只是指向了不同的出口——CC 说「只对你信任的代码用我」，Hermes 说「进程内没有任何东西算隔离，唯一边界是操作系统」。是「厂商托管、身后有人兜」还是「自托管、你自担」，决定了它把最后那道防线画在哪，也决定了它对自己诚实到什么份上。
   </div>
 
-  <h2><span class="num">06</span>悬而未决 · 边界说明（防「默认→绝对」以偏概全）</h2>
+  <h2><span class="num">06</span>边界说明（防「默认→绝对」以偏概全）</h2>
   <ul class="open">
-    <li><b>[CC · 默认]</b> 沙箱<b>默认是关的</b>：外部用户开箱即用并没有命令沙箱，安全全靠权限弹窗。而且开沙箱后命令<b>反而不再逐条问</b>——它是「换一种范式」（靠笼子物理隔离），不是「多加一层防护」。别记成「CC 在沙箱里跑命令」。</li>
-    <li><b>[HM · 默认]</b> 后端<b>默认 local ＝ 裸主机</b>；容器 / 远程 / 云沙箱、整进程 Docker / OpenShell 包裹，全是 opt-in。别记成「Hermes 把 agent 关在沙箱里」——恰恰相反，默认不关。真隔离是官方推荐、但要运维自己去开的选项。</li>
-    <li><b>[两家 · 子代理不自动隔离]</b> git worktree 隔离两家<b>都是手动 opt-in</b>：CC 明确「只有用户说 worktree 才用，切分支 / 改 bug 都不算」，子代理<b>默认共享同一工作目录</b>（可显式给某个子代理开 worktree 隔离，但不是默认）；Hermes 的 worktree 也要显式开。「并行分身各自隔离 blast radius」不是默认形态。</li>
-    <li><b>[CC · 窄例外]</b> 「出了工作区圈一律先问、读写对称授权」有一组<b>内部管线的窄例外</b>：harness 自己的暂存 / 计划 / 会话记忆目录，即便在工作区之外也<b>静默可写</b>（不弹窗）。但这组例外只限 harness 自身的后台目录、不含任意用户文件，「CC 信任工作区、出圈就问」的大结论仍成立。</li>
-    <li><b>[HM · 诚实漏洞]</b> 既非交互、又非网关、又非 cron 的无人会话，危险命令会被<b>直接放行</b>（当前主路径甚至不先做危险检测、也不拦不问）——官方标注的已知限制。所以「无人即更保守」只在被识别的 cron / 网关场景成立，<b>不是所有无人场景都兜底</b>。这一条不能被「无人时更安全」的干净故事压掉。</li>
-    <li><b>[HM · 别当默认支柱]</b> 内容扫描器 Tirith <b>默认「挂了就放行」（fail-open）</b>、smart 模式（小模型审查）与 off 都是 opt-in、记忆 / 技能写入审批默认关。硬禁地板是全文里<b>唯一</b>真正无条件的机制，其余大多是可配的默认值。</li>
-    <li><b>[CC · 分类器 ant-only]</b> 用 AI 分类器代替人审的 auto 模式是内部 / 特性门控，外部用户默认没有；写外部产品逻辑时不当它是通用能力。</li>
-    <li><b>[不评优劣]</b> 本篇讲的是「危险治理的<b>形态</b>与<b>在场假设</b>」，不评判两种模式孰优——取决于你是否在场、自托管还是托管、吃的是可信还是开放输入。</li>
-    <li><b>[时间切片]</b> 两家治理都在快速演进，本篇是某一时间切片（CC main / Hermes @daf4f1a7a）。</li>
+    <li><b>[两家 · 默认不隔离]</b> CC 命令沙箱<b>默认关</b>、开箱即用全靠权限弹窗；Hermes 后端<b>默认 local ＝ 裸主机</b>，容器／远程／云沙箱全是 opt-in。别记成「它们在沙箱里跑命令」——恰恰相反，默认不关。且沙箱一开是<b>换范式</b>（用隔离换掉逐条问）不是加一层。</li>
+    <li><b>[两家 · 事后只兜半格]</b> 「事后兜底全外包给 git」不成立：两家都有原生撤销，但都只覆盖<b>自己经结构化编辑工具改的文件</b>——CC 的 rewind 交互默认开、Hermes 的 rollback 默认关（v2 从开翻成关，注释「多数人从不用」）；bash 层的 rm／dd／重定向、已推 commit、已发外部动作，两家事后都兜不住。</li>
+    <li><b>[CC · 不对称]</b> 「删根被硬拦」只对 PowerShell 成立：同样删系统关键路径，PowerShell 返回硬拒（bypass 也压不过），Bash 却只是弹窗问（措辞「不能被规则自动放行」，Bypass 档仍可放行）。全仓没有硬编码的危险命令黑名单。CC 护栏强度按「走哪个 shell／碰没碰治理层」排，不按「动作可不可逆」排——这是护栏不一致，不是设计美学。</li>
+    <li><b>[HM · 诚实漏洞]</b> 既非交互、又非网关、又非 cron 的无人会话，软危险命令会被<b>直接放行</b>（本切片主路径连告警都不打，静默放行）——官方 docstring 明文保留这条历史 fail-open。硬地板／sudo 地板／deny 清单在放行前已拦，故缺口只对「可恢复的软危险命令」开。但「无人即更保守」只在被识别的 cron／网关场景成立：cron 无人默认拒，这条非 cron 无人却默认放行，两个无人路径处理不一致。</li>
+    <li><b>[HM · 别当默认支柱]</b> 内容扫描器 Tirith <b>默认「挂了就放行」（fail-open）</b>；smart（小模型审查）与 off 都是 opt-in、审批默认 manual。硬禁地板是全文里<b>唯一</b>真正无条件的机制，其余大多是可配的默认值。</li>
+    <li><b>[CC · 门控能力别当产品]</b> 用 AI 分类器代替人审的 auto 模式、团队记忆密钥拦，均为内部特性门控，外部用户默认不可达；harness 自身的暂存／计划／记忆目录即便在工作区外也<b>静默可写</b>（只限这些后台目录、不含任意用户文件，「出圈就问」的大结论仍成立）。</li>
+    <li><b>[两家 · 子代理不自动隔离]</b> git worktree 隔离两家<b>都是手动 opt-in</b>：CC 明确「只有用户说 worktree 才用」，子代理默认共享同一工作目录；Hermes 的 worktree 也要显式开。「并行分身各自隔离」不是默认形态。</li>
+    <li><b>[不评优劣 · 时间切片]</b> 本篇讲的是危险治理的<b>形态</b>与<b>账本</b>，不评两种模式孰优——取决于你是否在场、自托管还是托管、吃的是可信还是开放输入。两家治理都在快速演进，本篇是某一时间切片（CC main / Hermes @8e734810d）。</li>
   </ul>
 
   <div class="foot">
-    代码溯源（不在正文展示，仅存档）：<br>
-    <b>Claude Code</b> — <code>src/tools/BashTool/shouldUseSandbox.ts:130</code> · <code>src/tools/FileEditTool/FileEditTool.ts:125</code>（动作打在真文件系统 / 真 shell）· <code>src/utils/permissions/filesystem.ts:667</code> · <code>filesystem.ts:1030</code> · <code>filesystem.ts:1142</code>（工作目录＝信任圆心 · 读写对称授权）· <code>src/utils/sandbox/sandbox-adapter.ts:459</code> · <code>sandbox-adapter.ts:462</code> · <code>sandbox-adapter.ts:471</code>（命令沙箱默认关 · 开沙箱则命令默认自动放行）· <code>sandbox-adapter.ts:745</code> · <code>src/components/permissions/SandboxPermissionRequest.tsx:80</code>（笼内触网浮出问人）· <code>src/tools/EnterWorktreeTool/prompt.ts:12</code>（worktree 手动 opt-in · 子代理默认共享工作目录）· <code>src/types/permissions.ts:16</code> · <code>src/utils/permissions/PermissionMode.ts:42</code> · <code>getNextPermissionMode.ts:38</code>（五种权限模式 · Shift+Tab 旋钮）· <code>src/utils/permissions/permissions.ts:1158</code> · <code>permissions.ts:1262</code>（先拒后问再放行的顺序检查链）· <code>permissions.ts:1231</code> · <code>filesystem.ts:620</code>（Bypass 硬例外：.git / .claude / shell / IDE 配置）· <code>src/utils/permissions/dangerousPatterns.ts:18</code>（过宽 allow 规则的防呆剥离）· <code>src/types/hooks.ts:73</code> · <code>src/utils/hooks.ts:550</code>（PreToolUse 钩子＝可编程守门人）· <code>src/utils/messages.ts:226</code>（被拒后的绕行准则原文）· <code>permissions.ts:932</code>（无法弹窗即默认拒）· <code>src/utils/permissions/bypassPermissionsKillswitch.ts:19</code>（组织级远程总闸）· <code>src/tools/BashTool/prompt.ts:231</code>（默认进沙箱的系统提示）· <code>src/components/Onboarding.tsx:84</code>（「只对你信任的代码用」）<br>
-    <b>Hermes</b> — <code>tools/terminal_tool.py:1244</code>（后端默认 local ＝ 裸主机）· <code>SECURITY.md:60-71</code>（唯一边界是 OS · 进程内全是启发式）· <code>SECURITY.md:86-119</code>（两种 OS 级隔离姿态 · 均 opt-in）· <code>tools/approval.py:1883-1894</code>（容器后端跳过整个审批层）· <code>tools/terminal_tool.py:272-278</code>（Docker 挂宿主路径→隔离失效审批复活）· <code>cli.py:1258-1271</code>（worktree 并行隔离 · opt-in）· <code>tools/approval.py:1918-1943</code>（四层递进命令闸门）· <code>tools/approval.py:365-401</code> · <code>approval.py:464-477</code>（硬禁地板清单 + BLOCKED 原文）· <code>tools/approval.py:498-674</code>（约 47 条危险模式软清单）· <code>tools/approval.py:561-592</code>（防自尽 · 不许杀自己网关）· <code>tools/approval.py:1732-1735</code> · <code>approval.py:2354-2374</code>（manual / smart / off 三模式）· <code>tools/tirith_security.py:68-87</code>（内容扫描器 · 默认开 · 默认 fail-open）· <code>tools/approval.py:2428-2457</code>（被拒 / 超时训诫原文 · 沉默不等于同意）· <code>tools/approval.py:2211-2245</code>（cron 无人默认拒）· <code>tools/approval.py:1947-1966</code>（诚实漏洞：非交互非网关非 cron 自动放行 + 告警）· <code>SECURITY.md:155-169</code>（闯祸后果归运维 · 无厂商接盘）
+    代码溯源（不在正文展示，仅存档 · CC=claude-code-main／Hermes=@8e734810d）：<br>
+    <b>Claude Code</b> — <code>src/utils/permissions/permissions.ts:1226-1281</code>（先拒后问再放行的顺序检查链 · bypass 免疫分支）· <code>src/utils/permissions/filesystem.ts:620-665</code> · <code>filesystem.ts:57-79</code> · <code>filesystem.ts:426-433</code>（治理层 bypass 免疫：.git／.claude／shell 启动／IDE 配置 + 防提权注释）· <code>src/tools/BashTool/pathValidation.ts:70-108</code>（Bash 删危险路径＝软拦 ask · 「不能被规则自动放行」非 deny）· <code>src/tools/PowerShellTool/pathValidation.ts:848-857</code>（PowerShell 删除＝真硬拒 deny）· <code>src/tools/BashTool/destructiveCommandWarning.ts:1-102</code>（破坏性命令提示语＝纯信息 · 不影响放行）· <code>src/utils/messages.ts:226-239</code>（被拒后绕行准则原文）· <code>src/utils/sandbox/sandbox-adapter.ts:459-471</code>（命令沙箱默认关 · 开沙箱则命令默认自动放行）· <code>sandbox-adapter.ts:743-760</code> · <code>SandboxPermissionRequest.tsx:60-124</code>（沙箱触网浮出问人）· <code>src/utils/fileHistory.ts:63-135</code> · <code>FileEditTool.ts:435</code> · <code>src/commands/rewind/index.js</code>（文件检查点／rewind：交互默认开 · 仅覆盖结构化编辑）· <code>src/tools/MCPTool/MCPTool.ts:59-62</code>（MCP 工具 passthrough · 不过环境闸）· <code>bashProvider.ts:218-253</code>（子进程不清洗 env · 继承全部密钥）· <code>src/services/teamMemorySync/teamMemSecretGuard.ts:15-44</code>（写团队记忆扫密钥 · 特性门控）· <code>bypassPermissionsKillswitch.ts:19-47</code>（组织级远程锁死 Bypass 档）· <code>src/tools/EnterWorktreeTool/prompt.ts</code>（worktree 手动 opt-in）· <code>src/components/Onboarding.tsx</code>（「只对你信任的代码用」）<br>
+    <b>Hermes</b> — <code>tools/approval.py:2537</code>（主审批入口 check_all_command_guards · terminal_tool.py:256 调用）· <code>approval.py:366-403</code> · <code>approval.py:301-306</code>（硬禁地板 12 条 + 「deliberately tiny · no recovery path」设计注释）· <code>approval.py:513-526</code>（BLOCKED hardline 原文）· <code>approval.py:547-758</code>（约 47 条危险模式软清单 · yolo 可绕）· <code>approval.py:622-653</code>（防自尽＝软清单 · 非硬地板）· <code>approval.py:2217-2228</code>（隔离容器后端整链跳过 · 含硬地板 · 挂宿主路径则复活）· <code>approval.py:2819-2855</code>（被拒／超时训诫原文 · 「Silence is not consent」）· <code>approval.py:2600-2664</code>（诚实漏洞：非交互非网关非 cron 无人会话静默 fail-open）· <code>approval.py:1862-1867</code>（cron 无人默认拒）· <code>tools/tirith_security.py</code> · <code>cli-config.yaml.example:355-358</code>（内容扫描器默认开 · 默认 fail-open）· <code>tools/environments/local.py:241-282</code> · <code>code_execution_tool.py:78-207</code>（剥密钥：默认开 · GATEWAY 令牌无条件剥）· <code>tools/send_message_tool.py</code>（agent 发消息＝零审批）· <code>tools/mcp_tool.py:3859-3943</code>（MCP 调用不过环境审批）· <code>tools/checkpoint_manager.py</code> · <code>hermes_cli/config.py:1298-1317</code>（文件快照／rollback · 默认关 · v2 从开翻关）· <code>SECURITY.md:60-65</code> · <code>SECURITY.md:130-153</code>（唯一边界是 OS · 剥密钥非隔离 · 启发式非边界）· <code>SECURITY.md:192-219</code>（外部面 caller allowlist：治入口不治出口）· <code>SECURITY.md:276-321</code>（闯祸后果归运维 · 无 bug bounty）
   </div>
-</div></section>
+</div></div></section>
 <section class="chapter" id="ch-07"><div class="chwrap">
+<div class="ch07m">
 
-  <div class="eyebrow"><span class="badge">第 7 篇 · 轴二 · Loop 之外</span><span class="tag">多智能体拓扑</span></div>
-  <h1>Loop 与其他 Agent</h1>
-  <p class="subtitle">分身之间，靠喊话还是靠看板？</p>
-  <div class="chips">
-    <span class="chip">CC 三种分身：subagent / fork / 团队</span>
-    <span class="chip">全新隔离子代理趋同 · CC 另有 fork（Hermes 无）</span>
-    <span class="chip">团队层：消息同事团队 vs 共享状态看板流水线</span>
-    <span class="chip">两家都能盯单个分身</span>
-    <span class="chip">托管产品的 live-team 更完整</span>
-  </div>
+  <div class="eyebrow"><span class="badge">第 7 篇 · 轴二 · Loop 之外</span><span class="tag">Loop 与其他 Agent · 多智能体协作</span></div>
+  <h1>Loop 与其他 Agent：为几乎相同的理由拆开，却在拆开之后分道扬镳</h1>
+  <p class="subtitle">单个 agent 的上下文与时间总有极限——拆成多个分身是必然。真正分野的，是拆开「之后」。</p>
 
   <div class="thesis">
-    先分清一件常被混为一谈的事：<b>光是 Claude Code 自己，就有三种机制不同的分身</b>——<b>① 全新子代理（subagent）</b>：leader 写一段<b>自包含简报</b>、派一个<b>零共享上下文</b>的隔离分身，它跑完回一条结论；<b>② fork</b>：不给角色时触发，分身<b>继承 leader 的完整上下文与系统提示、共享提示缓存</b>（所以给它的是"做什么"的指令、而非重述背景）——这是"接着我的记忆去干"，和①正相反；<b>③ 团队（teammates）</b>：一队<b>具名</b>队友围着共享看板、用<b>邮箱互相发消息</b>、人当队长双向协作。三者作用与机制都不同。<br>
-    把两家摆开：在<b>「全新隔离子代理」这一支上两家趋同</b>——CC 的 subagent ≈ Hermes 的 delegation（都是 fresh 会话、隔离、只回结论；leader 可用消息续跑它，但分身之间不通信）；但 <b>CC 还多一条 Hermes 没有的 fork</b>（继承上下文、复用缓存），Hermes 的委派被明确设计为"只有 fresh 会话、无父历史"。<b>真正戏剧化的分野在「多角色团队」的协调媒介</b>：Claude Code 让代理<b>互相发消息</b>（邮箱 + 共享看板 + 具名队友，人以队长身份在同一张消息网里），这套 live-team 产品面做得<b>更完整、更产品化</b>；Hermes 则让<b>独立实例靠共享数据库状态协调</b>（看板/蜂群：依赖图、黑板评论、原子认领，彼此<b>不发消息</b>），且要<b>显式进入</b>才用。一句话：<b>「消息驱动的同事团队」 vs 「共享状态驱动的看板流水线」</b>。
+    <div class="thesis-tag">TL;DR</div>
+    <p style="margin:0 0 10px">多 agent 不是为了「更聪明」，是被上下文极限逼出来的手段——两家都提供三种模式：自己干、派一个隔离分身替你干一段、组一支共用看板的团队。<b>模式清单相似，不是差异所在。</b></p>
+    <p style="margin:0">真正的产品判断，不在「有哪些模式」，而在<b>什么时候该拆、什么时候升级、谁来决定</b>——这一层两家分道。本章像一份产品报告，按<b>一个任务被拆开、干完、合回来</b>的顺序走：为什么拆 → 有哪些模式 → 何时拆（脊）→ 派出去的代价 → 分身怎么协调 → 怎么合回来。不碰「谁假设有人在场盯着」那根线——那是综合②的活。</p>
   </div>
 
-  <h2><span class="num">01</span>问题：拆开之后，这些分身怎么协调</h2>
-  <p class="lead">用产品语言讲：多智能体不只是「怎么把活拆开并行」，更是「拆开之后，它们靠什么协调、汇聚、不互相踩脚」。</p>
-  <div class="story">
-    你把一个大活交给 agent——跨 12 个文件重构，或者一次调研 5 种方案。一个代理的上下文和时间扛不下，于是它拆成好几个分身。两个问题立刻冒出来：(1) 这些分身<b>怎么不互相踩脚</b>？(2) 它们<b>靠什么互相协调</b>——是像一支团队那样<b>互相发消息</b>，还是像流水线工人那样<b>各自读写一块共享白板</b>？<br><br>
-    这第二个问题，就是两家多智能体设计真正分岔的地方——它决定了整套东西长成「一支你带的同事团队」还是「一条你摆好的看板流水线」。
+  <h2><span class="num">00</span>问题：一个 agent 干不完的活，拆开之后谁跟谁怎么协调</h2>
+  <div class="problem">
+    <p>你交给它一个大活：把一个中型仓库从一套框架整体迁到另一套，顺带补全测试、更新文档。<b>一个 agent 干不完</b>——光是把相关文件逐个读进来、逐个尝试、逐个回滚，几十上百轮工具调用的原始输出就把它的上下文塞爆了，它开始「健忘」，也拖到你等不起。于是它把活拆开，派出几个分身各干一段。<b>拆开这一步，两家几乎一样</b>；可真正的问题从拆开之后才开始：<b>什么时候才真该拆、拆出来的分身带着什么代价、它们之间靠什么协调、干完又怎么合回一个连贯结果</b>？下面按这个顺序，一件件摊开。</p>
   </div>
 
-  <h2><span class="num">02</span>核心机制：委派层大致趋同（CC 多一条 fork），团队层才分岔</h2>
-  <p class="lead">左蓝 Claude Code，右紫 Hermes。<b>「全新隔离子代理」这一支两家趋同</b>（fresh 会话、隔离、只回结论）；<b>CC 另有一条 Hermes 没有的 fork</b>（继承上下文、复用缓存）。
-  <b>真正戏剧化的分野在「多角色团队」的协调媒介</b>：一边靠代理<b>互相发消息</b>，另一边靠<b>共享数据库状态</b>。</p>
+  <h2><span class="num">01</span>为什么非拆不可：两家给出的理由几乎逐字重合</h2>
+  <p class="lead">要理解分野，先得承认起点是<b>趋同</b>的。两家在提示词里自认的「为什么要多 agent」几乎一模一样：核心不是分工，而是<b>防中间原始输出淹没父的上下文</b>——把一段会产生大量一次性输出的子任务派出去，只让摘要回来。</p>
+
+  <p style="margin:14px 0 0"><span class="cc">Claude Code</span> 的 subagent 机制上也是隔离的——子在自己的子进程里跑、只把一条结果回你，护上下文是这个机制的自然结果。把这层判据讲得最直白的，是它 fork 实验里的一句质性问题（不是「任务大不大」，而是「这些中间输出我以后还要不要」）：</p>
+  <div class="artifact cc-b"><span class="lbl">CC · 何时该拆（fork 自己 · 灰度实验）· 原文</span>Fork yourself ... when the intermediate tool output isn't worth keeping in your context. The criterion is qualitative — "will I need this output again" — not task size.</div>
+
+  <p style="margin:16px 0 0"><span class="hm">Hermes</span> 把同一件事讲成一句机制承诺——中间结果根本不进你的窗口，只回摘要：</p>
+  <div class="artifact hm-b"><span class="lbl">HM · 委派的意义 · 原文</span>Only the final summary is returned -- intermediate tool results never enter your context window.</div>
+
+  <p style="margin:16px 0 0;color:var(--muted)">连「<b>何时不该拆</b>」也趋同：目标已知就直接读、单个工具调用直接调、机械活别专门开一支队伍——两家都在提示词里劝模型别为拆而拆。<b>这一层是全章最没有分歧的地方</b>，本章不在这里制造对立。既然「为什么拆」趋同，先把「有哪些协作模式」这张地图铺开——你会发现两家的模式清单也高度相似。</p>
+
+  <h2><span class="num">02</span>有哪些协作模式：三种，而不是一条阶梯</h2>
+  <p class="lead">把多 agent 能力摊开，真实结构是<b>三种模式</b>：自己干、派一个隔离分身替你干一段、一群分身共用一块看板协作。<b>注意：并行、嵌套这些不是独立模式，是「委派」这一种模式的用法参数——能同时发生（比如一次并行派 3 个后台分身）。</b>下面逐个讲清：<b>干嘛用、什么时候触发、CC / HM 触发后的特性差异</b>。</p>
+
+  <div class="mode">
+    <div class="mode-h"><span class="mode-n">模式一</span><b>不拆 · 单 agent 自己干</b></div>
+    <p><b>干嘛用</b>：目标明确、机械活，自己直接做最省——多拆一个分身都是白白的 token 与协调开销。<b>什么时候触发</b>：目标已知、单个工具能解决、不会产生海量中间输出。<b>特性</b>：<span class="cc">CC</span> → 直接 Read / Glob；<span class="hm">Hermes</span> → 直接 execute_code。</p>
+  </div>
+
+  <div class="mode main">
+    <div class="mode-h"><span class="mode-n">模式二 · 主力</span><b>委派 subagent · 派个隔离分身替你干一段</b><span class="bdg avail">两家人人可用</span></div>
+    <p><b>干嘛用</b>：把会产生大量中间输出的子任务派出去，只让<b>摘要</b>回来，别让原始输出淹没父的上下文。<b>什么时候触发</b>：中间产物会塞爆上下文、或有真正独立可并行的活。这是两家真正的主力能力（<span class="cc">CC</span> 的 AgentTool、<span class="hm">Hermes</span> 的 delegate_task，都无门控常驻）。</p>
+    <p>下面这些<b style="color:var(--text)">不是互斥的档，是同一次委派的用法参数——能同时发生</b>，触发后的特性差异才是两家分野所在：</p>
+    <div class="matrix">
+      <div class="mh">用法参数</div>
+      <div class="mh cc">Claude Code</div>
+      <div class="mh hm">Hermes</div>
+
+      <div class="dim">数量</div>
+      <div>派一个 / 一条消息里并行派多个（fan-out）。</div>
+      <div>派一个 / tasks 数组批量并行。</div>
+
+      <div class="dim">前台还是后台</div>
+      <div>模型按依赖<b>临场选</b>：前台等结果，或后台并行。</div>
+      <div>默认<b>后台异步</b>、模型不能选（老参数已废弃）。</div>
+
+      <div class="dim">能否再嵌套</div>
+      <div>默认扁平——teammate 不能再派 teammate；要嵌套编排须开 coordinator。<span class="exp-note">灰度实验</span></div>
+      <div>默认扁平（层深上限 1）——子 agent 也不能再派；要嵌套须显式把 max_spawn_depth 抬到 ≥2。</div>
+
+      <div class="dim">上下文共享</div>
+      <div>默认 fresh 零共享。<span class="exp-note">灰度实验</span>fork＝继承父上下文的分身。</div>
+      <div>一律 fresh、无父历史，靠 context 字段手搬。</div>
+
+      <div class="dim">隔离强度</div>
+      <div>同 cwd → 独立工作树 → 远程沙箱（默认弱、可升级；远程档仅内部构建可见）。</div>
+      <div>同进程线程 → 独立 OS 进程（按 profile 隔离）。</div>
+    </div>
+  </div>
+
+  <div class="mode">
+    <div class="mode-h"><span class="mode-n">模式三</span><b>共享看板 team · 一群分身共用一块持久状态板</b></div>
+    <p><b>干嘛用</b>：多个分身要长时间协作、互相交接、把成果汇聚成一个连贯结果。<b>什么时候触发</b>：<span class="cc">CC</span> <span class="exp-note">灰度实验</span>需开启 agent-swarms（feature flag），普通用户默认见不到——连它的 coordinator 编排、peer 跨机也都在这道门后；<span class="hm">Hermes</span> 靠 <code>hermes kanban</code> / profile <b>显式命令进入</b>（真产品入口）。<b>特性差异</b>：<span class="cc">CC</span> ＝具名队友＋共享任务看板＋队友互发消息；<span class="hm">Hermes</span> ＝kanban / swarm＋共享黑板＋依赖图＋固定角色链。这块的分身<b>到底怎么连</b>，留到 §05 那张图细看。</p>
+  </div>
+
+  <p style="margin:16px 0 0;color:var(--muted)">两处真非对称，各接住一段部署底色：<span class="cc">CC</span> 的 <b>fork</b>（<span class="exp-note">灰度实验</span>要个续着我思路干、却不弄脏我上下文的分身）、<span class="hm">Hermes</span> 的 <b>profiles</b>（把「角色」做成完全独立的实例，横切所有模式——接住它自托管、单机多实例的部署形态）。</p>
+  <div class="artpair">
+    <div class="artifact cc-b"><span class="lbl">CC · fork 继承父上下文（灰度实验）· 原文</span>it inherits your full conversation context ... keeps its tool output out of your context</div>
+    <div class="artifact hm-b"><span class="lbl">HM · profiles＝隔离实例花名册 · 原文</span>Each profile is a fully independent HERMES_HOME directory with its own config.yaml, .env, memory, sessions, skills, gateway, cron, and logs.</div>
+  </div>
+
+  <h2><span class="num">03</span>何时拆：拆不拆 · 拆多重 · 谁来判断——这一层才是产品判断的心脏</h2>
+  <p class="lead">机制清单只是坐标系，真正的产品判断在「何时动用」。每拆一个分身，都多一份 token、多一份协调、多一个跑偏风险，还丢了主 agent 的上下文连续性。所以「何时拆」不是一个点，是一条有三个刻度的线——两家在第一个刻度<b>趋同</b>，在后两个<b>分道</b>。</p>
+
+  <div class="gauge">
+    <div class="gk"><span class="gn">刻度 ①</span><span class="gt">拆不拆</span><span class="gd same">两家趋同</span></div>
+    <p style="margin:0 0 12px;color:var(--muted)">什么时候真该拆、什么时候单 agent 就够——两家几乎逐字重合地划同一条「别滥用」的红线。</p>
+    <div class="signals">
+      <div class="sig go"><h5>该拆的信号</h5><ul><li>中间产物会淹没父的上下文</li><li>有真正独立、可并行的活</li><li>推理密集、需要独立思考的子任务</li></ul></div>
+      <div class="sig no"><h5>不该拆的信号</h5><ul><li>机械活——别专门派一支队伍</li><li>单个工具调用能解决——直接调</li><li>目标已知——直接读，别绕分身</li></ul></div>
+    </div>
+    <div class="artpair">
+      <div class="artifact cc-b"><span class="lbl">CC · 判据是质性、不是任务大小（fork 灰度实验）· 原文</span>Fork yourself ... when the intermediate tool output isn't worth keeping in your context. The criterion is qualitative — "will I need this output again" — not task size.</div>
+      <div class="artifact hm-b"><span class="lbl">HM · WHEN TO USE · 原文</span>Reasoning-heavy subtasks · Tasks that would flood your context with intermediate data · Parallel independent workstreams</div>
+    </div>
+    <p style="margin:12px 0 0;color:var(--muted)">这处趋同本身就是产品逻辑：<b>多 agent 不是越多越好</b>。两家设计者站在同一条线上劝模型别为拆而拆——因为背后是同一个物理约束：上下文稀缺、协调有代价。</p>
+  </div>
+
+  <div class="gauge">
+    <div class="gk"><span class="gn">刻度 ②</span><span class="gt">拆多重 · 何时升级到重协作</span><span class="gd diff">开始分道</span></div>
+    <p style="margin:0 0 12px;color:var(--muted)">从「派个分身」到「组一支团队」是一次质变。什么时候值得升级？两家给模型的引导完全不同——但要留意：<b>CC 的组队本身还是灰度实验，对普通用户默认是关的</b>，所以这条引导目前只在实验开关背后生效。</p>
+    <div class="compare">
+      <div class="side cc">
+        <h4><span class="cc">Claude Code</span> · 提示词层鼓励主动组队 <span class="exp-note">灰度实验</span></h4>
+        <div class="artifact cc-b"><span class="lbl">CC · 拿不准就倾向组队 · 原文</span>Use this tool proactively whenever ... When in doubt about whether a task warrants a team, prefer spawning a team.</div>
+      </div>
+      <div class="side hm">
+        <h4><span class="hm">Hermes</span> · 不教择时，重协作是要人显式走进去的入口</h4>
+        <p style="color:var(--muted);font-size:14px;margin:0">提示词里<b>没有</b>「何时从 delegate 升级到 kanban」的择时语句；重协作靠 <code>hermes kanban</code> / profile 显式进入——是一条独立路径，不是模型临场就能走上去的。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="gauge">
+    <div class="gk"><span class="gn">刻度 ③</span><span class="gt">谁来做这个判断</span><span class="gd diff">分道</span></div>
+    <p style="margin:0 0 12px;color:var(--muted)">同样是「派一个分身」，「它该同步等结果、还是后台异步跑」这个决策放在哪一层——交给模型临场判断，还是写死进壳？</p>
+    <div class="artpair">
+      <div class="artifact cc-b"><span class="lbl">CC · 前后台交给模型质性判断 · 原文</span>Foreground (default) when you need the agent's results before you can proceed ... background when you have genuinely independent work to do in parallel.</div>
+      <div class="artifact hm-b"><span class="lbl">HM · 委派恒后台、模型不能选 · 原文</span>BOTH MODES RUN IN THE BACKGROUND ... Do NOT wait or poll
+<span class="hl">老 background 参数：DEPRECATED / IGNORED — you do not need to (and cannot) opt in or out.</span></div>
+    </div>
+    <p style="margin:14px 0 0;color:var(--muted)">别读成「CC 全交模型、Hermes 全固化」——两边都有反例：CC 也有硬规则（fork 模式下所有分身<b>恒后台</b>），Hermes 也给模型该拆 / 不该拆的清单。<b>准确的差异只落在「委派该不该后台异步」这一个具体决策上</b>：CC 默认前台＋模型选，Hermes 默认后台＋模型不能选——<b>一个信任模型临场决策，一个把决策沉淀成壳的默认。</b></p>
+  </div>
+
+  <h2><span class="num">04</span>派出去之后：分身带着什么代价干活</h2>
+  <p class="lead">分身派出去了，它带着几笔<b>代价</b>在外面干活：父信不信它自报的「我做完了」、它烧多少 token、它够不够得到你。第一笔最能照出两家的态度分野，也直接呼应轴一里两家对「自报」的整体态度——姿态正好相反。</p>
+  <div class="compare">
+    <div class="side cc">
+      <h4><span class="cc">Claude Code</span> · 默认信任，只有编排模式才另加核验层</h4>
+      <p style="color:var(--muted);font-size:15px;margin:0 0 4px">子分身的输出<b>默认就该信</b>——这是常规提示词里的原话、不受任何实验开关门控。<b>只有</b>显式开启的 coordinator 编排模式（灰度实验），才会额外插一层独立验证角色，并且强调验证要证明代码真能跑、不是盖章走过场。</p>
+      <div class="artifact cc-b"><span class="lbl">CC · 子输出默认可信（常规·非门控）· 原文</span>The agent's outputs should generally be trusted</div>
+      <div class="artifact cc-b"><span class="lbl">CC · 唯编排模式才加的核验纪律 · 原文</span>Verification means proving the code works, not confirming it exists. A verifier that rubber-stamps weak work undermines everything.</div>
+    </div>
+    <div class="side hm">
+      <h4><span class="hm">Hermes</span> · 默认不信，把「亲自复核」焊进委派工具本身</h4>
+      <p style="color:var(--muted);font-size:15px;margin:0 0 4px">子分身的摘要被当成<b>自报、不是已核实的事实</b>——这是委派工具的常态纪律，不是某个模式才开：要求子分身回一个可核验的凭据（URL / ID / 绝对路径 / HTTP 状态），父<b>自己去验</b>。</p>
+      <div class="artifact hm-b"><span class="lbl">HM · 摘要是自报、须亲验 · 原文</span>Subagent summaries are SELF-REPORTS, not verified facts ... require the subagent to return a verifiable handle (URL, ID, absolute path, HTTP status) and verify it yourself</div>
+    </div>
+  </div>
+  <div class="verdict"><b>为何相反：</b><span class="cc">CC</span> 把默认信任当基线、按需在编排模式加核验；<span class="hm">Hermes</span> 把默认怀疑写进委派常态。这正是轴一「对任何自报不全信」的态度在多 agent 场景里的延续——不是新立场，是同一立场的贯彻。</div>
+
+  <p style="margin:18px 0 0;color:var(--muted)"><b style="color:var(--text)">其余两笔代价，两家趋同。</b>　<b style="color:var(--text)">成本</b>：都对烧钱敏感、只是抓手不同——<span class="cc">CC</span> 优化缓存命中（fork 保持字节级相同的前缀、复用 prompt 缓存，还叮嘱别乱设模型），<span class="hm">Hermes</span> 优化上下文预算（按父剩余额度的一半再除以批量裁剪每条摘要，并发默认 3、超 10 个警告成本线性上涨）。　<b style="color:var(--text)">够不到用户</b>：两家的分身都<b>联系不上你</b>——CC 异步 agent 的工具白名单里没有「问用户」，Hermes 直接把 clarify 硬 block 掉，结论都必须由父转达。　<b style="color:var(--text)">隔离</b>（各自沙箱、防互踩）是每一级都能拧的旋钮，已在上一节阶梯的横切条里交代。</p>
+
+  <h2><span class="num">05</span>分身之间怎么协调：一张互发消息的同事网，还是一块只读写的共享状态板</h2>
+  <p class="lead">分身各自在外面干活，它们之间靠什么彼此协调？这是全章<b>形状差异最大</b>的一处。若不画出来，容易把两家的团队笼统当成「都是多 agent 协作」，看不出根本的形状差异。这张图的读法很直接：<b>看分身之间有没有直接连线</b>。<span class="exp-note">提醒</span>下文 CC 这套团队 / 编排协作属 §02 说的灰度实验，Hermes 的 kanban / swarm 是显式产品命令；这里只比协调的形状。</p>
 
   <div class="flow2">
     <div class="diagram">
-      <h3 style="color:var(--blue)">Claude Code：subagent / fork ＋ 团队（消息协作）</h3>
-      <p class="dlead">委派有两条：全新隔离子代理，或继承上下文的 fork；再往上是会互相发消息、你当队长的同事团队。</p>
+      <h3 style="color:var(--blue)">Claude Code · 互发消息的同事网</h3>
+      <p class="dlead">具名队友之间有双向消息箭头；人当队长，也在同一张网上。</p>
       <pre class="mermaid">
 flowchart TD
-    A[大任务] --> M1[委派 · subagent<br/>自包含简报 · 零共享上下文]
-    A --> M1b[委派 · fork<br/>继承 leader 全上下文 · 复用缓存]
-    A --> M2[团队 · teammates]
-    M1 --> P2[fresh 隔离 · 只回结论<br/>leader 可续跑 · 分身间不通信]
-    M1b --> P2
-    M2 --> Q2[具名队友 ＋ 邮箱互发消息 ＋ 共享看板<br/>双向 · 人当队长 · 可分屏旁观]
+  CAP["队长 / 协调者<br/>（人也在这张网上）"]
+  RES["研究队友"]
+  IMP["实现队友"]
+  VER["验证队友"]
+  BOARD["共享任务看板"]
+  CAP --> RES
+  CAP --> IMP
+  CAP --> VER
+  RES <-->|消息| IMP
+  IMP <-->|消息| VER
+  RES <-->|消息| VER
+  RES --- BOARD
+  IMP --- BOARD
+  VER --- BOARD
+  CAP --- BOARD
+  classDef msg stroke:#4b8bf5,stroke-width:3px,color:#e6edf3,fill:#12203a;
+  class RES,IMP,VER msg
+  linkStyle 3,4,5 stroke:#4b8bf5,stroke-width:2.6px
       </pre>
-      <div class="cap">委派两变体（subagent＝全新、fork＝继承上下文）；团队＝互相喊话的同事（更产品化）</div>
+      <div class="cap">高亮＝队友↔队友的消息箭头（蓝色粗线）。图注：具名队友 · 邮箱互发消息 · 共享看板并存。</div>
     </div>
-
     <div class="diagram">
-      <h3 style="color:var(--purple)">Hermes：委派（仅 fresh）＋ 看板/蜂群（共享状态）</h3>
-      <p class="dlead">委派只有 fresh 会话一种（无 fork 对应物）；团队层靠共享数据库状态协调独立实例，而非互相对话。</p>
+      <h3 style="color:var(--purple)">Hermes · 只读写的共享状态板</h3>
+      <p class="dlead">独立进程之间彼此没有连线；全部只连到中央那块持久状态板。</p>
       <pre class="mermaid">
 flowchart TD
-    A[大任务] --> M1[委派 · delegation<br/>只有 fresh 会话 · 无父历史]
-    A --> M2[看板/蜂群 · 需显式进入]
-    M1 --> P1[隔离 · 只回结论<br/>≈ CC 的 subagent · 但没有 fork]
-    M2 --> Q1[每个角色＝独立实例]
-    Q1 --> Q2[靠共享数据库状态协调<br/>依赖图 · 黑板评论 · 原子认领 · 不发消息]
+  W1["worker · 研究<br/>（独立进程）"]
+  W2["worker · 实现<br/>（独立进程）"]
+  W3["worker · 验证<br/>（独立进程）"]
+  BB["共享状态板 · kanban.db<br/>依赖图 · 黑板评论 · 原子认领"]
+  W1 <--> BB
+  W2 <--> BB
+  W3 <--> BB
+  classDef board stroke:#a371f7,stroke-width:3.4px,color:#e6edf3,fill:#241a3a;
+  class BB board
       </pre>
-      <div class="cap">委派≈CC subagent（趋同，但无 fork）；团队＝共享白板上的工人，不互相喊话</div>
+      <div class="cap">高亮＝中央共享状态板，且 worker 之间无任何连线（紫色粗描边）。图注：独立进程 · 不互发消息 · 只靠读写共享板协调。</div>
     </div>
   </div>
-  <p class="lead" style="margin-top:16px"><b>委派层</b>：全新隔离子代理两家趋同，但 <b>CC 多一条继承上下文的 fork（Hermes 无）</b>；<b>团队层</b>才是戏剧化分野——<b>CC 用消息（同事团队），Hermes 用共享状态（看板流水线）</b>，且两家都能盯/打断单个分身。</p>
 
-  <h2><span class="num">03</span>Hero 机制 · Claude Code 的「团队层」：一支互相发消息的同事团队</h2>
-  <p class="lead">这里拆的是 CC 的<b>团队层</b>——不是上面那两条即派即收的委派（subagent / fork），而是把分身编成一队会互相喊话、你当队长的同事。看这一整套「团队协作」的脚手架如何逐层长出来——它们没有一样是委派本身需要的，全是为了让分身能互相沟通、被你带着协作。</p>
-  <div class="stepper"><script type="application/json" class="captions">[
-  "<b>步骤 1</b> · 你把一个大项目交给 Claude。它不自己硬扛，而是当上「协调者/队长」，先建一支团队和一份全队共享的任务清单。",
-  "<b>步骤 2</b> · 往团队里拉入几个有名字、有角色的队友（研究员、实现者、验证者），各自从清单上认领任务。",
-  "<b>步骤 3</b> · 他们不是各干各的——通过一个「文件邮箱」互相点名发消息、求助、汇报；那份共享看板让谁都看得见谁在干什么、还剩什么、什么被卡住。",
-  "<b>步骤 4</b> · 你留在同一张消息网里：队友执行敏感动作时，权限确认会桥接给你拍板；你也随时能叫停一个跑偏的工人（注意：计划模式的审批是在队长侧自动通过的，不必你每次点头）。",
-  "<b>步骤 5</b> · 你还能实时旁观：每个队友被摆成一个终端分屏面板，你盯着它们干活，甚至直接往某个队友注入一句你敲的话。",
-  "<b>步骤 6</b> · 这一整套——具名队友、邮箱、看板、权限桥接、刹车、分屏旁观——没有一样是「模型自主并行」本身需要的；它们全指向同一个产品隐喻：把分身变成「一支你带的、会互相发消息的同事团队」。这就是 Claude Code 押的注。"
-]</script>
-    <div class="stage">
-      <!-- 6 帧，与 CAPTIONS 6 条一一对应 -->
-      <div class="frame on">
-        <div class="cols">
-          <div class="box blue"><div class="t">交给它一个大项目</div><code>它不自己硬扛<br>当上「协调者/队长」</code></div>
-          <div class="box purple"><div class="t">先立起两样东西</div><code>一支团队<br>一份全队共享的任务清单</code></div>
-        </div>
-      </div>
-      <div class="frame">
-        <div class="cols">
-          <div class="box blue"><div class="t">往团队里拉入队友</div><code>研究员 · 实现者 · 验证者<br>有名字 · 有角色</code></div>
-          <div class="box purple"><div class="t">各自认领</div><code>从共享清单上领任务</code></div>
-        </div>
-      </div>
-      <div class="frame">
-        <div class="cols">
-          <div class="box blue"><div class="t">他们不是各干各的</div><code>一个「文件邮箱」<br>互相点名 · 求助 · 汇报</code></div>
-          <div class="box purple"><div class="t">共享看板人人可见</div><code>谁在干什么 · 还剩什么 · 什么被卡住</code></div>
-        </div>
-      </div>
-      <div class="frame">
-        <div class="cols">
-          <div class="box blue"><div class="t">你留在同一张消息网里</div><code>队友执行敏感动作时<br>权限确认桥接给你拍板</code></div>
-          <div class="box purple"><div class="t">你握着刹车</div><code>随时叫停一个跑偏的工人</code></div>
-        </div>
-      </div>
-      <div class="frame">
-        <div class="cols">
-          <div class="box blue"><div class="t">你还能实时旁观</div><code>每个队友＝一个终端分屏面板<br>你盯着它们干活</code></div>
-          <div class="box purple"><div class="t">甚至直接介入</div><code>往某个队友注入一句你敲的话</code></div>
-        </div>
-      </div>
-      <div class="frame">
-        <div class="cols">
-          <div class="box blue"><div class="t">这一整套脚手架</div><code>具名队友 · 邮箱 · 看板<br>权限桥接 · 刹车 · 分屏旁观</code></div>
-          <div class="box purple"><div class="t">指向同一个产品隐喻</div><code>把分身变成「一支你带的、会互相发消息的同事团队」<br>这就是 Claude Code 押的注</code></div>
-        </div>
-      </div>
+  <div class="glossary">
+    <span class="gtitle">术语悬停可见解释：</span>
+    <span class="term" data-tip="CC 团队里队友互发消息的工具；不用它，队友就听不见你">SendMessage</span>
+    <span class="term" data-tip="CC 团队共享的一份任务清单，用 blocks / blockedBy 表达先后依赖">共享任务看板</span>
+    <span class="term" data-tip="Hermes 重协作的中央持久数据库，dispatcher 重启后仍在、可续跑">kanban.db</span>
+    <span class="term" data-tip="待依赖满足的任务自动升为 ready，构成上下游拓扑（workers→verifier→synthesizer）">依赖图</span>
+    <span class="term" data-tip="worker 把跨人的交接笔记，以结构化 JSON 评论写在根任务上——刻意做得低技术含量">黑板评论</span>
+    <span class="term" data-tip="多个 worker 抢同一件待办时，靠原子认领防止重复抢单">原子认领</span>
+  </div>
+
+  <div class="artpair">
+    <div class="artifact cc-b"><span class="lbl">CC · 队友靠消息才听得见彼此 · 原文</span>Your team cannot hear you if you do not use the SendMessage tool.</div>
+    <div class="artifact hm-b"><span class="lbl">HM · 协调靠写在根任务上的低技术黑板 · 原文</span>The shared blackboard is also deliberately low-tech: structured JSON comments on the root task.
+<span class="hl">Put cross-worker notes on the root task using structured comments.</span></div>
+  </div>
+
+  <p style="margin:18px 0 0;color:var(--muted)">遮住标题看形状：左图分身之间<b>有</b>箭头，右图分身之间<b>没有</b>（只各自连中央板）。这就是根本差异——<span class="cc">CC</span> 的团队层是「消息网＋共享看板」并存，分身彼此直接通话；<span class="hm">Hermes</span> 是「纯共享状态」，分身不互发消息、只把交接留在那块持久的板子上，让协作可以脱离某个具体的父自转。</p>
+  <p style="margin:12px 0 0;color:var(--muted)">但别把它读成「一方能盯、一方黑盒」：<b>可监督性上两家其实趋同</b>——都能旁观、暂停、打断单个分身。差异只在分身<b>彼此之间</b>怎么传话，不在你能不能看见它们。</p>
+
+  <h2><span class="num">06</span>干完怎么合回来：成果的回流、汇聚与落地</h2>
+  <p class="lead">分身跑完，成果怎么回流、谁把几份结果并成一个连贯输出、落到哪、还留不留？fan-out 是「怎么拆」，这一节是「怎么合」——而成果的去向，恰好照见上一节协调的形状。</p>
+
+  <p style="margin:0 0 6px;color:var(--muted)">最能照出分野的，是<b>谁来把几份结果并成一个连贯输出</b>——这一步两家的姿态截然不同：</p>
+  <div class="compare">
+    <div class="side cc">
+      <h4><span class="cc">Claude Code</span> · 父 / 协调者亲自综合，明令不可外包</h4>
+      <p style="color:var(--muted);font-size:15px;margin:0 0 4px">综合是父<b>最重要的活</b>，绝不把「理解」转交给另一个 worker——理解必须留在中心节点手里。</p>
+      <div class="artifact cc-b"><span class="lbl">CC · 综合不可外包 · 原文</span>Always synthesize — your most important job ... You never hand off understanding to another worker.</div>
     </div>
-    <div class="caption"></div>
-    <div class="ctrl">
-      <div class="dots"></div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span class="count"></span>
-        <button class="prev">‹ 上一步</button>
-        <button class="next">下一步 ›</button>
-      </div>
+    <div class="side hm">
+      <h4><span class="hm">Hermes</span> · 把「综合」做成拓扑里一张专职角色卡</h4>
+      <p style="color:var(--muted);font-size:15px;margin:0 0 4px">swarm 里 synthesis 不是父的专属职责，而是依赖链末端<b>一张独立的 synthesizer 卡</b>（前面还有 verifier 卡把关 pass / block）——综合被<b>外化成拓扑的一个角色</b>。</p>
+      <div class="artifact hm-b"><span class="lbl">HM · 综合是拓扑末端一张卡 · 原文</span>parallel specialist workers → verifier (todo until all workers done) → synthesizer (todo until verifier done)</div>
     </div>
   </div>
-  <div class="card">
-    <h3 style="color:var(--purple)">对照：Hermes 面对同一个大项目 —— 「一条看板流水线」</h3>
-    <p class="why">Hermes 的默认做法是——模型自己把活 fan-out 成几个分身并行跑、只把结论收回来；这些委派分身之间<b>刻意不互相对话</b>（不是一支会喊话的团队）。真要多角色协作，就<b>显式进入</b>看板 / 蜂群这条重路径：一张任务图，每个角色是一个完全独立的 Hermes 实例，它们不发消息给彼此，而是<b>各自读写一块共享数据库白板</b>（依赖图、黑板评论、原子认领）来协调——像流水线工人从看板上领活、交活。这里也<b>不是黑盒</b>：你能通过 TUI 的 /agents 面板旁观、暂停、打断单个分身。差别不在「能不能监督」，而在协调的隐喻——CC 是<b>互相喊话的同事</b>，Hermes 是<b>共享白板上的工人</b>；而且 CC 把「同事团队」这层做成了更完整、更产品化的一等体验，Hermes 的看板流水线则要你主动走进去才用。</p>
+
+  <div class="takeaways">
+    <div class="tk-row">
+      <div class="tk-lab">回流形式</div>
+      <div class="tk-body"><b style="color:var(--text)">两家趋同：都只回摘要、不回完整轨迹。</b><span class="cc">CC</span> 的 fork 强制固定格式（Scope / Result / Key files / Files changed / Issues）、上限 500 词；<span class="hm">Hermes</span> 回一个数组、每个任务一条 {status, summary}。</div>
+    </div>
+    <div class="tk-row">
+      <div class="tk-lab">落到哪</div>
+      <div class="tk-body"><span class="cc">CC</span> → 回<b>父的上下文</b>（一条通知消息）、worktree 改动落 git 分支、团队写共享 TaskList；<span class="hm">Hermes</span> 的 delegate 回父，但 kanban / swarm 沉进一块<b>共享的 kanban.db 黑板</b>（结构化 JSON 评论）。<b>去向恰好照见 §05 的形状：CC 回中心节点，HM 沉进可自转的共享板。</b></div>
+    </div>
+    <div class="tk-row">
+      <div class="tk-lab">还留不留</div>
+      <div class="tk-body"><span class="cc">CC</span> 全轨迹落盘、可 resume，worktree → 分支永久留痕；<span class="hm">Hermes</span> 的 delegate / async 成果<b>不持久</b>（退出即丢），但那块 kanban.db <b>持久沉淀</b>——dispatcher 重启后仍在、可续跑。</div>
+    </div>
   </div>
+  <p style="margin:18px 0 0;color:var(--muted)">合回来这一步再次印证了协调的形状：<span class="cc">CC</span> 一切回流到<b>父这个中心节点</b>、连综合都焊在父身上；<span class="hm">Hermes</span> 把成果沉进一块<b>可脱离父自转的共享状态板</b>、连综合都外化成拓扑里的一张卡。<b>本章到此为止，只描述形态、不评孰优</b>——也不碰「谁假设有人在场盯着」，那是综合②独占的总变量。</p>
 
-  <h2><span class="num">04</span>对比：七组对照看清分歧</h2>
-  <p class="lead">底座、协调隐喻、团队产品面、能否盯单个分身、人的拍板点、隔离强度、成本痕迹……同一个「多智能体」的目标，落成了「同事团队」与「看板流水线」两种形态。</p>
-
-  <div class="matrix">
-    <div class="mh"></div>
-    <div class="mh cc">Claude Code</div>
-    <div class="mh hm">Hermes</div>
-
-    <div class="dim">委派层 · 全新隔离子代理</div>
-    <div>subagent——自包含简报、<b>零共享上下文</b>、只回结论（leader 可续跑；分身间不通信）。</div>
-    <div>delegation——同样 fresh 会话、隔离、只回结论。<b>这一支两家趋同</b>。</div>
-
-    <div class="dim">委派层 · fork（继承上下文）</div>
-    <div><b>有</b>——不给角色即 fork：<b>继承 leader 全上下文 + 复用提示缓存</b>，给它指令而非重述背景。</div>
-    <div><b>无对应物</b>——委派被明确设计为"只有 fresh 会话、无父历史"。</div>
-
-    <div class="dim">团队层 · 多角色协调媒介（核心分野）</div>
-    <div><b>互相发消息的同事</b>——按名字点对点 / 广播的邮箱 + 收件箱轮询，再加一块共享看板。</div>
-    <div><b>共享白板上的工人</b>——独立实例彼此不发消息；看板/蜂群靠数据库状态、依赖图、黑板评论、原子认领协调。</div>
-
-    <div class="dim">「多代理团队」产品面</div>
-    <div><b>更完整、更产品化</b>——协调者 / 具名队友 / 角色 / 权限桥接 / 刹车，默认对内开、对外灰度放量。</div>
-    <div>有完整的看板 / 蜂群 / 角色花名册，但<b>要显式走进这条路径</b>，不是普通聊天的默认形态。</div>
-
-    <div class="dim">能否盯 / 打断单个分身</div>
-    <div><b>能</b>——tmux / iTerm 分屏旁观，可往队友注入消息。</div>
-    <div><b>也能</b>——TUI 的 /agents 面板可旁观、暂停、打断单个分身（两家在这点上一致）。</div>
-
-    <div class="dim">人的否决 / 拍板点</div>
-    <div>敏感工具 / 权限确认<b>桥接给人</b>拍板 ＋ 可叫停跑偏工人（计划审批则在 leader 侧自动通过，非必经人工）。</div>
-    <div>委派分身被剥夺「找用户确认」的能力、结论自报须父代理核验；看板/蜂群另设 human-blocker 卡点。</div>
-
-    <div class="dim">隔离强度</div>
-    <div>多档可选——独立 git 工作副本 / 远程沙箱 / 独立目录 / 同进程。</div>
-    <div>独立会话＋受限工具，但默认<b>共享同一容器工作目录</b>（除非注册隔离 override）；看板蜂群里每角色是完全独立实例（最强）。</div>
-
-    <div class="dim">成本敏感的痕迹</div>
-    <div>fork 刻意让子请求前缀字节相同，以共享整支「舰队」的提示缓存（托管产品对 token 成本敏感）。</div>
-    <div>委派按父代理剩余上下文余量，给多段结论做字数预算裁剪。</div>
-  </div>
-
-  <div class="verdict">
-    <b>为何不同（分野在团队层）：</b>先把委派层看清。<b>「全新隔离子代理」这一支两家趋同</b>——CC 的 subagent ≈ Hermes 的 delegation：fresh 会话、隔离、只回结论（leader 可用消息续跑单个分身，但分身之间不通信）；两家也都能旁观/暂停/打断单个分身。但<b>CC 在委派层还多一条 Hermes 没有的 fork</b>——不给角色时，分身继承 leader 的完整上下文与提示缓存，是"接着我的记忆去干"；Hermes 的委派被明确设计为只有 fresh 会话、无父历史。所以委派层并非完全趋同，只是"全新隔离"那一支趋同。<b>真正戏剧化的分野在团队层的协调媒介</b>：Claude Code 把分身编成一支<b>互相发消息的同事团队</b>——具名队友、按名字点对点/广播的邮箱、共享看板、协调者，人以队长身份接进同一张消息网；这套 live-team 产品面它做得<b>明显更完整、更产品化</b>（默认对内开、对外灰度放量）。Hermes 的团队层则走<b>看板/蜂群</b>——每个角色是独立实例，靠<b>共享数据库状态</b>（依赖图、黑板、原子认领）协调而非互相喊话，且要<b>显式走进去</b>才用。<b>一个合理的解读</b>（非代码可证的定论）：这跟第 04 篇的重心一脉相承——CC 是人持续在环的交互式工具，「一支你带的、会喊话的同事团队」是它的自然产品形态；Hermes 既要能无人值守（自托管），就更偏「模型自主拆活 + 一条摆好就能自己跑、靠共享状态协调的流水线」。<b>反直觉的收尾：</b>你以为把「代理蜂群」搞得最花哨的会是那个开源研究实验室——实际把「一支互相协作的 AI 同事团队」做得最完整、最产品化的，是那个<b>托管产品</b>；因为「一支你带的同事团队」正是持续在环的交互式工具最自然的隐喻。
-  </div>
-
-  <h2><span class="num">05</span>悬而未决 · 边界说明</h2>
+  <h2><span class="num">07</span>悬而未决 · 边界与降位说明</h2>
   <ul class="open">
-    <li><b>[CC 有三种分身，别混]</b> Claude Code 的多智能体<b>不止「团队」一种</b>，且委派本身分两条：<b>subagent</b>（自包含简报、零共享上下文的全新分身）与 <b>fork</b>（继承 leader 全上下文、复用缓存——和 subagent 正相反）；再加上双向协作的<b>团队</b>。本篇把「消息驱动的同事团队」这个特征限定在团队层；「零共享上下文」只对 subagent 成立、不适用于 fork。（早期稿曾把 fork 误并进 subagent，已更正。）</li>
-    <li><b>[委派非纯单向]</b> 即便普通 subagent，leader 也能用消息把它<b>续跑</b>（分身带完整上下文恢复、再回一条结果），coordinator 模式更把"续跑已完成/失败的 worker"当核心工作流。准确的说法是<b>「分身之间不互相发消息」</b>，而非"分身完全单向一次性"。</li>
-    <li><b>[两家都能监督]</b> 别读成「CC 能盯、Hermes 是黑盒」——两家都能旁观、暂停、打断单个分身（CC 靠分屏面板，Hermes 靠 TUI 的 /agents 面板）。分野在协调隐喻，不在能不能监督。</li>
-    <li><b>[不是「默认关闭」]</b> Hermes 的看板/蜂群不是被开关关掉的功能，其派发默认是开的；准确说法是「要显式走看板/蜂群这条路径才进入」，不是普通聊天的默认形态。</li>
-    <li><b>[CC 计划审批自动通过]</b> 桥接给人的是<b>敏感工具/权限确认</b>与<b>叫停</b>；「计划模式审批」在 leader 侧是自动通过的，并非每次必经人工。别把它读成「什么都要人批」。</li>
-    <li><b>[peer 未闭环]</b> CC 的「跨会话/跨机器 peer 通信」在当前代码树里提示词与地址已在、但若干实现文件缺失，未能闭环证明可用——本篇按<b>存疑</b>处理，不作为既成能力。</li>
-    <li><b>[隔离没那么强]</b> Hermes 委派分身默认<b>共享同一容器工作目录</b>（除非注册隔离 override），不是每个都独立沙箱；真正的强隔离在看板蜂群（每角色独立实例）。</li>
-    <li><b>[归因是解读]</b> 把差异归到「第 04 篇的在场重心」是一个<b>合理解读</b>，非代码可证的铁律——代码只能证明两套协调机制的形态差异。</li>
-    <li><b>[呼应轴一]</b> 「委派分身结论自报、父代理须自行核验」呼应轴一——Hermes 对<b>任何</b>模型（含自家）的「我做完了」都不全信。</li>
-    <li><b>[计划清单不在此篇]</b> 单个 agent 给<b>自己</b>列的「计划 / 待办清单」不是多智能体——它是一个 loop 内部的过程纪律，归<b>轴一·控制侧（第 01 篇 §04 第④维）</b>：那里对比了 CC「任务清单＋壳主动催」与 Hermes「待办工具刻意不挂钩子」。</li>
-    <li><b>[移动标靶 · 不评优劣]</b> CC 团队多在特性门后灰度放量，是移动标靶（本篇是 CC main / Hermes @daf4f1a7a 切片）；两种协调隐喻不评孰优，取决于你要「一支会喊话的同事团队」还是「一条靠共享状态协调的流水线」。</li>
+    <li><b>[CC 跨机 peer＝实现缺失]</b> CC 的提示词层与寻址解析层都写了「跨会话 / 跨机器给别的 agent 发消息」，但<b>传输层与发现层在当前源码树中缺失、全树搜不到</b>——不能端到端闭环。本章不把它当既成能力，凡提到均按「当前代码树未闭环」读。（另有一道跨机安全门：跨机器桥接消息需用户显式同意、且免疫绕过开关。）</li>
+    <li><b>[可监督性两家趋同]</b> 都能旁观 / 暂停 / 打断单个分身（CC 团队面板＋叫停，Hermes /agents 浮层＋远程调用叫停）。别写成「CC 能盯、Hermes 黑盒」。</li>
+    <li><b>[外来 agent 互通都非既成]</b> CC 跨会话仅走本地套接字 / 桥接（且见上，未闭环）；Hermes 有 ACP，但<b>仅出向</b>（配置驱动、把外部 provider 当子后端、对模型隐藏），不是通用的入向 agent 互通花名册。</li>
+    <li><b>[降位的支线机制]</b> 以下均非本章主线分岔，仅在此交代、不进重 / 中档：CC 的 observer / AgentSummary / 夜间 DreamTask；Hermes 的 MoA（<b>多模型集成、不是多 agent</b>，默认关）、batch_runner（离线批处理、非运行态）、同进程内 teammate；以及 CC 的远程沙箱档位（隔离升级的一档，非协作拓扑本身）。</li>
+    <li><b>[不评优劣 · 版本切片]</b> 本篇讲「拆开之后怎么协调」的<b>形态差异</b>，不评孰优——取决于你要的是围绕中心 agent 的团队，还是一台可自转的共享状态机。切片：CC 真源码树 / Hermes @8e734810d。</li>
   </ul>
 
   <div class="foot">
     代码溯源（不在正文展示，仅存档）：<br>
-    <b>Claude Code</b> — <code>src/tools/AgentTool/prompt.ts:202</code> · <code>src/tools/AgentTool/forkSubagent.ts:32</code>（子代理委派 / fork 共享缓存前缀）· <code>src/tools/AgentTool/prompt.ts:245</code> · <code>src/tools/AgentTool/AgentTool.tsx:70</code>（并行 fan-out / 后台）· <code>src/coordinator/coordinatorMode.ts:111</code>（协调者模式）· <code>src/tools/TeamCreateTool/prompt.ts:37</code> · <code>src/utils/agentSwarmsEnabled.ts:24</code>（团队 / 队友 · 灰度开关）· <code>src/utils/teammateMailbox.ts:1</code> · <code>src/hooks/useInboxPoller.ts:1</code>（跨代理邮箱 / 收件箱轮询）· <code>src/utils/peerAddress.ts:1</code> · <code>src/utils/concurrentSessions.ts:112</code>（跨会话 / 跨机器 peer · 当前树实现未闭环 · 存疑）· <code>src/tools/TaskCreateTool/prompt.ts:5</code>（共享任务看板）· <code>src/utils/swarm/leaderPermissionBridge.ts:1</code> · <code>src/coordinator/coordinatorMode.ts:234</code>（审批 / 权限桥接 / 叫停）· <code>src/tools/AgentTool/AgentTool.tsx:99</code> · <code>src/tasks/RemoteAgentTask/RemoteAgentTask.tsx:22</code>（隔离档位 · worktree / 远程）· <code>src/utils/swarm/backends/registry.ts:1</code> · <code>src/utils/swarm/teammateLayoutManager.ts:1</code>（分屏面板可视化）<br>
-    <b>Hermes</b> — <code>tools/delegate_tool.py:1</code> · <code>tools/delegate_tool.py:3181</code>（子代理委派 · 独立会话+受限工具+剥夺危险能力；默认共享容器工作目录）· <code>tools/delegate_tool.py:2552</code> · <code>tools/delegate_tool.py:1640</code>（并行 fan-out + 结论预算裁剪）· <code>tools/async_delegation.py:1</code> · <code>tools/async_delegation.py:154</code>（后台异步委派 · 结果回流）· <code>tools/delegate_tool.py:140</code> · <code>tools/delegate_tool.py:484</code>（嵌套编排者 + 深度预算）· <code>hermes_cli/kanban_swarm.py:1</code> · <code>hermes_cli/kanban.py:135</code> · <code>hermes_cli/profiles.py:1</code>（看板 / 蜂群 / 角色花名册 · 需显式进入的重路径）· <code>tui_gateway/server.py:7854</code>（TUI /agents 面板：旁观/暂停/打断单个分身）· <code>batch_runner.py:1</code>（离线批量并行）
+    <b>Claude Code</b>（真源码树 · 无版本哈希）— <code>src/tools/AgentTool/prompt.ts:83-88</code>（fork 判据 · 质性问题）· <code>:234-240</code>（何时不该拆）· <code>:202</code>（subagent 零共享）· <code>:257</code>（子结果对用户不可见须父转达）· <code>:264</code>（前台默认 · 前后台交模型）· <code>:91</code>（收到通知就信）· <code>:268</code>（子输出一般应被信任）· <code>:112</code>（Never delegate understanding）· <code>src/tools/AgentTool/forkSubagent.ts:24-27</code>（fork 恒后台）· <code>:32-39</code>（继承父上下文 · 输出不回污）· <code>:44-58</code>（字节级前缀 · 复用 prompt 缓存 · 别设 model）· <code>:171-198</code>（回流固定格式 ≤500 词）· <code>src/coordinator/coordinatorMode.ts:36-40</code>（编排模式 · feature flag＋env 双门控默认关）· <code>:220-227</code>（验证要证明能跑、非盖章）· <code>:255-259</code>（综合不可外包）· <code>src/tools/TeamCreateTool/prompt.ts:5-12</code>（鼓励主动组队）· <code>:107</code>（不用 SendMessage 队友听不见）· <code>src/tools/SendMessageTool/prompt.ts:6-20</code>（跨会话 / 跨机寻址提示词）· <code>SendMessageTool.ts:586-602</code>（跨机桥接需用户显式同意 · 免疫绕过）· <code>peerAddress.ts:8-21</code>（peer 寻址解析 · 传输 / 发现层全树缺失＝impl-missing）· <code>src/constants/tools.ts:55-71</code>（异步 agent 工具白名单无 AskUser / Agent）
+    <br>
+    <b>Hermes</b> @<code>8e734810d</code> — <code>tools/delegate_tool.py:3213</code>（只回摘要 · 中间结果不进窗口）· <code>:3211</code>（delegate_task fresh 无父历史）· <code>:3226-3229</code>（WHEN TO USE）· <code>:3231-3232</code>（何时不该拆）· <code>:3220-3225</code>（两模式恒后台 · 别等别轮询）· <code>:3405-3415</code>（background 参数 DEPRECATED / IGNORED）· <code>:3248-3254</code>（摘要是自报 · 须回可核验凭据并亲验）· <code>:3313</code>（orchestrator 角色 · 层深上限 1）· <code>:3443-3462</code>（ACP 仅出向 provider · 对模型隐藏）· <code>:45-54</code>（clarify / delegate 等被硬 block · 子够不到用户）· <code>run_agent.py:5664-5684</code>（硬编码 background＝非子分身）· <code>hermes_cli/profiles.py:1-9</code>（每 profile 完全独立实例目录）· <code>hermes_cli/toolsets.py:70-77</code>（kanban / swarm 显式进入）· <code>hermes_cli/kanban_swarm.py:1-15</code>（swarm 依赖链 workers→verifier→synthesizer）· <code>:47</code>（黑板刻意低技术 · 根任务结构化 JSON 评论）· <code>:66-74</code>（跨 worker 笔记写根任务 · 先读交接再干）· <code>:8-9,175-185</code>（verifier / synthesizer 专职角色卡）· <code>kanban.py:1-13 · kanban_decompose.py:5-11 · kanban_tools.py:68-77</code>（依赖满足升 ready · 原子认领 · kanban.db 持久）· <code>moa_config.py:1-21</code>（MoA 多模型 · 默认关 · 非多 agent）
   </div>
+
+</div>
 </div></section>
 <section class="chapter" id="ch-08"><div class="chwrap">
 
-  <div class="eyebrow"><span class="badge">第 8 篇 · 轴二 · Loop 之外</span><span class="tag">飞轮 · 谁拥有模型 · 训练闭环</span></div>
-  <h1>Loop 与自己</h1>
-  <p class="subtitle">越用越强，是真的还是宣传？</p>
-  <div class="chips">
-    <span class="chip">self-improving 是 README 第一句</span>
-    <span class="chip">改权重＝谁拥有模型说了算</span>
-    <span class="chip">CC 结构上没有训练代码</span>
-    <span class="chip">Hermes 有管线但不接你对话</span>
-    <span class="chip">两家都证不到权重级变强</span>
-  </div>
+<style class="bespoke">
+/* ============ 本章定制层（scoped 在 .slf 下，只引用全局 tokens）============ */
+/* 复用类在本仓按章重新 scoped（先例 ch01/02/03/05）：合订本 CSS 只从 _design-system 抽取，
+   .cc/.hm/.artifact 不在其中，故在此本章内声明，防合订本掉样式 */
+.slf .cc{color:var(--blue);font-weight:600}
+.slf .hm{color:var(--purple);font-weight:600}
+.slf .artifact{background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;margin:12px 0 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12.5px;line-height:1.65;color:var(--text);white-space:pre-wrap;overflow-x:auto}
+.slf .artifact .lbl{display:block;font-family:inherit;color:var(--faint);font-size:11px;
+  letter-spacing:.4px;margin-bottom:8px;text-transform:uppercase}
+.slf .artifact .hl{color:var(--amber)}
+.slf .decode{color:var(--faint);font-size:13px;line-height:1.6;margin:10px auto 0;max-width:760px;text-align:left}
+</style>
+<div class="slf">
+
+  <div class="eyebrow"><span class="badge">第 8 篇 · 轴二 · Loop 之外</span><span class="tag">控制回路 · 积累环闭合 · 评估环断口</span></div>
+  <h1>Loop 的 self-improvement：自改的手段都在，评估的环节缺席</h1>
+  <p class="subtitle">两家都能改写自己、都会把经验写回下一轮——却都没有一段代码，回头确认这次自改到底改对了没有。</p>
 
   <div class="thesis">
-    「越用越强」这句宣传，落到代码里要先分成两半：一半是<b>改壳</b>（把经验写成记忆文件，越用越懂你——这半是真的，另有『它如何适应你』一章专讲）；另一半是<b>改权重</b>——把你的使用变成<b>模型本身</b>更聪明。本章只钉后一半。而后一半能不能成立，答案又一次落在轴一那根<b>「谁拥有模型」</b>杠杆上：<b>CC 不拥有模型</b>，结构上根本没有「改权重」这条路，仓库里连一行训练代码都没有，只能把它<b>外包</b>给母公司的下一代基座；<b>Hermes 拥有模型</b>，仓库里真有一条产训练数据的管线——但那条管线<b>吃的是研究员策划好的数据集，根本不接你的真实对话</b>。所以一处<b>对称的诚实</b>必须先摆上桌：<b>两家仓库都证不到「你的使用让它权重级变强」</b>——CC 断在「没那个能力」，Hermes 断在「有能力却没把管子接到你身上」。「self-improving / 越用越强」这个飞轮，<b>两家都只证到了前半段，后半段都得标『意图，仓库外不可证』</b>。
+    <div class="thesis-tag">TL;DR</div>
+    <p>自我进化看起来像训练问题，其实是一个<b>控制回路</b>问题。两家都具备自改的手段（写记忆、造技能）和固化的机制（写盘、下次会话载入），<b>积累这半个回路是闭合的</b>——写入的经验，下一轮一定会被重新读到。</p>
+    <p>缺的是<b>评估</b>这一环：<b>没有任何代码在一次自改之后，去检验它是否真的改善了后续结果</b>。评估缺席，回路就无法真正闭合。差别只在这一环由谁来补：<span class="cc">CC</span> 把评估外包给厂商，<span class="hm">Hermes</span> 拥有模型、却尚未把评估构建出来。</p>
   </div>
 
-  <h2><span class="num">01</span>问题：跑过一千次任务，它自己变聪明了吗？</h2>
-  <p class="lead">用产品语言讲：「越用越强」有两种截然不同的含义——一种是它<b>记住了你</b>（改壳），一种是它这个<b>模型本身</b>变强了（改权重）。宣传把两者混着讲，本章只钉后一种。</p>
-  <div class="story">
-    它替你跑了一千次任务、被你纠正过几百回。<b>它这个模型因此变聪明了吗？</b>还是每一次调用的，都是同一个出厂时就定型、你怎么用都不会长进的它？<br><br>
-    这不是抬杠。Hermes 的 README <b>第一句</b>就把自己定义成「self-improving AI agent」「唯一自带学习闭环」，还专列一行讲「产轨迹、压缩，用来<b>训练下一代</b>工具调用模型」。这些词听起来像是「你越用，它这个脑子越聪明」。<b>所以问题很具体：这条从『你的使用』通到『更聪明的权重』的飞轮，落到两个仓库的代码里，到底哪一段是真接通的、哪一段只是意图？</b>
+  <h2><span class="num">00</span>问题：自我进化，进化的是「变好」还是「变大」</h2>
+  <div class="problem">
+    <p>「自我进化」是这类 agent 最诱人的一个承诺：用得越久，它越懂你、越能干，仿佛会自己成长。这个画面背后藏着一个更基本、也更少被追问的问题——<b>一个 agent 说自己在自我进化，它究竟在进化什么：是真的变得更好，还是只是攒下越来越多的东西？</b></p>
+    <p>两家确实都在不停地往磁盘写记忆、造技能，下次开机再读回来，积累这件事实打实地转着。但<b>攒得多，不等于变得好</b>。于是真正的问题落在一个很具体的地方：<b>有没有哪一段代码，在一次自改之后，回头确认过这次改动真的让后来的结果变好了？</b>这一章要挖的，正是被「自我进化」四个字盖住的这道缺口——它到底在闭合哪半个回路。</p>
   </div>
 
-  <h2><span class="num">02</span>核心机制：能不能改权重，是「谁拥有模型」说了算</h2>
-  <p class="lead">「改权重」不是一个功能开关，而是一个<b>结构性前提</b>：你得先<b>拥有</b>那个模型，才谈得上把使用喂回去重训它。这一条，把两家从起点就劈成两极。</p>
-  <div class="compare">
-    <div class="side cc">
-      <h4>Claude Code · 不拥有模型 → 这条路结构上就不存在</h4>
-      <p>CC 是托管产品，调用的是母公司的模型，<b>不拥有权重</b>。所以它仓库里<b>没有、也不可能有</b>任何训练代码。它能做的极限，是在你<b>逐次同意</b>下，把对话转录上传给母公司当训练素材（<b>仅抹掉密钥、绑你的账户，并非匿名</b>）——这是<b>单向投喂</b>，喂进去之后能不能变成更强的下一代基座、什么时候变，<b>全在仓库之外、CC 自己看不到也证不到</b>。改权重这件事，根本不在它手里。</p>
-    </div>
-    <div class="side hm">
-      <h4>Hermes · 拥有模型 → 握着杠杆，但没把管子接到你</h4>
-      <p>Hermes 出自自训模型的 Nous，<b>拥有权重</b>，仓库里<b>真备了一条产训练数据的管线</b>：批量跑任务、生成轨迹、压缩保训练信号。这根「把使用变权重」的杠杆，它确实握在手里。<b>但关键在于管线的进料口</b>：那条批量管线吃的是<b>一份研究员策划好的任务数据集</b>，跟你平时聊天攒下的<b>真实对话库之间，代码里没有任何自动接线</b>。它有能力闭合飞轮，却没把入口对准你。</p>
-    </div>
+  <h2><span class="num">01</span>先厘清一个误读：你的使用没有在重训它的权重</h2>
+  <p class="lead">Hermes 把自己写成「self-improving」，README 第一句就自称自带学习闭环。最容易产生的误读是「你每天跟它聊天，就在实时重训它的权重」——这个读法不成立，两家代码都不支持。</p>
+  <p><span class="hm">Hermes</span> 的训练管线吃的是研究员策划好的数据集；跑批量时把持久记忆整个关掉、也不自存轨迹，轨迹压缩是离线后处理——跟你的活会话之间，<b>没有一根自动接线</b>。</p>
+  <div class="artifact"><span class="lbl">Hermes · 批量训练管线：吃策划集、封住记忆、不自存轨迹</span>save_trajectories=False,   # We handle saving ourselves
+skip_memory=True,          # Don't use persistent memory in batch runs
+
+dataset_file (str): Path to the dataset JSONL file with 'prompt' field</div>
+  <p><span class="cc">Claude Code</span> 那边更干脆：仓库里 grep 不到一行训练代码。唯一沾边的是转录上传，要你逐次点头、非匿名、上传前脱敏——它自己的注释把这件事定义成「给厂商<b>攒训练数据</b>」，你的使用是喂给一条你看不见的外部流水线的原料，不是它自己能闭合的循环。</p>
+  <div class="artifact"><span class="lbl">Claude Code · 注释：这是为「训练数据收集」而做，别浪费标注员时间</span>For training-data collection, a model response conditioned on synthetic placeholders is tainted — fail the trajectory rather than waste labeler time on a turn that will be rejected at submission anyway.</div>
+  <p>但这个最窄读法从来不是有意思的问题。就算脑子冻结，Hermes 确实有一套<b>真的</b>学习回路——攒记忆、造技能、回灌下次会话，CC 也有。真正该问的是：<b>这套回路是让它变好，还是只让它变大？</b></p>
+
+  <h2><span class="num">02</span>自我进化是一个控制回路，两家只闭合了积累半环</h2>
+  <p class="lead">把「自我进化」摊开，它是一个有若干环节的控制回路：先定义什么算「变好」（目标 / fitness），再发现问题（误差信号），再动手自改，再<b>评估</b>这次自改是否奏效（信用分配），最后把有效的经验固化上线、进入下一轮。<b>本章只盯评估这一环</b>。</p>
+  <p>两家的自改与固化都真接通了——自动抽取记忆、后台造/改技能，直接写进磁盘，下次会话开场就载入进系统提示。积累这半个回路是实打实转起来的。（记忆怎么攒、怎么懂你，是第 5 篇的事；这里只看回路闭没闭。）</p>
+
+  <div class="diagram">
+    <pre class="mermaid">
+%%{init: {"flowchart":{"nodeSpacing":40,"rankSpacing":52},"themeVariables":{"fontSize":"15px"}}}%%
+flowchart LR
+  A[自改<br/>写记忆 · 造技能] --> P[固化<br/>写盘 · 下次会话载入]
+  P -->|载入后继续自改| A
+  P -. 本应经过：这次自改是否奏效 .-> E[效果评估 / 信用分配<br/>—— 运行时缺失 ——]
+  E -. 本应回流：据此修正下一次自改 .-> A
+  P --> GC[按闲置 / 整洁清理<br/>不衡量效果]
+  E -. CC .-> CX[评估在厂商<br/>发版前 eval + 线上 A/B<br/>闭合在会话之外]
+  E -. Hermes .-> HX[评估尚未构建<br/>无处可接]
+  classDef acc fill:#12241f,stroke:#3fb950,stroke-width:2px,color:#e6edf3;
+  classDef gc fill:#2a2418,stroke:#d9a441,stroke-width:1.8px,color:#d9a441;
+  classDef gap fill:#1a1f2b,stroke:#5a6675,stroke-width:1.6px,stroke-dasharray:5 4,color:#8b98a9;
+  classDef ccx fill:#161b26,stroke:#4b8bf5,stroke-width:1.4px,color:#8b98a9;
+  classDef hmx fill:#161b26,stroke:#a371f7,stroke-width:1.4px,color:#8b98a9;
+  class A,P acc;
+  class GC gc;
+  class E gap;
+  class CX ccx;
+  class HX hmx;
+    </pre>
+    <div class="cap">实线是<b>积累环</b>——自改与固化两步彼此闭合，两家都真的转起来。虚线是<b>评估环</b>：一次自改之后本应经过「效果评估」、再回流修正下一次自改，这个环节在运行时并不存在，回路因此没有真正闭合。琥珀那条只按年龄清理、不衡量效果。</div>
+    <p class="decode">术语：<b>信用分配</b>＝把后续结果的好坏归因到之前某次自改（这次自改是否奏效）；<b>效果评估</b>＝据此判断该保留、强化还是撤回。回路里的「载入 / 清理」是常识，不再解释。</p>
   </div>
-  <div class="verdict"><b>同一根杠杆的两极：</b>「改权重」这条路存不存在，先看<b>你拥不拥有模型</b>。CC 不拥有 → 路本身不存在，只能把权重级变强<b>外包</b>给母公司；Hermes 拥有 → 路存在、管线也真在，<b>但入口没接你的会话</b>。所以两家都到不了「你的使用让它权重级变强」这个终点——一个<b>没有能力</b>，一个<b>有能力没接线</b>。</div>
+  <p>这张图的读法很直接：实线的<b>积累环</b>是闭合的，而本应嵌在回路里的<b>评估环</b>（虚线）在运行时并不存在——一次自改之后，没有代码回头判断它是否奏效。下面两节，先证「评估环两家都缺」，再看「缺法为什么不同」。</p>
 
-  <h2><span class="num">03</span>深潜 · 把飞轮从中间切开：宣传怎么说，代码怎么接</h2>
-  <p class="lead">「self-improving」的飞轮，从「你的使用」到「更聪明的权重」，中间要走好几段。把它<b>从中间切开</b>看，你会发现两家的代码都只接通了<b>前半段</b>，后半段全是仓库外的意图。先看宣传原文，再看代码到底接到了哪里。</p>
+  <h2><span class="num">03</span>评估环缺席：没有代码检验「这次自改是否奏效」</h2>
+  <p class="lead">造了技能、写了记忆之后，没有任何一段代码回头衡量「这次自改是否改善了后续结果」。两家一样。最有力的证据不是我转述，是系统自己的话。</p>
+  <p><span class="hm">Hermes</span> 的技能整理器，在它自己的 prompt 里直接承认：用得多不多，根本证明不了一个技能有没有价值。而后台复盘的 prompt 又把「这一轮没写东西」定义成失败——它要的是<b>多写</b>，不是<b>变好</b>。</p>
+  <div class="artifact"><span class="lbl">Hermes · curator prompt：使用次数不是价值信号</span>'use=0' is not evidence a skill is valuable; it's absence of evidence either way.
+Corollary: 'use=0' is ALSO not a reason to PRUNE a skill.</div>
+  <div class="artifact"><span class="lbl">Hermes · background review prompt：没写东西 ＝ 错过机会（隐含目标是多写）</span>Be ACTIVE — most sessions produce at least one skill update, even if small. A pass that does nothing is a missed learning opportunity, not a neutral outcome.</div>
 
-  <div class="card">
-    <h3>宣传怎么说：Hermes README 把「学习闭环 + 训下一代」写进门面</h3>
-    <p class="why">README 用词很重：self-improving、closed learning loop、训练下一代模型。读者很容易把它理解成「我越用，这个模型越聪明」。</p>
-    <div class="artifact"><span class="lbl">README.md · self-improving 定位 + 学习闭环 + 训下一代</span>The self-improving AI agent built by Nous Research. It's the only agent with a built-in learning loop …
-
-（A closed learning loop）Agent-curated memory with periodic nudges. Autonomous skill creation after complex tasks. Skills self-improve during use …
-
-（Research-ready）Batch trajectory generation, trajectory compression for training the next generation of tool-calling models.</div>
-  </div>
-
-  <div class="compare">
-    <div class="side cc">
-      <h4>CC 代码怎么接：没有训练代码，只有匿名·单向·仓库外</h4>
-      <p>CC 仓库里搜不到任何训练管线。唯一跟「训练」沾边的，是一处<b>账户级的同意开关</b>和<b>逐次同意的转录上传</b>——上传的是<b>完整原始转录</b>，只抹掉密钥、绑你的账户，<b>并不匿名、也不剥代码/路径</b>（真正剥代码/路径的是另一套「遥测」，那是产品分析、不是训练素材）。连它自己的注释都把训练数据采集定义成「给母公司攒<b>训练数据</b>、别浪费<b>标注员</b>的时间」——也就是说，你的使用是<b>喂给一条你看不见的外部标注/训练流水线</b>的原料，而不是它自己能闭合的循环。</p>
-      <div class="artifact"><span class="lbl">src · 代码注释把上传定义成「攒训练数据、别浪费标注员时间」</span>For training-data collection, a model response conditioned on synthetic placeholders is tainted — fail the trajectory rather than waste labeler time on a turn that will be rejected at submission anyway.</div>
-    </div>
-    <div class="side hm">
-      <h4>Hermes 代码怎么接：管线吃策划集，轨迹导出默认关</h4>
-      <p>那条批量管线的入参明写着 <b>dataset_file</b>——一份预先备好的 JSONL 任务集，跟你的对话库两回事。而唯一能把<b>当前这次对话</b>存成轨迹的开关，代码里<b>默认是关的</b>、要手动开，存下来也只是<b>本地一个 JSONL 文件</b>，既不自动训练、也不流进那条批量管线。两条管子之间，<b>没有一行代码把它们接起来</b>。</p>
-      <div class="artifact"><span class="lbl">src · 批量管线吃策划数据集（--dataset_file）</span>python batch_runner.py --dataset_file=data.jsonl --batch_size=10 --run_name=my_run
-    dataset_file (str): Path to the dataset JSONL file with 'prompt' field</div>
-      <div class="artifact"><span class="lbl">src · 会话轨迹导出默认关、只写本地 JSONL</span>save_trajectories: bool = False
-    Save conversation trajectories to JSONL files (appends to trajectory_samples.jsonl). Defaults to False.</div>
-    </div>
-  </div>
-  <div class="verdict"><b>飞轮切开后剩下什么：</b>前半段两家都<b>可证</b>——CC 有匿名转录上传，Hermes 有产轨迹的管线。后半段「训进权重、下一代更聪明」两家都<b>证不到、都在仓库外</b>。而最锋利的一刀是给 Hermes 的：<b>就算它拥有模型、管线也真在，那条管线的进料口对准的是策划数据集、不是你的对话</b>——所以连「你每天用它 → 你的使用自动变成训练燃料」这句都不成立。别把「有产数据的能力」讲成「你正在把它喂强」。</div>
-
-  <h2><span class="num">04</span>对比 · 同一条飞轮，两处断点长得不一样</h2>
-  <p class="lead">把两家的飞轮并排画出来：<b>实线</b>那段是仓库内可证的，<b>虚线</b>那段是仓库外的意图。注意两图<b>断点</b>的颜色——<b>红＝CC 断在「结构上没能力」</b>（不拥有模型），<b>琥珀＝Hermes 断在「有能力却没接你」</b>（管线不吃你的对话）。3 秒就能看出：一堵硬墙 vs 一道没接线的缝。</p>
-
-  <div class="flow2">
-    <div class="diagram">
-      <h3 style="color:var(--blue)">Claude Code：断在「没能力」——不拥有模型</h3>
-      <p class="dlead">它能做的极限是匿名上传转录当素材；改权重这件事结构上不在它手里。</p>
-      <pre class="mermaid">
-flowchart TD
-  U[你的使用] --> A[逐次同意上传原始转录<br/>只抹密钥·绑账户·可证·仓库内]
-  A --> B[断点·没能力<br/>CC 不拥有模型<br/>仓库里没有一行训练代码]
-  B -. 交给母公司训下一代 .-> W[改权重·基座更强]
-  W --> G[[仓库外·不可证·意图]]
-  style B stroke:#f0603a,stroke-width:2.5px,fill:#2b1a17,color:#f0603a
-  style G stroke:#3fb950,color:#3fb950
-      </pre>
-      <div class="cap">红色断点＝一堵结构性的硬墙：路本身不存在</div>
-    </div>
-
-    <div class="diagram">
-      <h3 style="color:var(--purple)">Hermes：断在「没接你」——有管线不吃你对话</h3>
-      <p class="dlead">它拥有模型、真有产训练数据的管线；但管线的进料口是策划集，不是你。</p>
-      <pre class="mermaid">
-flowchart TD
-  D[研究员策划的任务集] --> T[批量产轨迹·压缩<br/>训练管线·可证·仓库内]
-  U[你的真实对话] --> B[断点·没接你<br/>管线吃策划集·不接会话库<br/>轨迹导出默认关·手动本地存]
-  B -. 两管无接线 .-x T
-  T -. 训进权重·下一代更强 .-> W[改权重]
-  W --> G[[仓库外·不可证·意图]]
-  style B stroke:#d9a441,stroke-width:2.5px,fill:#2a2418,color:#d9a441
-  style G stroke:#3fb950,color:#3fb950
-      </pre>
-      <div class="cap">琥珀断点＝一道没接线的缝：有路、有能力，就是没对准你</div>
-    </div>
-  </div>
-  <p class="lead" style="margin-top:16px">把两张图叠起来看：<b>虚线终点（改权重成功）两家都到不了</b>——但 CC 的断点<b>红</b>在「它没有那个能力」，Hermes 的断点<b>琥珀</b>在「它有能力、却没把管子接到你身上」。这就是「谁拥有模型」这根轴一杠杆，在「对自己·飞轮」这一侧的回归。</p>
-
-  <h2><span class="num">05</span>对比 · 三组对照，全落在「谁拥有模型」上</h2>
-  <p class="lead">改权重那半飞轮能不能自己闭合、什么现实逼出了这条路、以及「变强」到底发生在哪——同一个飞轮，答案又一次指向所有权。</p>
-
+  <p>把「量没量效用」逐条并排，三处都是同一个空缺：</p>
   <div class="matrix">
     <div class="mh"></div>
     <div class="mh cc">Claude Code</div>
     <div class="mh hm">Hermes</div>
 
-    <div class="dim">改权重<br>能不能自己闭合</div>
-    <div><b>结构上不能</b>（不拥有模型）：仓库里没有训练代码，只能经你逐次同意匿名上传转录 / 翻一个训练同意开关 → 外包给下一代基座（仓库外·不可证）。</div>
-    <div><b>握着杠杆</b>（拥有模型）：仓库里真有产训练数据的管线（可证）；但训进权重不可证，<b>且管线吃策划数据集、不接你的活会话</b>——闭环没在仓库里合上。</div>
+    <div class="dim">技能造完<br>之后回收吗</div>
+    <div>造技能向导造完只告诉你存哪了、怎么调用、可自行编辑——<b>无任何效果回收</b>。</div>
+    <div>技能遥测只记 use / view / patch 计数与时间戳，<b>没有成功 / 评分 / 有用性字段</b>——用得多但结果烂的技能，和好技能<b>分不出</b>。</div>
 
-    <div class="dim">什么现实<br>逼出这条路</div>
-    <div>不拥有模型的<b>托管产品</b> → 想「变强」只能把权重级进化<b>外包</b>给母公司；自己能掌控的只剩壳内记忆。</div>
-    <div>模型作者的<b>数据飞轮动机</b> ＋ 开源自托管 → 几乎必然把「self-improving / 训下一代」写进 README 门面、真备一条产数据的工程。</div>
+    <div class="dim">收到的反馈<br>信号去哪了</div>
+    <div>记忆调查确实弹 good/bad（20% 抽样），但信号<b>只落 analytics 事件</b>、不回流去选记忆。</div>
+    <div>复盘把「写成功」当成功——<b>写工具返回 OK 就算</b>，从不看下游结果好坏。</div>
 
-    <div class="dim">「变强」<br>到底发生在哪</div>
-    <div>在<b>仓库之外</b>：你的转录汇入母公司一条你看不见的标注 / 训练流水线，何时变成更强基座、你都无从查证。</div>
-    <div>在<b>离线批量作业里</b>：跑的是研究员策划集、不在你的会话现场；你日常怎么用，都不会自动流进那条管线。</div>
+    <div class="dim">谁在做减法<br>按什么轴</div>
+    <div>夜间整合的剪枝是<b>卫生式</b>：去重、消矛盾、删陈旧、把索引压到 200 行 25KB，没有效用维度。</div>
+    <div>技能整理器<b>纯按闲置时长</b>剪（30 天转 stale / 90 天归档）、按内容重叠合并（默认关），明令别拿使用数当价值。</div>
   </div>
+
+  <p>说清楚一件事，免得矫枉过正：这不是「两家都不做选择」。两家都在剪枝、都有选择压力——只是<b>选择的轴是整洁与新鲜，不是好坏</b>。也别把「回合内的质检」误当信用分配：CC 有专门的核验子代理、Hermes 会在会话内捕捉你的纠正和挫败线索，那测的是<b>单个任务里对不对</b>，不是「我这次跨任务的自改，让后来变好了没」。（写入侧那些护栏——审批闸、防漂移——都是负向、事故驱动的，属第 5 篇。）</p>
+
+  <h2><span class="num">04</span>评估环的两种缺法：一个外包给厂商，一个尚未构建</h2>
+  <p class="lead">自改的手段两家都有，分野出在评估：<b>运行时都没有评估，但缺的方式不同</b>。这是本章最关键的一处非对称，别当成两家一样。</p>
+  <div class="matrix">
+    <div class="mh"></div>
+    <div class="mh cc">Claude Code</div>
+    <div class="mh hm">Hermes</div>
+
+    <div class="dim">自改<br>由谁触发</div>
+    <div><b>留给人</b>：造技能向导只对内部员工开、且只能人手动调，模型不能自触发。</div>
+    <div><b>自动化</b>：后台复盘定期自动写记忆 / 技能（按回合节奏触发、非每回合），不等你开口。</div>
+
+    <div class="dim">运行时<br>有无评估</div>
+    <div><b>空</b>。</div>
+    <div><b>空</b>。</div>
+
+    <div class="dim">评估<br>实际在哪</div>
+    <div><b>在别处、而且是真的</b>：发版前的实验室 eval ＋ 厂商拿线上做 A/B ＋ 在场的人逐次当裁判。</div>
+    <div><b>哪都没接</b>：拥有模型、造了最自主的自改机器，改进回路却最不闭合。</div>
+  </div>
+  <p><span class="cc">CC</span> 把评估外包得很彻底，而且这套评估是真的。记忆相关的 prompt 里到处标着「Eval-validated」，某条排除规则旁边就注着一个 eval 案例从 0/2 跑到 3/3——说明这些措辞是在实验室里用离线跑分调出来的。但那些 eval 文件不随产品发货：它约束的是<b>发版前的 prompt</b>，不是<b>你会话里的运行时行为</b>。CC 的改进回路确实闭合——闭在厂商的发版节奏上，不在你的会话里。</p>
+  <div class="artifact"><span class="lbl">Claude Code · 记忆 prompt 旁注：某条规则由一次 eval 案例验证（0/2 → 3/3）</span>// H2: explicit-save gate. Eval-validated (memory-prompt-iteration case 3, 0/2 → 3/3): prevents "save this week's PR list" → activity-log noise.</div>
+  <p><span class="hm">Hermes</span> 恰恰相反：它拥有模型、造出了最自主的自改机制，改进回路却最不闭合——训练管线是真的，但吃的是策划集、不接活会话；运行时的评估，一处都没接上。</p>
 
   <div class="verdict">
-    <b>为何都到不了终点 —— 落在「谁拥有模型」这一根杠杆上：</b><br><br>
-    CC 把「变强」<b>结构上根本不可能</b>放进权重——它不拥有权重；它能做的只是把转录<b>外包</b>出去，进化的是母公司的下一代基座、不是它自己能闭合的循环。Hermes 因为自训模型，<b>握着</b>把使用变权重原料的杠杆，仓库里也真备了产训练数据的工程——<b>但那条管线的入口对准的是策划集、不是你的对话</b>。<br><br>
-    所以<b>关键的对称诚实</b>是：两家仓库都证不到「你的使用让它权重级变强」——CC 断在「没有那个能力」，Hermes 断在「有能力却没把管子接到你的会话」。准确的说法只能是：<b>权重那半飞轮，只有 Hermes 握着闭合它的结构性杠杆与意图，但谁都不能把它讲成『它正越用越强』。</b>那一半真的「越用越懂你」——发生在壳里、靠记忆，是另一章的事。
+    <p><b>为什么是这两种缺法？</b>往回接两根全书的主脊——</p>
+    <p>① 谁拥有模型（轴一）：<span class="cc">CC</span> 不拥有模型，改进注定是厂商的活，于是它<b>自觉把评估整个外包</b>（实验室 eval ＋ 厂商 A/B ＋ 在场的人）；<span class="hm">Hermes</span> 拥有模型、本可本地闭环，却<b>构建了自改、没构建评估</b>。</p>
+    <p>② 谁假设有人盯（综合②）：<span class="cc">CC</span> 假设人在场、厂商在后，就不需要自主评估——在场的人就是那个逐次校准的裁判；<span class="hm">Hermes</span> 常态无人值守，<b>最需要自主评估，偏偏最缺</b>——这是最刺眼的落差。</p>
   </div>
 
-  <h2><span class="num">06</span>悬而未决 · 防夸大红线（飞轮最容易被讲过头）</h2>
+  <p>回到「对它而言，『变好』由谁定义」这个实然问题——两条答案都立在机制上，不评谁更好：</p>
+  <p>对 <span class="cc">CC</span> 而言，变好是一件<b>托管产品</b>的事：由厂商按版本迭代、由在场的人当场校准；你只管用，改进由外部完成。</p>
+  <p>对 <span class="hm">Hermes</span> 而言，它更像一个<b>追求自立、但尚未具备自我评估的系统</b>：能自己修改自己，却还不能判断这些修改是否让自己变好。</p>
+
+  <h2><span class="num">05</span>悬而未决 · 可证边界与防夸大</h2>
   <ul class="open">
-    <li><b>[两家 · 飞轮从中间切开]</b> 「越用越强」这句话，落到两个仓库里都只证到<b>前半段</b>：CC 证到「经同意匿名上传了转录 / 翻了一个训练同意开关」，Hermes 证到「有一条产训练数据的管线」。<b>后半段「训进权重、下一代更聪明」两家都是意图、都发生在仓库之外</b>，必须对称地标「意图，非本仓库可证」——不许只给一家戴这顶帽子。</li>
-    <li><b>[Hermes · 最硬的一刀]</b> 就算 Hermes 拥有模型，它那条产训练数据的管线<b>吃的是研究员策划好的任务数据集、不是你的真实对话库</b>——两者在代码里没有自动接线。三条证据：① 批量管线的入参是 <code>dataset_file</code>（预备的 JSONL 任务集）；② 唯一能存当前对话的轨迹开关<b>默认关</b>、要手动开；③ 就算开了也只写<b>本地一个 JSONL 文件</b>，不流进那条批量管线。所以连「你每天用它 → 你的对话自动变成训练燃料」都<b>不成立</b>。别把「有产数据的能力」写成「你的使用正在把它喂强」。</li>
-    <li><b>[CC · 结构上就没有]</b> CC 仓库里<b>没有一行训练代码</b>，也不可能有——它不拥有模型。它的转录上传是<b>匿名、单向、逐次同意</b>的，喂进的是母公司一条它看不见的外部流水线。别把「上传转录」写成「它在自我训练」——素材汇给别人训下一代，跟「它自己变强」是两回事。</li>
-    <li><b>[不评优劣 · 时间切片]</b> 本篇只讲「飞轮的<b>形态</b>与<b>可证边界</b>」，不评两条路孰优——取决于你要的是能独立发货的托管产品，还是拥有模型、有潜力闭合飞轮的自托管栈。切片：CC main / Hermes @daf4f1a7a。</li>
-    <li><b>[另有一章 · 别把两半混讲]</b> 「越用越强」真正落地的那半——它<b>记住你、越用越懂你</b>（改壳·记忆）——不在本章，见「它如何适应你」一章。本章只钉<b>改权重</b>那半飞轮；两半别混成一句「它在自我进化」。</li>
+    <li><b>[训练那半 · 对称标]</b> 两家都只证到「攒了数据 / 攒了轨迹」；「训进权重、下一代更强」都在仓库外、都是意图。必须<b>对称</b>标「意图 · 非本仓可证」，不许只给一家戴帽。</li>
+    <li><b>[fitness 残余 · 仓外 / 未审]</b> 「仓内运行时无」是高置信，但边界要老实划：<span class="cc">CC</span> 的 eval / A/B 在厂商侧、不在仓库，另有一处 confidenceRating 服务只在注释里被提到、本快照无源文件；<span class="hm">Hermes</span> 接的外部记忆 provider（Honcho）内部打不打分未审，随附的 datagen 示例配置里还有个 held-out eval 旋钮（eval_every / eval_size）、但本仓未见实现、且属训练侧、不接活会话。这些都标「仓外 / 未审」——<b>不写「绝对没有」</b>，也别把未实现的示例抬成「它有 fitness」。</li>
+    <li><b>[状态纪律 · 别把门后当默认]</b> 记忆 / 技能自造多是门控或示例配置默认开：Hermes <b>代码里默认关、随附示例配置默认开</b>；CC 的 dream / 记忆调查都在门控后面。写审批闸默认关、curator 合并默认关。别把门后的实验讲成「默认就这么强」。</li>
+    <li><b>[回合内质检 ≠ 跨改进信用分配]</b> 会话内的对错核验，和「我这次自改跨任务变好了没」是两件事，别混。写入侧那些护栏都是负向 / 事故驱动的，细节见第 5 篇。</li>
+    <li><b>[不评优劣 · 时间切片]</b> 本篇只讲飞轮的<b>形态与可证边界</b>，不评两条路孰优。切片：CC 快照 2026-04-03 / Hermes @daf4f1a7a。</li>
   </ul>
 
   <div class="foot">
     代码溯源（不在正文展示，仅存档）：<br>
-    <b>Claude Code</b> — <code>src/utils/messages.ts:5128-5132</code>（代码注释：为「训练数据收集」而失败轨迹·别浪费标注员时间）· <code>src/utils/privacyLevel.ts:1-58</code>（遥测/非必要流量的隐私分级）· <code>src/services/api/grove.ts:120-148</code> · <code>src/components/grove/Grove.tsx:109-116</code>（唯一说「训练」的账户级同意开关）· <code>src/components/FeedbackSurvey/submitTranscriptShare.ts:44-58</code>（经同意·匿名上传转录）· <code>src/services/analytics/metadata.ts:44-57</code>（遥测只发结构化指标·类型守卫禁代码/路径）<br>
-    <b>Hermes</b> — <code>batch_runner.py:12-20</code>（批量管线用法·<code>--dataset_file</code>）· <code>batch_runner.py:534-670</code>（吃策划 JSONL 任务集·batch 加载）· <code>run_agent.py:426,5616,5635</code>（<code>save_trajectories</code> 默认 False·文档说明只写本地 JSONL）· <code>run_agent.py:1840-1853</code>（手动导出轨迹·默认关时直接 return）· <code>agent/trajectory.py:30-56</code>（append 到 <code>trajectory_samples.jsonl</code> 本地文件）· <code>trajectory_compressor.py:1-31</code>（轨迹压缩·保训练信号）· <code>README.md:19,26</code>（self-improving / closed learning loop / 训下一代 tool-calling 模型的意图原文）
+    <b>Claude Code</b> — <code>src/memdir/memoryTypes.ts:192-194</code>（记忆规则旁注 Eval-validated 0/2→3/3）· <code>src/memdir/memoryTypes.ts:206-213,228-239</code>（其余记忆规则标注离线 eval 假设检验）· <code>src/components/FeedbackSurvey/useMemorySurvey.tsx:76-88</code>（记忆调查 good/bad 只落 analytics、不回流选记忆）· <code>src/skills/bundled/skillify.ts:151-156,159,176-177</code>（skillify 造完只告知存处·仅内部员工+人触发，无效果回收）· <code>src/services/autoDream/consolidationPrompt.ts:53-60</code>（dream 剪枝是卫生式·无效用维度）· <code>src/services/extractMemories/extractMemories.ts:1-9,12,294</code>（loop 终点抽取记忆写盘·注释提及 confidenceRating 姊妹服务·本快照无源文件）· <code>src/utils/messages.ts:5127-5131</code>（注释：为训练数据收集失败轨迹·别浪费标注员时间）· <code>src/components/FeedbackSurvey/submitTranscriptShare.ts:23-27,72,87-89</code>（转录逐次同意·非匿名·上传前脱敏）<br>
+    <b>Hermes</b> — <code>README.md:19,26,30</code>（self-improving / closed learning loop / 训下一代的意图原文）· <code>agent/curator.py:433-443</code>（curator prompt：use=0 不是价值证据）· <code>agent/curator.py:58-59,64</code>（stale 30 天 / archive 90 天·合并默认关）· <code>agent/background_review.py:171-175</code>（复盘 prompt：没写东西＝错过机会）· <code>agent/background_review.py:1-13,5-8,180-195,196-231</code>（后台 fork 自主写盘·误差靠会话内文本线索·偏好序 patch 优先）· <code>tools/skill_usage.py:487-491,611-641,17-22</code>（技能遥测只记计数·无效用字段·recency 生命周期）· <code>agent/turn_finalizer.py:435-441</code> · <code>agent/turn_context.py:294-301</code>（复盘按回合间隔触发·非误差触发）· <code>tools/memory_tool.py:349-354,359-361</code>（add 跳过防漂移·仅拒完全重复）· <code>agent/agent_init.py:1201,1209</code> + <code>cli-config.yaml.example:514-517</code>（记忆代码默认关·示例配置默认开）· <code>batch_runner.py:331,345,534,1020</code>（skip_memory / save_trajectories 关 / dataset_file / success_rate 只是工具调用成功率）· <code>run_agent.py:426</code> · <code>agent/trajectory.py:41-53</code>（save_trajectories 默认 False·按 run 完成度分文件）· <code>trajectory_compressor.py:1-30</code>（离线轨迹压缩·保训练信号）· <code>tools/write_approval.py:11-25</code>（写审批闸默认关·因误存错误假设而加）· <code>datagen-config-examples/web_research.yaml:44-46</code>（示例配置含 held-out eval 旋钮 eval_every/eval_size·本仓未见实现·训练侧不接活会话）
   </div>
+</div>
 </div></section>
 <section class="chapter" id="ch-syn2"><div class="chwrap">
 <div class="syn2">

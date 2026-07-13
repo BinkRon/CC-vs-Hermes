@@ -1,0 +1,180 @@
+{
+  "slice": "claude-code-main（本地源码树，无 git tag/version 标识；package.json 无 version 字段。分析针对 src/ TypeScript 源码）",
+  "mechanisms": [
+    {
+      "name": "四档权限模式（default / acceptEdits / plan / bypassPermissions）",
+      "what": "harness 的总闸：default 每个动作弹窗问、acceptEdits 工作区内文件编辑免问、plan 只读不落地、bypassPermissions 全放行。模式决定动作要不要经过人。",
+      "default": "默认开（启动即 default 模式；bypassPermissions/acceptEdits/plan 需用户显式切或 CLI flag）",
+      "rows": [1, 2, 3, 4, 5],
+      "column": "事前",
+      "evidence": ["src/utils/permissions/permissions.ts:1262-1281", "src/utils/permissions/PermissionMode.ts"]
+    },
+    {
+      "name": "allow / deny / ask 权限规则",
+      "what": "用户/组织配置的规则表，按工具+内容匹配。deny 规则最高优先、在 bypass 之前返回（硬拒）；ask 规则强制弹窗；allow 规则免问。",
+      "default": "默认空（用户/policy 配置）；deny 规则 bypass 也压不过",
+      "rows": [1, 2, 3, 4, 5],
+      "column": "事前",
+      "evidence": ["src/utils/permissions/permissions.ts:1226-1250", "src/utils/permissions/pathValidation.ts:150-162"]
+    },
+    {
+      "name": "文件写入安全检查（bypass-immune 治理层护栏）",
+      "what": "对写/编辑落在敏感路径的动作强制弹窗，连全放行档也压不过：.git/.vscode/.idea/.claude 目录、shell 启动脚本、git/mcp 配置、可疑 Windows 路径、UNC 路径。护的是「治理层本身被改写」。",
+      "default": "默认开·bypass-immune（写路径命中即 ask，即便 bypassPermissions）",
+      "rows": [3],
+      "column": "事前",
+      "evidence": ["src/utils/permissions/permissions.ts:1252-1260", "src/utils/permissions/filesystem.ts:620-665", "src/utils/permissions/filesystem.ts:57-79", "src/utils/permissions/pathValidation.ts:178-196"],
+      "artifact": "DANGEROUS_FILES = ['.gitconfig','.gitmodules','.bashrc','.bash_profile','.zshrc','.zprofile','.profile','.ripgreprc','.mcp.json','.claude.json']；DANGEROUS_DIRECTORIES = ['.git','.vscode','.idea','.claude']。isClaudeConfigFilePath 另覆盖 .claude/settings*、commands/、agents/、skills/。注释（filesystem.ts:426-433）：'Files in .git directories or .gitconfig files (to prevent git-based data exfiltration and code execution)'、'.vscode ... (to prevent VS Code settings manipulation and potential code execution)'、'Shell configuration files (to prevent shell startup script manipulation)'"
+    },
+    {
+      "name": "Auto 模式安全分类器（LLM classifier 逐条判命令）",
+      "what": "auto 模式下，Bash 命令交给一个分类器模型判「安全否」，安全则免问、危险则拒并给理由。不是规则表，是模型判断。",
+      "default": "内部 feature-flag 门控（TRANSCRIPT_CLASSIFIER）+ GrowthBook tengu_auto_mode_config（enabled 字段默认 'disabled'）+ 熔断器 + 需模型支持 + 用户 opt-in",
+      "rows": [1, 2, 4, 5],
+      "column": "事前",
+      "evidence": ["src/utils/permissions/permissionSetup.ts:1283-1333", "src/utils/permissions/bashClassifier.ts", "src/utils/messages.ts:267-282"],
+      "artifact": "buildYoloRejectionMessage 里的规则提示（BASH_CLASSIFIER on 时）：'To allow this type of action in the future, the user can add a permission rule like Bash(prompt: <description of allowed action>) to their settings. At the end of your session, recommend what permission rules to add so you don't get blocked again.'",
+      "misfit": "auto 模式整套默认不可达（多重门控），不是常驻产品面。写章时勿当默认行为。"
+    },
+    {
+      "name": "over-broad allow 规则剥离（进 auto 模式时）",
+      "what": "进入 auto 模式时，把会「绕过分类器」的过宽 allow 规则（如 Bash(python:*)、Bash(*)、PowerShell(iex:*)）自动剥掉——因为放行任意解释器=放行任意代码。这是防用户自己把口子开太大。",
+      "default": "随 auto 模式（feature-flag 门控）；ant 内部额外剥离 gh/curl/wget/git/kubectl/aws/gcloud/gsutil 等（USER_TYPE==='ant' 才生效）",
+      "rows": [1, 2, 4, 5],
+      "column": "事前",
+      "evidence": ["src/utils/permissions/dangerousPatterns.ts:18-80", "src/utils/permissions/permissionSetup.ts:94-233", "src/utils/permissions/permissionSetup.ts:940-968"],
+      "misfit": "这不是「拦危险命令」，是「拦危险的授权规则」。dangerousPatterns.ts 名字易误读成命令黑名单，实为 allow-rule 前缀黑名单。"
+    },
+    {
+      "name": "Bash 危险删除路径拦截（软拦·可被 bypass 盖过）",
+      "what": "rm/rmdir 目标命中系统关键路径（/、~、/etc、/usr、C:\\、盘符直属子目录、结尾 /*）时弹窗，且「不能被 allow 规则自动放行」。但它返回 ask 而非 deny。",
+      "default": "默认开，但仅硬于 allow 规则/auto 模式；bypassPermissions 档可盖过（Bash 无 requiresUserInteraction，decisionReason 为 'other' 不触发 bypass-immune 分支）",
+      "rows": [1, 4],
+      "column": "事前",
+      "evidence": ["src/tools/BashTool/pathValidation.ts:70-108", "src/tools/BashTool/pathValidation.ts:728-737", "src/utils/permissions/pathValidation.ts:331-367", "src/utils/permissions/permissions.ts:1231-1281"],
+      "artifact": "'Dangerous rm operation detected: '<path>'\\n\\nThis command would remove a critical system directory. This requires explicit approval and cannot be auto-allowed by permission rules.'（注意措辞是 'cannot be auto-allowed by permission rules'，非 'cannot be bypassed'）"
+    },
+    {
+      "name": "PowerShell 危险删除硬拒（真·bypass-immune deny）",
+      "what": "Remove-Item 命中系统关键路径时返回 behavior:'deny'——在权限流第 1d 步、bypass 检查之前返回，任何档位都压不过。与 Bash 同类动作只是 ask 形成明显不对称。",
+      "default": "默认开·bypass-immune（deny 在 bypass 之前返回）",
+      "rows": [1, 4],
+      "column": "事前",
+      "evidence": ["src/tools/PowerShellTool/pathValidation.ts:848-857", "src/tools/PowerShellTool/pathValidation.ts:1724-1748", "src/utils/permissions/permissions.ts:1226-1228"],
+      "artifact": "\"Remove-Item on system path '<path>' is blocked. This path is protected from removal.\"",
+      "misfit": "反例（A2 可逆性倒挂）：同为「删系统关键路径」这一无恢复路径动作，PowerShell 硬拒、Bash 只软拦（bypass 可放行）。护栏强度取决于走哪个 shell，而非动作的可逆性——是护栏不一致，不是按可逆性设计。"
+    },
+    {
+      "name": "破坏性命令提示语（纯信息·不拦）",
+      "what": "命令匹配破坏性模式（git reset --hard、git push --force、git clean -f、rm -rf、DROP TABLE、kubectl delete、terraform destroy 等）时，在弹窗里附一句警示文案。仅供人看，不影响放行逻辑。",
+      "default": "默认开（但只是弹窗里的一行 Note，不改变 allow/deny 结果）",
+      "rows": [1, 5],
+      "column": "事前",
+      "evidence": ["src/tools/BashTool/destructiveCommandWarning.ts:1-102", "src/tools/PowerShellTool/destructiveCommandWarning.ts:12-89"],
+      "artifact": "文件头注释：'This is purely informational — it doesn't affect permission logic or auto-approval.' 示例：git push --force → 'Note: may overwrite remote history'；rm -rf → 'Note: may recursively force-remove files'；DROP/TRUNCATE → 'Note: may drop or truncate database objects'。",
+      "misfit": "看似 5 类风险的兜底，实为零强制力的 UI 提示。不能算防线，只算知情。"
+    },
+    {
+      "name": "被拒后的「绕行准则」训诫（附给模型）",
+      "what": "任何动作被拒，随拒绝消息给模型一段行为准则：允许用等价工具达成目标、但禁止恶意绕过拒绝意图、真需要就停下来向用户解释。属「事前·被拒后训诫」。",
+      "default": "默认开（拼进所有 AUTO_REJECT / DONT_ASK / classifier 拒绝消息）",
+      "rows": [1, 2, 3, 4, 5],
+      "column": "事前",
+      "evidence": ["src/utils/messages.ts:226-239", "src/utils/messages.ts:267-282"],
+      "artifact": "DENIAL_WORKAROUND_GUIDANCE 逐字：'IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomplish this goal, e.g. using head instead of cat. But you *should not* attempt to work around this denial in malicious ways, e.g. do not use your ability to run tests to execute non-test actions. You should only try to work around this restriction in reasonable ways that do not attempt to bypass the intent behind this denial. If you believe this capability is essential to complete the user's request, STOP and explain to the user what you were trying to do and why you need this permission. Let the user decide how to proceed.'"
+    },
+    {
+      "name": "命令沙箱（OS 级隔离：Linux bubblewrap / macOS seatbelt）",
+      "what": "开启后 Bash 命令跑在 OS 级沙箱里，限制文件写入到 allowlist 目录、拦截网络外发。属「事中·隔」。",
+      "default": "默认关（settings.sandbox.enabled ?? false）",
+      "rows": [1, 2, 5],
+      "column": "事中",
+      "evidence": ["src/utils/sandbox/sandbox-adapter.ts:459-466", "src/utils/sandbox/sandbox-adapter.ts:172-245", "src/setup.ts:406-437"],
+      "misfit": "默认关，故默认配置下事中隔离基本空白（见 empty_cells）。"
+    },
+    {
+      "name": "沙箱开启后 Bash 命令默认自动放行",
+      "what": "一旦开沙箱，被沙箱包住的 Bash 命令默认不再逐条弹窗（因为隔离已兜底）。即「开沙箱=用隔离换免问」。",
+      "default": "默认开（当沙箱开启时）：settings.sandbox.autoAllowBashIfSandboxed ?? true",
+      "rows": [1, 2],
+      "column": "事中",
+      "evidence": ["src/utils/sandbox/sandbox-adapter.ts:468-471", "src/utils/permissions/permissions.ts:1186-1206"]
+    },
+    {
+      "name": "沙箱网络外发闸（触网即问 / 仅限管控域名）",
+      "what": "沙箱内命令尝试对外联网时，弹窗问是否允许该 host；组织策略 allowManagedDomainsOnly 可收紧为「只放行 policy 里的域名」并去掉「不再询问」选项。",
+      "default": "随沙箱（默认关）；allowManagedDomainsOnly 为 policySettings opt-in",
+      "rows": [2, 5],
+      "column": "事中",
+      "evidence": ["src/utils/sandbox/sandbox-adapter.ts:743-760", "src/utils/sandbox/sandbox-adapter.ts:152-157", "src/components/permissions/SandboxPermissionRequest.tsx:60-124"],
+      "artifact": "弹窗：'Do you want to allow this connection?' / 'Host: <host>'；选项 'Yes' / 'Yes, and don't ask again for <host>'（managedDomainsOnly 时移除此项）/ 'No, and tell Claude what to do differently (esc)'。managedDomainsOnly 命中时日志：'[sandbox] Blocked network request to <host> (allowManagedDomainsOnly)'"
+    },
+    {
+      "name": "git worktree 隔离（多 agent / 隔离工作副本）",
+      "what": "harness 可把 agent 放进独立 git worktree 工作，改动落在隔离副本、不污染主工作区。属「事中·隔」。",
+      "default": "opt-in（EnterWorktree/ExitWorktree 工具，需触发）",
+      "rows": [1, 5],
+      "column": "事中",
+      "evidence": ["src/utils/worktree.ts", "src/tools/ExitWorktreeTool/ExitWorktreeTool.ts:116"]
+    },
+    {
+      "name": "★文件检查点 / 回退（fileCheckpointing / rewind）",
+      "what": "harness 自建的事后恢复：Claude 通过编辑工具改文件前，先按内容备份原文件；按用户消息（每一棒）建快照。可用 /rewind、消息选择器、或 --rewind-files <message-id> 把文件回滚到某一棒时的状态。这直接推翻「事后兜底整个外包给 git」。",
+      "default": "交互式默认开（getGlobalConfig().fileCheckpointingEnabled !== false，即除非显式设 false 或设 CLAUDE_CODE_DISABLE_FILE_CHECKPOINTING）；SDK/非交互默认关（需 CLAUDE_CODE_ENABLE_SDK_FILE_CHECKPOINTING opt-in）",
+      "rows": [1],
+      "column": "事后",
+      "evidence": ["src/utils/fileHistory.ts:63-135", "src/utils/fileHistory.ts:198-290", "src/tools/FileEditTool/FileEditTool.ts:435", "src/tools/FileWriteTool/FileWriteTool.ts:259", "src/tools/NotebookEditTool/NotebookEditTool.ts:312", "src/tools/BashTool/BashTool.tsx:391-394", "src/commands/rewind/index.js", "src/main.tsx (--rewind-files)", "src/tools/ConfigTool/supportedSettings.ts:69-73"],
+      "artifact": "config 描述：'Enable file checkpointing for code rewind'；CLI flag 描述：'Restore files to state at the specified user message and exit (requires --resume)'。MAX_SNAPSHOTS=100，备份存 Claude config home。",
+      "misfit": "★关键 scope 限制：只覆盖 Claude 经【结构化编辑工具】(FileEdit/FileWrite/NotebookEdit) + Bash 里被拦截模拟成 edit 的 `sed -i` 的改动。任意 Bash 破坏性命令（rm/mv/dd/> 重定向/git 操作）不进检查点、不可 rewind。也只管文件内容，不管会话状态/已推送 commit/已发外部动作。故对本章关注的灾难面（bash 删档、外泄、外部后果）rewind 兜不住——git/厂商仍是唯一后手。"
+    },
+    {
+      "name": "团队记忆写入 secret 拦截",
+      "what": "向「团队记忆」文件（会同步给全体仓库协作者）写入内容时，扫描检测密钥/凭证，命中则拒写。防经由共享记忆外泄。",
+      "default": "内部 feature-flag 门控（feature('TEAMMEM')，off 时 inert）",
+      "rows": [2, 5],
+      "column": "事前",
+      "evidence": ["src/services/teamMemorySync/teamMemSecretGuard.ts:15-44", "src/tools/FileWriteTool/FileWriteTool.ts:156-160"],
+      "artifact": "'Content contains potential secrets (<labels>) and cannot be written to team memory. Team memory is shared with all repository collaborators. Remove the sensitive content and try again.'",
+      "misfit": "唯一一处针对「机密外泄」的主动拦，但只管「写进团队记忆」这一条极窄外泄路径，且 feature-flag 门控。不是通用密钥防线。"
+    },
+    {
+      "name": "组织级 Bypass 档远程锁死（killswitch）",
+      "what": "组织/企业可远程关掉 bypassPermissions 全放行档：命中则运行时把上下文降级为「禁用 bypass」。也可本地 settings 关。",
+      "default": "远程 Statsig/GrowthBook 门控 tengu_disable_bypass_permissions_mode（默认不锁）+ 本地 settings.permissions.disableBypassPermissionsMode",
+      "rows": [1, 2, 3, 4, 5],
+      "column": "事前",
+      "evidence": ["src/utils/permissions/bypassPermissionsKillswitch.ts:19-47", "src/utils/permissions/permissionSetup.ts:1265-1267", "src/utils/permissions/permissionSetup.ts:1371-1382", "src/services/analytics/growthbook.ts:851-890"]
+    },
+    {
+      "name": "harness 内部目录静默可写（工作区之外）",
+      "what": "若干 harness 自用目录即使在工作区外也免问直接写：会话计划文件、scratchpad、agent memory、跨会话记忆(memdir)、模板 job 目录、.claude/launch.json 预览配置。走的是安全检查之前的白名单分支。",
+      "default": "混合：plan/scratchpad/agent-memory 默认开；job 目录 feature('TEMPLATES') 门控；memdir 默认路径开、有 override 时不开",
+      "rows": [1, 3],
+      "column": "事前",
+      "evidence": ["src/utils/permissions/filesystem.ts:1479-1605", "src/utils/permissions/pathValidation.ts:164-176"],
+      "misfit": "这是「放行」不是「防线」——但因它绕过工作区边界和 .claude 安全检查静默落盘，是 caveat：harness 自身可在工作区外无弹窗写文件。"
+    }
+  ],
+  "questions": {
+    "A1a": "Bypass 也压不过的硬例外集合（permissions.ts:1226-1260，均在 bypass 检查 2a 之前返回）：①工具 checkPermissions 返回 behavior:'deny'（含用户/policy 的 deny 规则、PowerShell 危险删除 deny）；②requiresUserInteraction()+ask 的工具（仅 AskUserQuestion、ExitPlanMode，非安全相关）；③用户显式配置的 content-specific ask 规则（如 Bash(npm publish:*)，decisionReason 为 rule+ruleBehavior:'ask'）；④safetyCheck 类型的 ask（写/编辑命中 .git/.vscode/.idea/.claude、shell 启动脚本、DANGEROUS_FILES、可疑 Windows 路径、UNC）。除 .git/.claude/shell/IDE 外，DANGEROUS_FILES 还含 .gitconfig/.gitmodules/.bash_profile/.zshrc/.zprofile/.profile/.ripgreprc/.mcp.json/.claude.json；isClaudeConfigFilePath 还含 .claude 下 settings/commands/agents/skills；另有可疑 Windows 路径(NTFS ADS、8.3 短名、长路径前缀、DOS 设备名、结尾点/空格)与 UNC 路径。WHY 有代码注释：filesystem.ts:426-433 明写 .git=防 git 数据外泄+代码执行、.vscode=防设置篡改致代码执行、shell 配置=防启动脚本篡改；permissions.ts:1252-1253 注释 'Safety checks ... are bypass-immune — they must prompt even in bypassPermissions mode'。",
+    "A1b": "无条件硬拒（任何档位/规则压不过、返回 behavior:'deny'）的命令集合极小，实测只有：PowerShell 危险删除路径 dangerousRemovalDeny（Remove-Item 命中 /、~、盘符根、系统直属子目录等，pathValidation.ts:848）——它在权限流 1d 步先于 bypass 返回。★关键更正：Bash 侧同类的 checkDangerousRemovalPaths（rm/rmdir 命中危险路径）返回的是 behavior:'ask' 而非 deny，其硬度仅到「不能被 allow 规则/auto 模式自动放行」，bypassPermissions 档仍可放行（Bash 无 requiresUserInteraction、decisionReason 为 'other'，不落入任何 bypass-immune 分支）。全仓未发现任何硬编码危险命令黑名单（grep 过 rm -rf/mkfs/dd if=/fork bomb/shutdown/deltree 等，均无匹配）。destructiveCommandWarning（含 rm -rf、force push、DROP TABLE、kubectl delete、terraform destroy）是纯信息提示、'doesn't affect permission logic'。故旧稿「PowerShell 删除才硬拒」核实为【属实】：确实只有 PowerShell 删除是真硬拒，Bash 删除是可被 bypass 盖过的软拦。",
+    "A2": "软拦 vs 硬拒逐条按可逆性：【硬拒】PowerShell 删系统关键路径=无恢复路径（合理）。【软拦(ask，可被 bypass 盖)】Bash 删系统关键路径=无恢复路径（护栏偏弱，见反例）；写敏感配置/shell脚本(safetyCheck，bypass-immune)=代价大但多可恢复；破坏性命令警示=零强制力。反例1（不可逆却软拦）：Bash `rm -rf /`/`rm -rf ~` 无恢复路径，却只 ask 且 bypass 可放行——比 PowerShell 同动作弱。反例2（可逆却 bypass-immune 硬拦）：写 .vscode/.idea 设置、.gitconfig（多为可 git 恢复或代价可控）却是连 bypass 都压不过的强护栏。可见 CC 的护栏强度不是按「动作可逆性」排布，而是按「是否触及治理层/走哪个工具/走哪个 shell」——治理层护得最死（对），但灾难性不可逆删除因走 Bash 反而护得松（不对称）。",
+    "B1a": "★生死题答案：CC 有 harness 自建的事后恢复机制——文件检查点/回退（fileCheckpointing / rewind），故『事后兜底整个外包给 git』这一论断【不成立·需改写】。存在性：有（src/utils/fileHistory.ts，/rewind 命令，--rewind-files CLI flag，config 项 'Enable file checkpointing for code rewind'）。默认：交互式【默认开】(fileCheckpointingEnabled !== false，除非显式关或设 CLAUDE_CODE_DISABLE_FILE_CHECKPOINTING)；SDK/非交互【默认关】(需 CLAUDE_CODE_ENABLE_SDK_FILE_CHECKPOINTING opt-in)。覆盖：文件内容，编辑前备份原文件，快照按【用户消息(每一棒)】组织，上限 100 快照，存 Claude config home。恢复粒度：回滚到某条用户消息时的文件状态（/rewind 交互选、或 --rewind-files <message-id> 命令行）。★scope 限制(务必写进章)：只兜 Claude 经【结构化编辑工具】(FileEdit/FileWrite/NotebookEdit)+Bash 中被解析为模拟 edit 的 `sed -i` 的改动；任意 Bash 破坏性命令(rm/mv/dd/重定向/git)不入检查点、rewind 兜不住；只管文件、不管会话状态/已推送 commit/已发外部动作。→ 正确表述：CC 对『自己结构化编辑的文件』有原生回退，但对『bash 层的删除/外部/外泄类灾难』事后仍只能靠 git/厂商，harness 回退不覆盖这些。",
+    "B2a": "分开陈述：(1)git push --force / 发布类 / 对外发送——【无代码闸】。全仓无对 force push、npm publish 的专门权限拦截；仅 destructiveCommandWarning 里 force push 有一句信息提示('Note: may overwrite remote history')，不影响放行。npm publish 只能靠用户自配 Bash(npm publish:*) 的 ask/deny 规则（permissions.ts:1238-1250 举的正是这个例子，说明它是『用户可配』而非『内置』）。(2)系统提示里『不主动 commit/push』是【提示纪律(prompt 语句)】，非闸门：见 BashTool/prompt.ts:89 'NEVER run destructive git commands (push --force, reset --hard...) unless the user explicitly requests'——这是写给模型的话，代码不强制。另有 gitOperationTracking.ts 仅做事后【检测/记录】push、PR create 发生过，也不拦。产品含义：force push/publish 在 CC 里靠『模型自律+可选用户规则』，无 harness 硬闸。",
+    "B2c": "MCP / 外部工具【不过】环境侧的路径/命令安全闸。MCPTool.checkPermissions 直接返回 behavior:'passthrough'(MCPTool.ts:59-62)，只受 allow/deny/ask 规则(step 1a)与模式治理，完全不经过危险删除检查、文件安全检查、沙箱。即：环境侧那套兜底(危险 rm、.git 保护、沙箱)只覆盖 Bash/PowerShell/文件编辑工具，【不覆盖 MCP 及其它自定义工具】。一个 MCP 工具写文件/联网/删数据，绕开全部环境侧护栏，只被『工具名级别的规则+模式弹窗』挡。bypass 档或一条 allow 规则即可让 MCP 无检查运行。工具面覆盖不全本身是发现。",
+    "B3a": "(1)子进程 env【不清洗】：Bash provider(bashProvider.ts:218-253)只往子进程 env【新增】少数键(TMUX 隔离、沙箱 TMPDIR、/env 会话变量)，未剥离任何父进程密钥——spawn 的命令继承完整 process.env(含 ANTHROPIC_API_KEY、AWS/GCP 凭证等)。无 secret scrub/redact。(2)读密钥类文件【无专门拦】：~/.ssh、.env、云凭证没有专属只读黑名单；它们只受通用工作区边界约束(工作区外的读走 isPathAllowed 读路径→无 allow 规则则 ask，pathValidation.ts:141-263)。即『工作区外文件读要问一次』，但非因它是密钥、而是因它在工作区外；工作区内的 .env/凭证可直接读。唯一 secret 专项是 teamMemSecretGuard(写团队记忆时扫密钥拒写，feature('TEAMMEM') 门控)——只堵『写进共享记忆』一条外泄路径，不管读、不管子进程 env。",
+    "B3c": "网络外发闸只在沙箱内成立(旧线索重验属实)：沙箱开启时，沙箱运行时拦截沙箱内命令的对外连接并弹窗问 host(sandbox-adapter.ts:743-760、SandboxPermissionRequest.tsx)，policy allowManagedDomainsOnly 可收紧为只放行管控域名。但★沙箱默认关，故【默认配置下无网络边界拦截】：沙箱外的 curl/wget/任意联网命令走普通 Bash 权限路径(分类器+规则+模式)——是基于命令内容判断，不是基于『这是一次外发』的网络边界闸。故 CC 对『读+传』组合外泄没有网络侧硬闸，默认仅靠逐命令弹窗/分类器。",
+    "D3": "属实且范围略扩：harness 自用目录在工作区外仍静默免问可写(checkEditableInternalPath，走安全检查之前的白名单)。清单：会话计划文件、scratchpad、agent memory、跨会话记忆 memdir(默认路径，设 override 时改走正常流程)、模板 job 目录(feature('TEMPLATES') 门控)、.claude/launch.json 预览配置。证据 filesystem.ts:1479-1605。产品含义 caveat 仍成立：harness 能在工作区外、且绕过 .claude 安全检查，无弹窗落盘自己的暂存/计划/记忆文件。",
+    "D4": "属实。命令沙箱默认关(settings.sandbox.enabled ?? false，sandbox-adapter.ts:463)；一旦开沙箱，被沙箱包住的 Bash 命令默认自动放行不逐条问(autoAllowBashIfSandboxed ?? true，sandbox-adapter.ts:468-471，配合 permissions.ts:1186-1206 的 canSandboxAutoAllow 跳过 ask 规则)。即『开沙箱=拿 OS 级隔离换掉逐命令弹窗』的设计仍在。",
+    "D5": "逐字原文(DENIAL_WORKAROUND_GUIDANCE, src/utils/messages.ts:226-232)：'IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomplish this goal, e.g. using head instead of cat. But you *should not* attempt to work around this denial in malicious ways, e.g. do not use your ability to run tests to execute non-test actions. You should only try to work around this restriction in reasonable ways that do not attempt to bypass the intent behind this denial. If you believe this capability is essential to complete the user's request, STOP and explain to the user what you were trying to do and why you need this permission. Let the user decide how to proceed.'",
+    "D7": "属实·仍在。组织/企业可远程锁死 Bypass 全放行档：远程 Statsig/GrowthBook 门控 tengu_disable_bypass_permissions_mode，命中则运行时把权限上下文降级为禁用 bypass(bypassPermissionsKillswitch.ts:19-47 → shouldDisableBypassPermissions → checkSecurityRestrictionGate, growthbook.ts:851-890)。另有本地 settings.permissions.disableBypassPermissionsMode='disable' 等价开关(permissionSetup.ts:1371-1382)。是『fallback-to-blocking』语义的组织级总闸。"
+  },
+  "empty_cells": "矩阵在 CC 侧近乎空白的格：(1)事中列整体——命令沙箱与网络闸默认关，worktree 隔离为 opt-in，故【默认配置下事中隔离基本空白】，隔离不是默认防线而是可选加固。(2)机密外泄(行2)×事前——除 feature-flag 门控的 teamMemSecretGuard(只堵写团队记忆)外，无通用密钥读拦、无子进程 env 清洗，事前几乎空白。(3)机器失能(行4)×全部——无对关机/fork炸弹/删根的专门机制；删根仅落入危险删除路径(Bash 软拦/PS 硬拒)，关机/fork炸弹无任何专项拦，事中事后全空。(4)外部世界后果(行5)×事后——无对『已推送/已发送/已发布』的撤回机制，事后全靠外部。(5)事后列整体——除文件检查点(仅覆盖结构化编辑)外无 harness 级回滚，资产毁损中的 bash 删除、及行2/4/5 的事后兜底全外包给 git/厂商。",
+  "not_found": [
+    "硬编码危险命令黑名单：grep 过 rm -rf/remove-item/mkfs/dd if=/fork bomb/forkbomb/shutdown/deltree/:(){ 于 src/**/*.ts(x)——未发现任何『命中即无条件拒』的命令模式表；危险性判断要么靠 LLM 分类器(auto 模式)、要么靠危险删除【路径】检查(仅 rm/rmdir/Remove-Item)、要么靠纯信息 warning。",
+    "子进程 env 清洗/密钥剥离：查过 bashProvider.ts/powershellProvider.ts 的 env 构造、grep scrub/redact/sanitizeEnv/filterEnv/stripEnv——未发现对 spawn 子进程做密钥剥离，子进程继承完整 process.env。",
+    "密钥文件专属只读黑名单(~/.ssh、id_rsa、.aws、云凭证)：grep 过 .ssh/id_rsa/.aws/credentials/secret 于 src——未发现『这些文件永不可读』的专门拦；仅通用工作区边界约束读。",
+    "fork 炸弹 / 关机 / 格盘 的专项拦截：未发现(grep shutdown/fork bomb/mkfs)。",
+    "对 git push --force / npm publish 的专门权限闸：未发现代码级拦截，仅 prompt 纪律 + destructiveCommandWarning 信息提示 + 可选用户规则 + gitOperationTracking 事后记录。"
+  ]
+}

@@ -19,8 +19,6 @@
 body{margin:0;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
 .wrap{max-width:var(--maxw);margin:0 auto;padding:48px 28px 120px}
 a{color:var(--blue);text-decoration:none}
-
-/* 顶部：badge + 标题 + 副标题 + chips */
 .eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:10px}
 .badge{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
   padding:4px 10px;font-size:13px;font-weight:700;letter-spacing:.5px;color:var(--muted)}
@@ -31,27 +29,23 @@ h1{font-size:34px;margin:.1em 0 .15em;letter-spacing:-.5px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
 .chip{background:var(--surface);border:1px solid var(--border);border-radius:999px;
   padding:4px 12px;font-size:13px;color:var(--muted)}
-
-/* 一句话核心洞察：渐变高亮框 */
 .thesis{background:linear-gradient(120deg,#12241f,#0f1e2e);border:1px solid #234;
   border-left:4px solid var(--green);border-radius:12px;padding:18px 22px;margin:28px 0 8px;font-size:17px}
 .thesis b{color:var(--green)}
-
-/* 分节标题 */
+.thesis .thesis-tag{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--green);margin-bottom:9px;opacity:.92}
+.problem{max-width:var(--col,100%);background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:22px 26px;margin:16px 0 0}
+.problem p{font-size:16px;line-height:1.82;color:var(--text);margin:0 0 14px}
+.problem p:last-child{margin-bottom:0}
+.problem p b{font-weight:650}
 h2{font-size:24px;margin:52px 0 6px;padding-top:18px;border-top:1px solid var(--border)}
 h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 .lead{color:var(--muted);margin:0 0 20px}
-
-/* 卡片 / 机制块 */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin:16px 0}
 .card h3{margin:0 0 6px;font-size:18px}
 .card .why{color:var(--muted);font-size:15px}
-
-/* “问题”叙事块（讲具体故事） */
 .story{background:var(--surface);border:1px dashed var(--border);border-radius:12px;padding:18px 22px;color:var(--muted)}
 .story b{color:var(--text)}
-
-/* Mermaid 图容器 */
 .diagram{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;
   padding:20px;margin:16px 0;overflow:auto;text-align:center}
 .diagram .cap{color:var(--faint);font-size:13px;margin-top:10px}
@@ -61,8 +55,6 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 .flow2 .diagram .dlead{color:var(--muted);font-size:13px;margin:0 0 12px;text-align:left}
 .flow2 .diagram .mermaid{flex:1;display:flex;align-items:center;justify-content:center;min-width:0}
 @media(max-width:820px){.flow2{grid-template-columns:1fr}}
-
-/* 分步演示 stepper（Hero 机制用） */
 .stepper{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:0;overflow:hidden;margin:18px 0}
 .stepper .stage{padding:26px;min-height:200px;display:flex;align-items:center;justify-content:center}
 .stepper .frame{display:none;width:100%}
@@ -78,13 +70,10 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 .dots{display:flex;gap:6px}.dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
 .dot.on{background:var(--blue)}
 .count{color:var(--muted);font-size:13px}
-/* stepper 里的盒子（画“进程/上下文”这类概念用） */
 .box{border:1.5px solid var(--border);border-radius:10px;padding:16px;background:var(--bg)}
 .box.blue{border-color:var(--blue)} .box.purple{border-color:var(--purple)} .box.dim{opacity:.4}
 .box .t{font-weight:700;margin-bottom:8px} .box code{color:var(--muted);font-size:13px}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-
-/* 对比块（产品逻辑，非技术表格） */
 .compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
 .compare .side{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
 .compare .side.cc{border-top:3px solid var(--blue)}
@@ -93,24 +82,11 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 .verdict{background:var(--surface-2);border:1px solid var(--border);border-left:4px solid var(--amber);
   border-radius:10px;padding:14px 20px;margin-top:12px}
 .verdict b{color:var(--amber)}
-
-/* 真实制品：原文引用块（贴逐字文案/清单，等宽、可横滑） */
-.artifact{background:var(--bg);border:1px solid var(--border);border-radius:10px;
-  padding:14px 16px;margin:10px 0 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  font-size:12.5px;line-height:1.6;color:var(--text);white-space:pre-wrap;overflow-x:auto}
-.artifact .lbl{display:block;font-family:inherit;color:var(--faint);font-size:11px;
-  letter-spacing:.4px;margin-bottom:8px;text-transform:uppercase}
-
-/* 悬而未决 */
 .open li{color:var(--muted);margin:6px 0}
 .foot{margin-top:60px;color:var(--faint);font-size:13px;border-top:1px solid var(--border);padding-top:16px}
-
-/* 维度小标题 + 单组对比（综合篇用） */
 .matrix-row{margin:22px 0}
 .matrix-row h3{font-size:16px;margin:0 0 10px;color:var(--text)}
 .matrix-row h3 .n{color:var(--faint);font-weight:400;margin-right:8px}
-
-/* 多维对照矩阵：左列维度名 + CC/Hermes 两列答案（多行对比时比堆叠 .compare 更好扫读） */
 .matrix{display:grid;grid-template-columns:minmax(112px,1fr) 1.9fr 1.9fr;
   gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:16px 0}
 .matrix>div{background:var(--surface);padding:11px 15px;font-size:14px;line-height:1.55}
@@ -119,183 +95,268 @@ h2 .num{color:var(--faint);font-weight:400;margin-right:10px}
 .matrix .dim{background:var(--surface-2);font-weight:600;color:var(--text)}
 @media(max-width:760px){.matrix{grid-template-columns:1fr 1.4fr 1.4fr;font-size:12.5px}}
 </style>
+<style class="bespoke">
+/* ============ 本章定制层（scoped 在 .ch06e 下，只引用全局 tokens）============ */
+/* 复用类在本仓按章重新 scoped（先例 ch01/02/03/05）：合订本 CSS 只从 _design-system 抽取，
+   .cc/.hm/.artifact 不在其中，故在此本章内声明，防合订本掉样式 */
+.ch06e .cc{color:var(--blue);font-weight:600}
+.ch06e .hm{color:var(--purple);font-weight:600}
+.ch06e .artifact{background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;margin:10px 0 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12.5px;line-height:1.6;color:var(--text);white-space:pre-wrap;overflow-x:auto}
+.ch06e .artifact .lbl{display:block;font-family:inherit;color:var(--faint);font-size:11px;
+  letter-spacing:.4px;margin-bottom:8px;text-transform:uppercase}
+.ch06e .artifact .hl{color:var(--amber)}
+
+/* 中档：覆盖网（损失类型 × 防线阶段 · 标默认形态的填充度） */
+.ch06e .cov{display:grid;grid-template-columns:minmax(116px,1.05fr) 1fr 1fr 1fr;gap:1px;
+  background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:16px 0 8px}
+.ch06e .cov>div{background:var(--surface);padding:12px 13px}
+.ch06e .cov .ch{background:var(--surface-2);font-weight:700;font-size:12.5px;color:var(--muted);text-align:center;align-self:stretch}
+.ch06e .cov .rl{background:var(--surface-2);font-weight:600;color:var(--text);font-size:13px;line-height:1.4}
+.ch06e .cov .rl small{display:block;color:var(--faint);font-weight:400;font-size:11px;margin-top:3px}
+.ch06e .cov .cell{display:flex;flex-direction:column;gap:8px}
+.ch06e .cov .mrow{display:flex;align-items:center;gap:8px;font-size:12px}
+.ch06e .cov .mrow .who{width:20px;font-weight:700;flex:none}
+.ch06e .cov .mrow.c .who{color:var(--blue)} .ch06e .cov .mrow.h .who{color:var(--purple)}
+.ch06e .cov .mk{width:12px;height:12px;border-radius:50%;flex:none;border:1.5px solid currentColor}
+.ch06e .cov .mrow.c .mk{color:var(--blue)} .ch06e .cov .mrow.h .mk{color:var(--purple)}
+.ch06e .cov .mk.full{background:currentColor}
+.ch06e .cov .mk.half{background:linear-gradient(90deg,currentColor 50%,transparent 50%)}
+.ch06e .cov .mk.none{background:transparent;opacity:.55}
+.ch06e .cov .mrow .lab{color:var(--muted)}
+.ch06e .cov .na{color:var(--faint);font-size:12px}
+.ch06e .covleg{display:flex;flex-wrap:wrap;gap:16px;color:var(--faint);font-size:12px;margin:0 0 6px}
+.ch06e .covleg span{display:inline-flex;align-items:center;gap:6px}
+.ch06e .covleg i{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--muted);color:var(--muted);flex:none}
+.ch06e .covleg i.full{background:currentColor} .ch06e .covleg i.half{background:linear-gradient(90deg,currentColor 50%,transparent 50%)} .ch06e .covleg i.none{opacity:.55}
+
+/* 重档：两套判据的对角交叉 */
+.ch06e .diag{display:grid;grid-template-columns:minmax(132px,.95fr) 1fr 1fr;gap:12px;margin:20px 0 8px}
+.ch06e .diag .dh{font-weight:700;font-size:15px;padding:4px 6px 2px;text-align:center;align-self:end}
+.ch06e .diag .dh.cc{color:var(--blue)} .ch06e .diag .dh.hm{color:var(--purple)}
+.ch06e .diag .da{display:flex;flex-direction:column;justify-content:center;background:var(--surface-2);
+  border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.ch06e .diag .da .at{font-weight:700;color:var(--text);font-size:13.5px}
+.ch06e .diag .da .as{color:var(--faint);font-size:11.5px;margin-top:3px;line-height:1.4}
+.ch06e .diag .dc{border:1px solid var(--border);border-radius:10px;padding:13px 15px;font-size:13px;line-height:1.5;background:var(--surface)}
+.ch06e .diag .dc.hard{border-color:color-mix(in srgb,var(--amber) 62%,transparent);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--amber) 26%,transparent) inset}
+.ch06e .diag .dc.soft{opacity:.7}
+.ch06e .diag .dc .vt{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.3px;border-radius:5px;padding:1px 7px;margin-bottom:7px}
+.ch06e .diag .dc.hard .vt{color:var(--amber);border:1px solid color-mix(in srgb,var(--amber) 45%,transparent)}
+.ch06e .diag .dc.soft .vt{color:var(--faint);border:1px solid var(--border)}
+.ch06e .diag .dc b{color:var(--text)}
+@media(max-width:720px){.ch06e .diag{grid-template-columns:1fr}.ch06e .diag .dh{display:none}}
+</style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap"><div class="ch06e">
 
-  <div class="eyebrow"><span class="badge">第 6 篇 · 轴二 · Loop 之外</span><span class="tag">环境 · 危险动作治理</span></div>
-  <h1>Loop 与环境</h1>
-  <p class="subtitle">动作落在哪、闯了祸算谁的？</p>
-  <div class="chips">
-    <span class="chip">动作落在你的真机器</span>
-    <span class="chip">隔离与审批是替代关系</span>
-    <span class="chip">连全放行都压不过的地板</span>
-    <span class="chip">为在场设计 vs 为缺席设计</span>
-    <span class="chip">都说「别全信我」·但指向不同出口</span>
-  </div>
+  <div class="eyebrow"><span class="badge">第 6 篇 · 轴二 · Loop 之外</span><span class="tag">Loop 与环境 · 危险动作治理</span></div>
+  <h1>Loop 与环境：护栏趋同，分野在闯了祸算谁的</h1>
+  <p class="subtitle">兜底不是把模型变聪明，是让「模型不聪明」也不致命。</p>
 
   <div class="thesis">
-    两家在「环境」这一侧<b>惊人地趋同</b>：默认都不把 agent 关进沙箱，动作直接落在你的真机器上；都把「隔离」和「审批」当成互相<b>替代</b>的两条路——关进笼子，就不再逐条问你；都设了一道<b>连「全速前进」都压不过的绝对地板</b>；被拒时都塞给模型一段几乎同款的「别耍花招绕过」训诫。真正的分野不在机制清单，而在这套治理<b>默认假设谁在场、谁为闯的祸兜底</b>：CC 厂商托管、跑在你自己装满真实资产的机器上，把治理做成一个你亲手转的<b>信任旋钮</b>，原生假设终端前坐着能随时点确认的人；Hermes 开源自托管、常以一个被消息叫醒的常驻实体跑着、常常无人值守，必须为「没人点确认」定义确定行为，并因为没有厂商兜底、闯祸是你自担，索性白纸黑字告诉你「进程内没有任何东西算隔离，唯一的边界是操作系统」。一句话：<b>CC 为「有人盯着」设计，Hermes 为「没人盯着」设计。</b>
+    <div class="thesis-tag">TL;DR</div>
+    环境这一侧，两家的安全机制<b>惊人地趋同</b>：默认都不把 agent 关进沙箱、动作直落你的真机器；都把「隔离」和「审批」当成互相<b>替代</b>的两条路；都留了一道<b>连全放行都压不过的绝对地板</b>；被拒后都塞给模型一段几乎同款的「别耍花招绕过」训诫。趋同不奇怪——兜底要防的是「模型会犯错」这个普适前提，下限设计的答案空间本就窄。<br><br>
+    真正的分野不在机制清单，在两处。一是那道绝对地板，两家用了<b>两套不同的判据</b>：Hermes 按「物理可不可挽回」护住<b>机器</b>，CC 按「动没动管着 agent 的那层」护住<b>规则本身</b>——同一个 <code>rm -rf /</code>，一家无条件拦、一家全放行可放行。二是<b>闯了祸算谁的</b>，以及由此逼出的<b>对能力边界多诚实</b>：越是没有厂商接盘、越是你自担，它越被迫在文档里亲口写明「这不是墙」。
   </div>
 
-  <h2><span class="num">01</span>问题：它动的是你的真机器，闯的祸是真祸</h2>
-  <p class="lead">这一侧不谈玩具环境。agent 编辑的是你磁盘上真实的文件、跑的是你机器上真实的命令行——没有中间的模拟层。</p>
-  <div class="story">
-    agent 干着干着，要 <b>删一整个目录</b>、要 <b>强推覆盖远端分支</b>、要 <b>读你家目录里的密钥文件</b>、要 <b>连一个陌生外网地址</b>。这些动作不是在沙盒里排练，是真的落在你的电脑上——删了就是真删了，推了就是真推了。<br><br>
-    于是每个 agent 都要回答同一组问题：这些动作<b>落在哪个范围</b>能碰、哪个范围碰不得？危险的那些，<b>谁来拦、怎么拦</b>？真闯了祸，<b>谁来兜底</b>？而最关键的一层追问是——拦的时候，<b>假设有没有人在旁边点头</b>？
+  <h2><span class="num">00</span>问题：动作落在真机器上，兜底该怎么分类</h2>
+  <div class="problem">
+    <p>agent 干着干着，要删一整个目录、要强推覆盖远端分支、要读你家目录里的密钥、要连一个陌生外网地址。这些动作不在沙盒里排练，是真的落在你的电脑上——删了就是真删了，推了就是真推了。</p>
+    <p>于是壳（harness）要替它兜底，而且兜的不是「让模型想得更清楚」（那是 Loop 之内的事）——是<b>万一模型没想清楚、做错了，能不能保住下限、让代价可控</b>。这就带出这一章的问题：<b>如果损失真的发生，会是哪几类？针对每一类，壳把防线摆在了哪一步——动手前拦、动手时隔、还是闯了祸之后兜？</b></p>
+    <p>把两家的答案摆进一张「损失类型 × 防线阶段」的网里，会撞见一件反直觉的事：<b>两家填格的方式几乎一样，真正的差别只藏在少数几个格子里。</b></p>
   </div>
 
-  <h2><span class="num">02</span>核心机制：一个动作要执行，先过哪条闸门链</h2>
-  <p class="lead">左蓝 Claude Code、右紫 Hermes。两条链形状不同，但都在末端撞上同一个岔口——<b>有没有人在场</b>。注意两处「短路」：CC 里「碰到自我治理层」连全放行都拦；Hermes 里「后端是隔离容器」直接跳过整条审批链。</p>
+  <h2><span class="num">01</span>先看总览：防线几乎全压在「事前」，隔离与兜底大多是空格</h2>
+  <p class="lead">纵轴是「祸可能落在哪」的五类损失，横轴是防线站在祸的哪一步。每格标两家<b>默认形态</b>下的填充度——不是「有没有这个功能」，是「开箱默认拦不拦」。</p>
 
-  <div class="flow2">
-    <div class="diagram">
-      <h3 style="color:var(--blue)">Claude Code：按「落点」圈信任 + 一道自我治理硬核</h3>
-      <p class="dlead">地基是「按物理距离圈信任」——工作区之外一律先问，圈内的写默认也要问、切到 Accept edits 档才免问；再叠一圈连全放行都拦的硬核。</p>
-      <pre class="mermaid">
-flowchart TD
-  A[一个动作要执行] --> B{明令禁止规则?}
-  B -->|是| X[拒绝]
-  B -->|否| D{落点在工作区圈内?}
-  D -->|圈外| Q[弹窗问人]
-  D -->|圈内| E{碰到自我治理层?<br/>.git · .claude 配置 · shell 启动}
-  E -->|是 · 连全放行也拦| Q
-  E -->|否| F{当前信任档放行?}
-  F -->|Bypass / 规则允许| G[执行]
-  F -->|默认| H{有人在场?}
-  H -->|有| Q
-  H -->|无 · 已预授权| G
-  H -->|无 · 没预授权| X2[默认拒绝]
-      </pre>
-      <div class="cap">危险按「落在哪」判；末端撞上「有没有人在场」</div>
+  <div class="covleg">
+    <span><i class="full"></i>默认就在的防线</span>
+    <span><i class="half"></i>有，但默认关／门控／只覆盖一部分</span>
+    <span><i class="none"></i>近乎空白</span>
+  </div>
+  <div class="cov">
+    <div class="ch"></div>
+    <div class="ch">事前 · 拦</div>
+    <div class="ch">事中 · 隔</div>
+    <div class="ch">事后 · 兜</div>
+
+    <div class="rl">资产毁损<small>文件／数据没了</small></div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk full"></span><span class="lab">弹窗＋删除拦</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk full"></span><span class="lab">硬地板＋软清单</span></div>
+    </div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">沙箱默认关</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">默认裸主机</span></div>
+    </div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk half"></span><span class="lab">rewind·仅编辑</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">rollback 默认关</span></div>
     </div>
 
-    <div class="diagram">
-      <h3 style="color:var(--purple)">Hermes：按「命令内容」判 + 一道谁都压不过的地板</h3>
-      <p class="dlead">默认落在裸主机上；危险按命令内容模式判；真隔离一旦到位，整条审批链短路。</p>
-      <pre class="mermaid">
-flowchart TD
-  A[一条命令要执行] --> Z{执行后端是隔离容器?}
-  Z -->|是 · 碰不到宿主机| G[执行<br/>审批层整个跳过]
-  Z -->|否 / 挂了宿主机路径| B{硬禁地板?<br/>删根 · 格盘 · 关机 · 炸弹}
-  B -->|是 · 连 yolo 也压不过| X[无条件拒]
-  B -->|否| C{开了 yolo / 关了审批?}
-  C -->|是| G
-  C -->|否| D{命中永久白名单?}
-  D -->|是| G
-  D -->|否| E{危险模式 / 内容扫描命中?}
-  E -->|否| G
-  E -->|是| M{审批模式}
-  M -->|smart| L[小模型当审查员判]
-  M -->|off| G
-  M -->|manual · 默认| H{当前会话能触达人吗?}
-  H -->|有人 · CLI 或推消息| Q[等人点确认]
-  H -->|无人 · cron| X2[默认拒<br/>沉默不等于同意]
-  H -->|无人 · 未被识别的会话| W[⚠ 直接放行 · 不拦不问<br/>官方已知漏洞]
-      </pre>
-      <div class="cap">危险按「做什么」判；真隔离在最上方短路整链；注意右下「无人」有三态、含一处诚实漏洞</div>
+    <div class="rl">机密外泄<small>密钥被读走＋传出</small></div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">近空白</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk half"></span><span class="lab">扫描·读无拦</span></div>
+    </div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">网络闸随沙箱</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk full"></span><span class="lab">剥密钥·默认开</span></div>
+    </div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">—</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">—</span></div>
+    </div>
+
+    <div class="rl">失控·二阶<small>治理层本身被改写</small></div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk full"></span><span class="lab">配置连全放行也拦</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk half"></span><span class="lab">改配置在软层·可绕</span></div>
+    </div>
+    <div class="na">—　结构上无「事中」对应</div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">—</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">—</span></div>
+    </div>
+
+    <div class="rl">机器失能<small>关机／删根／炸弹</small></div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk half"></span><span class="lab">删根软拦·关机无专项</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk full"></span><span class="lab">硬地板·无条件</span></div>
+    </div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">—</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">—</span></div>
+    </div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">—</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">—</span></div>
+    </div>
+
+    <div class="rl">外部世界后果<small>强推／发消息／发布</small></div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">仅信息提示</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">发消息零审批</span></div>
+    </div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">—</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">—</span></div>
+    </div>
+    <div class="cell">
+      <div class="mrow c"><span class="who">CC</span><span class="mk none"></span><span class="lab">已发不可撤</span></div>
+      <div class="mrow h"><span class="who">HM</span><span class="mk none"></span><span class="lab">已发不可撤</span></div>
     </div>
   </div>
-  <p class="lead" style="margin-top:16px">两条链都不是「一层层加防护」，而是<b>顺序敏感的短路链</b>：「明令禁止」和那道自我治理硬核永远短路在「放行」前面、连全放行档也绕不过（一句普通的「问一下」则可能被更放手的档位盖过）。而它们最终都要在同一个岔口分流——<b>此刻有没有人能回答</b>。</p>
 
-  <h2><span class="num">03</span>深潜一 · 连「全速前进」都压不过的地板，各自护着什么</h2>
-  <p class="lead">两家都给了一个「我盯着，你放手干」的档位（CC 的 Bypass Permissions、Hermes 的 yolo）。但两家也都留了一道<b>连这个档位都压不过</b>的绝对地板——有意思的是，两道地板圈住的<b>不是同一样东西</b>。</p>
+  <p class="lead" style="margin-top:14px">这张网一眼给出三件事。<b>其一，防线几乎全挤在「事前」列</b>——两家都把赌注押在「动手前把危险动作拦下来问人」。<b>其二，「事中」列默认几乎全空</b>：沙箱、容器隔离两家默认都不开，隔离不是默认防线、是要你自己去开的加固；而且它一开就是<b>替代</b>审批而非叠加——CC 开了沙箱，命令反而默认不再逐条问；Hermes 后端换成隔离容器，<b>整条审批链（含硬地板）直接短路</b>（碰不到宿主机就不必拦）。<b>其三，「事后」列几乎全空</b>：两家都只有一格半——各自给「自己动笔改的文件」做了原生撤销（CC 的 rewind 默认开、Hermes 的 rollback 默认关），但 bash 层的删除、外泄、已推 commit 一律兜不住，只能回落到 git 或操作系统。</p>
+
+  <p class="lead">趋同到什么程度？连「动作被拒之后对模型说的原话」都近乎逐字重合——一个托管闭源、一个开源自托管，却都在闸门后面补了同一句训诫：<b>不许换个命令、换个说法把同一件事再做一遍</b>。</p>
   <div class="compare">
     <div class="side cc">
-      <h4>Claude Code · 地板圈住「管着 agent 自己的那一层」</h4>
-      <p>哪怕你切到 Bypass（全放行、红色警示），有几类动作仍被强制拦下要你确认：改 <b>.git/</b>、改 <b>.claude/</b> 自己的配置、改 <b>shell 启动脚本</b>（.bashrc 等）、改 <b>IDE 配置</b>。逻辑是：放手可以，但改动「<b>能自我提权、能改写游戏规则本身</b>」的东西，永远不放手。全放行不等于无法无天。</p>
-      <div class="artifact"><span class="lbl">真实清单 · 连全放行都拦的路径</span>.git/  ·  .claude/（自身配置）  ·  ~/.bashrc / shell 启动脚本  ·  .vscode/ / .idea/（IDE 配置）  ·  以及任何用户显式标了「禁止 / 要问」的规则</div>
+      <h4>Claude Code · 被拒后随附给模型的绕行准则</h4>
+      <div class="artifact"><span class="lbl">src · 拒绝消息里的行为准则</span>You <span class="hl">*may*</span> attempt to accomplish this action using other tools ... e.g. using head instead of cat. But you <span class="hl">*should not*</span> attempt to work around this denial in malicious ways ... If you believe this capability is essential ... STOP and explain to the user ... Let the user decide how to proceed.</div>
     </div>
     <div class="side hm">
-      <h4>Hermes · 地板圈住「别把这台机器毁了」</h4>
-      <p>有一小撮命令被定为<b>无论如何都不许跑</b>：删根 / 删系统目录 / 删家目录、格式化磁盘、往裸块设备写、fork 炸弹、杀掉所有进程、关机 / 重启。这道地板在 yolo、关审批、cron 放行之下——原话逻辑是「开 yolo 是你信任它动你的文件和服务，不是信任它去把磁盘擦了、把机器关了」。（它另有一组「防自尽」规则不许杀掉自己的常驻网关，但那属<b>可绕的软清单</b>、不是这道无条件的硬地板。）</p>
-      <div class="artifact"><span class="lbl">真实原文 · 硬禁地板被拦时给 agent 的话</span>BLOCKED (hardline): {description}. This command is on the unconditional blocklist and cannot be executed via the agent — not even with --yolo, /yolo, approvals.mode=off, or cron approve mode. If you genuinely need to run it, run it yourself in a terminal outside the agent.</div>
+      <h4>Hermes · 命令被拒／超时给模型的原文</h4>
+      <div class="artifact"><span class="lbl">src · 被拒时的话（超时再追加一句）</span>The user has NOT consented to this action. <span class="hl">Do NOT retry</span> this command, <span class="hl">do NOT rephrase</span> it, and do NOT attempt the same outcome via a different command. Stop the current workflow and wait for the user to respond ...
+
+（超时追加：）<span class="hl">Silence is not consent.</span></div>
     </div>
   </div>
-  <div class="verdict"><b>同一个动作、两种恐惧：</b>两家真正的差别不在「护不护」，而在<b>把哪一样设成连全速前进都不可绕过的绝对地板</b>。CC 的 bypass-免疫地板护的是<b>「管着 agent 自己的那层配置」</b>（.git / .claude / shell 启动 / IDE）；灾难命令它<b>也</b>查，但多是「问一下」这种能被放手档盖过的软拦（个别如 PowerShell 删除才是硬拒），而非无条件地板。Hermes 的 yolo-免疫地板正相反，护的是<b>「别毁了这台机器」</b>（删根 / 格盘 / 关机等）；改自己的安全配置它<b>也</b>拦，但没放进这道硬禁地板。<b>各自把对方留在软层的那一样，单独升格成了硬地板</b>——这，而非「谁护谁不护」，才是分歧点。两道硬地板刻意都<b>极小</b>：只收「没有恢复路径」的动作；像 <code>rm -rf /tmp/x</code>、<code>curl|sh</code> 这种「代价大但可恢复」的都留在软清单、yolo 一开就放行，别把软清单也当成不可绕过。</div>
+  <p class="lead" style="margin-top:14px">这是趋同的最强证据，也点破了危险治理最脆弱的一环：光有闸门不够，还得堵死模型「被拦一次就换姿势重试」的动机——所以两家都把「拒绝」从一堵冷墙，改成一次有引导的协商。<b>机制层的趋同到此为止。差别，要到那道「连全放行都压不过」的地板上才显形。</b></p>
 
-  <h2><span class="num">04</span>深潜二 · 被拒之后：两家几乎同款的「别耍花招」训诫</h2>
-  <p class="lead">这是我们独有的一张王牌——把两家在「动作被拒之后对模型说的原话」并排。一个托管闭源、一个开源自托管，措辞却近乎逐字重合：<b>都不许模型用歪招绕过这次拒绝</b>。</p>
+  <h2><span class="num">02</span>分野一：同一道绝对地板，两家用了两套判据</h2>
+  <p class="lead">两家都给了一个「我盯着、你放手干」的最高档（CC 的 Bypass Permissions、Hermes 的 yolo），也都留了一道<b>连这个档都压不过</b>的绝对地板。有意思的是：拿两个动作去撞这两道地板——一个是删根（<code>rm -rf /</code>，物理不可逆），一个是改 agent 自己的治理配置（改 <code>.claude</code>／改审批规则，元级失控）——<b>两道地板恰好落在对角线上</b>。</p>
+
+  <div class="diag">
+    <div></div>
+    <div class="dh cc">Claude Code</div>
+    <div class="dh hm">Hermes</div>
+
+    <div class="da"><span class="at"><code>rm -rf /</code></span><span class="as">删根 · 物理不可逆 · 机器级</span></div>
+    <div class="dc soft"><span class="vt">软拦 · 全放行可放行</span>走 Bash 只弹窗问一次，措辞是「<b>不能被规则自动放行</b>」——不是「不能被绕过」；切到 Bypass 档<b>仍可放行</b>。（PowerShell 同款删除才是真硬拒，是一处不对称。）</div>
+    <div class="dc hard"><span class="vt">硬地板 · 无条件拒</span>撞上 12 条无恢复路径清单，<b>连 yolo 都压不过</b>，直接拒。</div>
+
+    <div class="da"><span class="at">改 <code>.claude</code> / 审批规则</span><span class="as">改治理层本身 · 元级失控</span></div>
+    <div class="dc hard"><span class="vt">硬地板 · 连全放行也拦</span>写 <code>.git</code>／<code>.claude</code>／shell 启动脚本／IDE 配置，<b>即便 Bypass 档也强制问</b>——护住「能改写游戏规则本身」的那层。</div>
+    <div class="dc soft"><span class="vt">软层 · yolo 可绕</span>改自己的安全配置、甚至杀掉自己的常驻网关，都只在<b>软清单</b>里，yolo 一开就能过。</div>
+  </div>
+  <p class="lead" style="margin-top:6px">两块 amber 高亮的硬地板落在<b>对角线</b>上，这就是分野：<b>Hermes 的判据是「物理可不可挽回」</b>——它的地板只收「没有恢复路径」的动作（删根／格盘／写裸设备／fork 炸弹／关机），护的是<b>机器</b>；<b>CC 的判据是「动没动管着 agent 的那层」</b>——它连全放行都压不过的是治理配置，护的是<b>规则本身</b>。各自把对方设成绝对地板的那类，恰好留在了自己能被放手档盖过的软层。</p>
+
+  <div class="compare">
+    <div class="side hm">
+      <h4>Hermes · 地板为什么这么小：判据写死在注释里</h4>
+      <div class="artifact"><span class="lbl">src · 硬地板设计注释</span>The list is deliberately tiny — only things with <span class="hl">no recovery path</span>: filesystem destruction rooted at /, raw block device overwrites, kernel shutdown/reboot ... Recoverable-but-costly operations (git reset --hard, rm -rf /tmp/x, chmod -R 777, curl|sh) <span class="hl">stay in DANGEROUS_PATTERNS where yolo can pass them through</span> — that's what yolo is for.</div>
+    </div>
+    <div class="side cc">
+      <h4>Claude Code · 地板为什么护配置：注释写的是防提权</h4>
+      <div class="artifact"><span class="lbl">src · bypass 免疫路径清单 + 缘由</span>.git / .claude（自身配置）/ .bashrc·shell 启动脚本 / .vscode·.idea（IDE 配置）
+
+// to prevent git-based data <span class="hl">exfiltration and code execution</span>
+// to prevent VS Code settings manipulation ...
+// to prevent shell startup script manipulation</div>
+    </div>
+  </div>
+  <div class="verdict"><b>同一个动作、两种恐惧：</b>这才是分歧点——不是「谁护谁不护」（灾难命令两家<b>都</b>查、治理配置两家<b>也</b>都拦），而是<b>把哪一样升格成连全速前进都不可绕过的绝对地板</b>。Hermes 怕的是物理不可挽回，CC 怕的是元级失控。两道硬地板刻意都<b>极小</b>：只收「没有恢复路径」的动作；像 <code>rm -rf /tmp/x</code>、<code>curl|sh</code> 这种「代价大但可恢复」的都留在软层、放手档一开就放行——别把软清单也当成不可绕过的墙。</div>
+
+  <h2><span class="num">03</span>分野二：机密外泄这一行，一家做了减法却亲口否认那是墙</h2>
+  <p class="lead">在覆盖网里，「机密外泄」这一行两家的填法正好相反——而这处相反，把「闯了祸算谁的」如何反过来决定「它对自己诚实到什么份上」摆到了明面。</p>
   <div class="compare">
     <div class="side cc">
-      <h4>Claude Code · 给模型的绕行准则原文</h4>
-      <div class="artifact"><span class="lbl">src · 拒绝后随附的行为准则</span>IMPORTANT: You *may* attempt to accomplish this action using other tools ... e.g. using head instead of cat. But you *should not* attempt to work around this denial in malicious ways ... If you believe this capability is essential ... STOP and explain to the user ... Let the user decide how to proceed.</div>
+      <h4>Claude Code · 基本敞开：赌你在可信环境</h4>
+      <p><span class="cc">子进程继承全部密钥</span>（不做 env 清洗）、<span class="cc">读密钥文件无专项拦</span>（<code>~/.ssh</code>／<code>.env</code> 只受「出没出工作区」的通用约束）、<span class="cc">网络外发的闸只在沙箱里成立</span>——而沙箱默认关。唯一一处密钥专拦（写团队记忆时扫密钥）还是特性门控。默认形态下，外泄这一行几乎没有防线。</p>
     </div>
     <div class="side hm">
-      <h4>Hermes · 命令被拒 / 超时给模型的原文</h4>
-      <div class="artifact"><span class="lbl">src · 被拒时的话（超时再追加一句）</span>The user has NOT consented to this action. Do NOT retry this command, do NOT rephrase it, and do NOT attempt the same outcome via a different command. Stop the current workflow and wait for the user to respond ...
+      <h4>Hermes · 主动剥密钥：却在文档里说这不算隔离</h4>
+      <p><span class="hm">默认就剥密钥</span>：把 API 密钥、网关令牌在传给子进程前先黑掉（GATEWAY 令牌无条件剥）。这是覆盖网「事中」列里两家唯一非空的一格——<b>但它自己在安全文档里主动降级了这道护栏</b>。</p>
+      <div class="artifact"><span class="lbl">SECURITY.md · 对自己能力边界的自白</span>（剥密钥）This reduces casual exfiltration. <span class="hl">It is not containment.</span> Any component running inside the agent process ... can read whatever the agent itself can read ...
 
-（超时追加：）Silence is not consent.</div>
+（总纲）The only security boundary against an adversarial LLM is <span class="hl">the operating system</span>. Nothing inside the agent process constitutes containment ... They are useful. <span class="hl">They are not boundaries.</span></div>
     </div>
   </div>
-  <div class="verdict"><b>为什么两家不谋而合：</b>危险治理最脆弱的地方从来不是「拦不拦得住第一次」，而是「拦住之后，模型会不会换个命令、换个说法、假借跑测试之名把同一件事再做一遍」。两家都发现：<b>光有闸门不够，还得在闸门后面放一句给模型的训诫，堵死绕行的动机</b>。把「拒绝」从一堵冷墙，变成一次有引导的协商——「你可以正当地换条路（用 head 代替 cat），但不许耍花招绕过我的本意；真觉得非做不可，就停下来问人」。Hermes 那句「沉默不等于同意」尤其点题：它常常无人值守，<b>没人回答不能被模型解读成默许</b>。</div>
+  <div class="verdict"><b>诚实度是「风险归谁」的下游：</b>Hermes 既动手剥了密钥、又亲口否认那是边界——不是自相矛盾，是它的处境逼出来的坦白。它开源自托管、从开放渠道吃不可信输入、常常无人值守，<b>没有厂商接盘、闯祸是你自担</b>（文档里连 bug bounty 都明说没有、部署加固全列为运维的责任）。正因为残余风险最终落在你头上，它才被迫把「真边界在哪」说死，免得你把一道软门错当成真墙。CC 反过来：多半跑在你自己可信的仓库里、你就在旁边、身后还有厂商，于是它能用更轻的姿态——「<b>只对你信任的代码用我</b>」——把外泄这一行的残余风险，交还给「你选对了输入」。</div>
 
-  <h2><span class="num">05</span>对比 · 七组对照，落在「在场契约」上</h2>
-  <p class="lead">默认关不关沙箱、危险靠什么判、地板护什么、谁扛后果、假设谁在场……同一个「治理危险动作」的目标，答案却指向两种部署现实。</p>
+  <h2><span class="num">04</span>共同盲区：两家的护栏都只盯着「本机」</h2>
+  <p class="lead">覆盖网里有两处，是两家<b>一起</b>留白的——不是谁的取舍，是这类产品共同的射程边界，对读者判断「我能把什么托付给它」尤其要紧。</p>
 
-  <div class="matrix">
-    <div class="mh"></div>
-    <div class="mh cc">Claude Code</div>
-    <div class="mh hm">Hermes</div>
+  <p class="lead"><b>盲区一：祸落在别人头上的那一类，两家事前几乎都不设防。</b>强推覆盖共享分支、往外发消息／邮件、发布 npm／pip 包——这些「外部世界后果」在覆盖网第五行几乎全空。CC 这边，force push 只有一句信息提示（不影响放行）、npm publish 要靠你自己写规则、系统提示里「不主动 push」是<b>写给模型的纪律、不是代码闸门</b>；Hermes 这边，agent 主动发消息／发邮件<b>零审批</b>，publish 无拦，只有 force push 被某条 shell 正则偶然覆盖到。两家的防线都画在「别毁了这台机器、这个仓库」，对「别把祸甩给别人」基本沉默。</p>
 
-    <div class="dim">默认关不关沙箱</div>
-    <div>命令沙箱<b>默认关</b>，动作直落你的真机器；开沙箱是 opt-in。</div>
-    <div>执行后端<b>默认 local ＝ 裸主机</b>；容器 / 远程 / 云沙箱是 opt-in。</div>
+  <p class="lead"><b>盲区二：护栏几乎只长在「shell 命令」这一个面上。</b>那套危险删除拦截、配置保护、沙箱，两家都只覆盖终端命令和文件编辑。<span class="cc">CC 的 MCP／自定义工具直接放行</span>（passthrough，完全不过环境侧的路径闸和沙箱）；<span class="hm">Hermes 的 MCP 调用、发消息、发布</span>也都绕开命令闸，只靠一个<b>默认关（opt-in）</b>的通用钩子兜——插件默认不加载，非 shell 面开箱即无闸。含义很实：<b>一个改用 MCP 工具去删数据、去联网外传的 agent，能绕开两家几乎全部的环境护栏。</b></p>
 
-    <div class="dim">隔离与审批<br>的关系</div>
-    <div>开了沙箱，命令反而<b>默认自动放行</b>、不再逐条问（触网才浮出问人）。</div>
-    <div>后端是隔离容器，就<b>整个跳过审批层</b>（碰不到宿主机就不必拦）。</div>
+  <div class="verdict"><b>为什么一起留白：</b>两家的环境治理，本质是<b>「本机资产治理」</b>——把 shell 能对这台机器、这个仓库干的坏事拦住。一旦动作换个出口（对外发送、发布、经由 MCP 工具落地），或者后果换个落点（砸在协作者而非你自己头上），就掉出了射程。这不是 bug，是这一代 harness 危险治理的形状：它守的是「你的机器」，不是「你的机器能波及的世界」。</div>
 
-    <div class="dim">危险靠什么判</div>
-    <div>先按<b>落点</b>（在不在工作区圈内），再叠命令模式——地基是「按物理距离圈信任」。</div>
-    <div>按<b>命令内容</b>（硬禁清单 ＋ 数十条危险正则 ＋ 内容扫描），真边界指向 OS。</div>
-
-    <div class="dim">连全放行<br>都压不过的地板</div>
-    <div>改 .git / .claude 自身配置 / shell 启动 / IDE 配置——护住「<b>管着 agent 自己的那层</b>」。</div>
-    <div>删根 / 格盘 / fork 炸弹 / 关机等灾难命令，连 yolo 也无条件拒——护住「<b>别毁了这台机器</b>」。</div>
-
-    <div class="dim">谁扛闯祸后果</div>
-    <div>你的真文件 / 凭证 / 版本库；<b>没有一键回滚，安全网是 git</b>；企业另有远程总闸可锁死全放行档。</div>
-    <div>你的机器 / 你的账号；<b>没有厂商接盘</b>，插件安全、暴露公网的责任明确归运维。</div>
-
-    <div class="dim">假设谁在场<br>（脊椎）</div>
-    <div><b>原生假设人在场</b>——危险动作弹窗、Shift+Tab 现场转信任旋钮。</div>
-    <div><b>常态假设人不在场</b>——常驻被时钟 / 消息叫醒，跑完把结果推给你。</div>
-
-    <div class="dim">没人点确认<br>时怎么办</div>
-    <div>无法弹窗即<b>默认拒</b>（「此环境无权限提示」）；要无人干活，须提前用 allow 规则 / 全放行档 / 钩子把那次点击签好。</div>
-    <div>cron <b>默认拒</b>、沉默不等于同意、硬禁地板永在；<b>但有诚实漏洞</b>——未被识别为 cron/网关的无人会话会自动放行 ＋ 仅告警。</div>
-  </div>
-
+  <h2><span class="num">05</span>verdict · 机制趋同，账本分家</h2>
   <div class="verdict">
-    <b>为何不同 —— 分水岭是「在场契约」：这套危险治理，默认假设有没有人在场？</b><br><br>
-    <b>CC 原生假设人在场。</b>整套默认姿态就是「危险动作弹窗、等你点 Yes/No」，信任档位靠 Shift+Tab 现场转——这些只有当终端前坐着一个能随时回答的人才成立。无人化对 CC <b>不是免费的</b>：你得用预授权（allow 规则 / 全放行档 / 钩子）把「本属于人的那次点击」提前签好；而当真没人回答，它的安全默认是<b>拒绝</b>。<br><br>
-    <b>Hermes 的常态恰恰是没人在场。</b>它常以一个被时钟 / webhook / 消息叫醒的常驻实体跑着，跑完把结果推给不在场的你（见第 04 篇）。于是它必须为「没人点确认」定义<b>确定行为</b>——cron 默认拒、沉默不等于同意、硬禁地板永远在；能触达你时（推到 Telegram / Slack 等你 /approve）才把决定权交回人。<br><br>
-    <b>更深一层：两家其实都在对你说「别全信我」——但指向了不同的出口。</b>CC 说「<b>只对你信任的文件用我</b>」（把残余风险推给你选对输入，因为它多半在你自己可信的仓库里、你就在旁边）；Hermes 说「<b>进程内没有任何东西算隔离，唯一的边界是操作系统</b>」（把残余风险推给你在 OS 层做隔离，因为它是个从开放渠道吃不可信输入、又常常无人值守的常驻体）。是「厂商托管、有人在场」还是「自托管、无人值守」，决定了它把最后那道防线画在哪、也决定了它对自己能力边界诚实到什么程度——诚实到什么份上？它明明还搭了一层进程内的护栏（把 API 密钥、网关令牌在传给子进程前<b>剥掉</b>，堵住恶意扩展把凭据隧道出去），却仍在文档里主动写明「<b>这只减少随手泄露，不算隔离</b>」。既动手缓解、又亲口否认那是边界——这正是它整套「别把软门当真墙」姿态的注脚。<br><br>
-    <b>一个共识别漏掉：</b>真到了「没人在家」且被正确识别的时候，两家的安全默认<b>都是「不做」</b>——CC 无法弹窗即默认拒，Hermes cron 默认拒 / 沉默不等于同意。分歧不在这条底线，而在<b>谁把「无人」当常态来设计</b>。这，就是喂给综合②「在场契约」脊椎的那一块。
+    <b>把这一章收成一句：环境侧的安全机制之所以惊人趋同，是因为它们都在给「模型会犯错」这个普适前提做下限设计——答案空间窄，就收敛到同一批动作上（拦、隔、兜）。真正把两家分开的，是账本。</b><br><br>
+    <b>第一本账：那道绝对地板护什么。</b>Hermes 按「物理可不可挽回」护机器，CC 按「动没动治理层」护规则本身。一个防的是物理上收不回的动作，一个防的是能改写游戏规则本身的动作——各自把对方留在软层的那一样，单独升格成了硬地板。<br><br>
+    <b>第二本账：闯了祸算谁的。</b>CC 厂商托管、多半跑在你自己可信的仓库里、身后有 git 兜文件、有企业总闸能远程锁死全放行档；Hermes 开源自托管、你的机器你的账号、没有厂商接盘、责任白纸黑字归运维。风险归属的不同，又反过来逼出了「对能力边界多诚实」的不同：越是你自担，它越被迫把「真边界只有操作系统」说死。<br><br>
+    <b>一个共识别漏掉：</b>两家其实都在对你说「别全信我」，只是指向了不同的出口——CC 说「只对你信任的代码用我」，Hermes 说「进程内没有任何东西算隔离，唯一边界是操作系统」。是「厂商托管、身后有人兜」还是「自托管、你自担」，决定了它把最后那道防线画在哪，也决定了它对自己诚实到什么份上。
   </div>
 
-  <h2><span class="num">06</span>悬而未决 · 边界说明（防「默认→绝对」以偏概全）</h2>
+  <h2><span class="num">06</span>边界说明（防「默认→绝对」以偏概全）</h2>
   <ul class="open">
-    <li><b>[CC · 默认]</b> 沙箱<b>默认是关的</b>：外部用户开箱即用并没有命令沙箱，安全全靠权限弹窗。而且开沙箱后命令<b>反而不再逐条问</b>——它是「换一种范式」（靠笼子物理隔离），不是「多加一层防护」。别记成「CC 在沙箱里跑命令」。</li>
-    <li><b>[HM · 默认]</b> 后端<b>默认 local ＝ 裸主机</b>；容器 / 远程 / 云沙箱、整进程 Docker / OpenShell 包裹，全是 opt-in。别记成「Hermes 把 agent 关在沙箱里」——恰恰相反，默认不关。真隔离是官方推荐、但要运维自己去开的选项。</li>
-    <li><b>[两家 · 子代理不自动隔离]</b> git worktree 隔离两家<b>都是手动 opt-in</b>：CC 明确「只有用户说 worktree 才用，切分支 / 改 bug 都不算」，子代理<b>默认共享同一工作目录</b>（可显式给某个子代理开 worktree 隔离，但不是默认）；Hermes 的 worktree 也要显式开。「并行分身各自隔离 blast radius」不是默认形态。</li>
-    <li><b>[CC · 窄例外]</b> 「出了工作区圈一律先问、读写对称授权」有一组<b>内部管线的窄例外</b>：harness 自己的暂存 / 计划 / 会话记忆目录，即便在工作区之外也<b>静默可写</b>（不弹窗）。但这组例外只限 harness 自身的后台目录、不含任意用户文件，「CC 信任工作区、出圈就问」的大结论仍成立。</li>
-    <li><b>[HM · 诚实漏洞]</b> 既非交互、又非网关、又非 cron 的无人会话，危险命令会被<b>直接放行</b>（当前主路径甚至不先做危险检测、也不拦不问）——官方标注的已知限制。所以「无人即更保守」只在被识别的 cron / 网关场景成立，<b>不是所有无人场景都兜底</b>。这一条不能被「无人时更安全」的干净故事压掉。</li>
-    <li><b>[HM · 别当默认支柱]</b> 内容扫描器 Tirith <b>默认「挂了就放行」（fail-open）</b>、smart 模式（小模型审查）与 off 都是 opt-in、记忆 / 技能写入审批默认关。硬禁地板是全文里<b>唯一</b>真正无条件的机制，其余大多是可配的默认值。</li>
-    <li><b>[CC · 分类器 ant-only]</b> 用 AI 分类器代替人审的 auto 模式是内部 / 特性门控，外部用户默认没有；写外部产品逻辑时不当它是通用能力。</li>
-    <li><b>[不评优劣]</b> 本篇讲的是「危险治理的<b>形态</b>与<b>在场假设</b>」，不评判两种模式孰优——取决于你是否在场、自托管还是托管、吃的是可信还是开放输入。</li>
-    <li><b>[时间切片]</b> 两家治理都在快速演进，本篇是某一时间切片（CC main / Hermes @daf4f1a7a）。</li>
+    <li><b>[两家 · 默认不隔离]</b> CC 命令沙箱<b>默认关</b>、开箱即用全靠权限弹窗；Hermes 后端<b>默认 local ＝ 裸主机</b>，容器／远程／云沙箱全是 opt-in。别记成「它们在沙箱里跑命令」——恰恰相反，默认不关。且沙箱一开是<b>换范式</b>（用隔离换掉逐条问）不是加一层。</li>
+    <li><b>[两家 · 事后只兜半格]</b> 「事后兜底全外包给 git」不成立：两家都有原生撤销，但都只覆盖<b>自己经结构化编辑工具改的文件</b>——CC 的 rewind 交互默认开、Hermes 的 rollback 默认关（v2 从开翻成关，注释「多数人从不用」）；bash 层的 rm／dd／重定向、已推 commit、已发外部动作，两家事后都兜不住。</li>
+    <li><b>[CC · 不对称]</b> 「删根被硬拦」只对 PowerShell 成立：同样删系统关键路径，PowerShell 返回硬拒（bypass 也压不过），Bash 却只是弹窗问（措辞「不能被规则自动放行」，Bypass 档仍可放行）。全仓没有硬编码的危险命令黑名单。CC 护栏强度按「走哪个 shell／碰没碰治理层」排，不按「动作可不可逆」排——这是护栏不一致，不是设计美学。</li>
+    <li><b>[HM · 诚实漏洞]</b> 既非交互、又非网关、又非 cron 的无人会话，软危险命令会被<b>直接放行</b>（本切片主路径连告警都不打，静默放行）——官方 docstring 明文保留这条历史 fail-open。硬地板／sudo 地板／deny 清单在放行前已拦，故缺口只对「可恢复的软危险命令」开。但「无人即更保守」只在被识别的 cron／网关场景成立：cron 无人默认拒，这条非 cron 无人却默认放行，两个无人路径处理不一致。</li>
+    <li><b>[HM · 别当默认支柱]</b> 内容扫描器 Tirith <b>默认「挂了就放行」（fail-open）</b>；smart（小模型审查）与 off 都是 opt-in、审批默认 manual。硬禁地板是全文里<b>唯一</b>真正无条件的机制，其余大多是可配的默认值。</li>
+    <li><b>[CC · 门控能力别当产品]</b> 用 AI 分类器代替人审的 auto 模式、团队记忆密钥拦，均为内部特性门控，外部用户默认不可达；harness 自身的暂存／计划／记忆目录即便在工作区外也<b>静默可写</b>（只限这些后台目录、不含任意用户文件，「出圈就问」的大结论仍成立）。</li>
+    <li><b>[两家 · 子代理不自动隔离]</b> git worktree 隔离两家<b>都是手动 opt-in</b>：CC 明确「只有用户说 worktree 才用」，子代理默认共享同一工作目录；Hermes 的 worktree 也要显式开。「并行分身各自隔离」不是默认形态。</li>
+    <li><b>[不评优劣 · 时间切片]</b> 本篇讲的是危险治理的<b>形态</b>与<b>账本</b>，不评两种模式孰优——取决于你是否在场、自托管还是托管、吃的是可信还是开放输入。两家治理都在快速演进，本篇是某一时间切片（CC main / Hermes @8e734810d）。</li>
   </ul>
 
-  <nav style="max-width:1080px;margin:40px auto 0;padding:16px 28px;border-top:1px solid #2a3342;text-align:center;font-size:13px;color:#8b98a9">导读：<a href="04-outside-time-trigger.html">04 时间与触发</a> · <a href="05-outside-user.html">05 用户</a> · <b>06 环境</b> · <a href="07-outside-multiagent.html">07 多智能体</a> · <span style="color:var(--faint)">08 自我改进（待）· 综合②（待）</span></nav>
+  <nav style="max-width:1080px;margin:40px auto 0;padding:16px 28px;border-top:1px solid #2a3342;text-align:center;font-size:13px;color:#8b98a9">导读：<a href="05-outside-user.html">← 05 Loop 与用户</a> · <b>06 Loop 与环境</b> · <a href="07-outside-multiagent.html">07 Loop 与其他 Agent →</a></nav>
 
   <div class="foot">
-    代码溯源（不在正文展示，仅存档）：<br>
-    <b>Claude Code</b> — <code>src/tools/BashTool/shouldUseSandbox.ts:130</code> · <code>src/tools/FileEditTool/FileEditTool.ts:125</code>（动作打在真文件系统 / 真 shell）· <code>src/utils/permissions/filesystem.ts:667</code> · <code>filesystem.ts:1030</code> · <code>filesystem.ts:1142</code>（工作目录＝信任圆心 · 读写对称授权）· <code>src/utils/sandbox/sandbox-adapter.ts:459</code> · <code>sandbox-adapter.ts:462</code> · <code>sandbox-adapter.ts:471</code>（命令沙箱默认关 · 开沙箱则命令默认自动放行）· <code>sandbox-adapter.ts:745</code> · <code>src/components/permissions/SandboxPermissionRequest.tsx:80</code>（笼内触网浮出问人）· <code>src/tools/EnterWorktreeTool/prompt.ts:12</code>（worktree 手动 opt-in · 子代理默认共享工作目录）· <code>src/types/permissions.ts:16</code> · <code>src/utils/permissions/PermissionMode.ts:42</code> · <code>getNextPermissionMode.ts:38</code>（五种权限模式 · Shift+Tab 旋钮）· <code>src/utils/permissions/permissions.ts:1158</code> · <code>permissions.ts:1262</code>（先拒后问再放行的顺序检查链）· <code>permissions.ts:1231</code> · <code>filesystem.ts:620</code>（Bypass 硬例外：.git / .claude / shell / IDE 配置）· <code>src/utils/permissions/dangerousPatterns.ts:18</code>（过宽 allow 规则的防呆剥离）· <code>src/types/hooks.ts:73</code> · <code>src/utils/hooks.ts:550</code>（PreToolUse 钩子＝可编程守门人）· <code>src/utils/messages.ts:226</code>（被拒后的绕行准则原文）· <code>permissions.ts:932</code>（无法弹窗即默认拒）· <code>src/utils/permissions/bypassPermissionsKillswitch.ts:19</code>（组织级远程总闸）· <code>src/tools/BashTool/prompt.ts:231</code>（默认进沙箱的系统提示）· <code>src/components/Onboarding.tsx:84</code>（「只对你信任的代码用」）<br>
-    <b>Hermes</b> — <code>tools/terminal_tool.py:1244</code>（后端默认 local ＝ 裸主机）· <code>SECURITY.md:60-71</code>（唯一边界是 OS · 进程内全是启发式）· <code>SECURITY.md:86-119</code>（两种 OS 级隔离姿态 · 均 opt-in）· <code>tools/approval.py:1883-1894</code>（容器后端跳过整个审批层）· <code>tools/terminal_tool.py:272-278</code>（Docker 挂宿主路径→隔离失效审批复活）· <code>cli.py:1258-1271</code>（worktree 并行隔离 · opt-in）· <code>tools/approval.py:1918-1943</code>（四层递进命令闸门）· <code>tools/approval.py:365-401</code> · <code>approval.py:464-477</code>（硬禁地板清单 + BLOCKED 原文）· <code>tools/approval.py:498-674</code>（约 47 条危险模式软清单）· <code>tools/approval.py:561-592</code>（防自尽 · 不许杀自己网关）· <code>tools/approval.py:1732-1735</code> · <code>approval.py:2354-2374</code>（manual / smart / off 三模式）· <code>tools/tirith_security.py:68-87</code>（内容扫描器 · 默认开 · 默认 fail-open）· <code>tools/approval.py:2428-2457</code>（被拒 / 超时训诫原文 · 沉默不等于同意）· <code>tools/approval.py:2211-2245</code>（cron 无人默认拒）· <code>tools/approval.py:1947-1966</code>（诚实漏洞：非交互非网关非 cron 自动放行 + 告警）· <code>SECURITY.md:155-169</code>（闯祸后果归运维 · 无厂商接盘）
+    代码溯源（不在正文展示，仅存档 · CC=claude-code-main／Hermes=@8e734810d）：<br>
+    <b>Claude Code</b> — <code>src/utils/permissions/permissions.ts:1226-1281</code>（先拒后问再放行的顺序检查链 · bypass 免疫分支）· <code>src/utils/permissions/filesystem.ts:620-665</code> · <code>filesystem.ts:57-79</code> · <code>filesystem.ts:426-433</code>（治理层 bypass 免疫：.git／.claude／shell 启动／IDE 配置 + 防提权注释）· <code>src/tools/BashTool/pathValidation.ts:70-108</code>（Bash 删危险路径＝软拦 ask · 「不能被规则自动放行」非 deny）· <code>src/tools/PowerShellTool/pathValidation.ts:848-857</code>（PowerShell 删除＝真硬拒 deny）· <code>src/tools/BashTool/destructiveCommandWarning.ts:1-102</code>（破坏性命令提示语＝纯信息 · 不影响放行）· <code>src/utils/messages.ts:226-239</code>（被拒后绕行准则原文）· <code>src/utils/sandbox/sandbox-adapter.ts:459-471</code>（命令沙箱默认关 · 开沙箱则命令默认自动放行）· <code>sandbox-adapter.ts:743-760</code> · <code>SandboxPermissionRequest.tsx:60-124</code>（沙箱触网浮出问人）· <code>src/utils/fileHistory.ts:63-135</code> · <code>FileEditTool.ts:435</code> · <code>src/commands/rewind/index.js</code>（文件检查点／rewind：交互默认开 · 仅覆盖结构化编辑）· <code>src/tools/MCPTool/MCPTool.ts:59-62</code>（MCP 工具 passthrough · 不过环境闸）· <code>bashProvider.ts:218-253</code>（子进程不清洗 env · 继承全部密钥）· <code>src/services/teamMemorySync/teamMemSecretGuard.ts:15-44</code>（写团队记忆扫密钥 · 特性门控）· <code>bypassPermissionsKillswitch.ts:19-47</code>（组织级远程锁死 Bypass 档）· <code>src/tools/EnterWorktreeTool/prompt.ts</code>（worktree 手动 opt-in）· <code>src/components/Onboarding.tsx</code>（「只对你信任的代码用」）<br>
+    <b>Hermes</b> — <code>tools/approval.py:2537</code>（主审批入口 check_all_command_guards · terminal_tool.py:256 调用）· <code>approval.py:366-403</code> · <code>approval.py:301-306</code>（硬禁地板 12 条 + 「deliberately tiny · no recovery path」设计注释）· <code>approval.py:513-526</code>（BLOCKED hardline 原文）· <code>approval.py:547-758</code>（约 47 条危险模式软清单 · yolo 可绕）· <code>approval.py:622-653</code>（防自尽＝软清单 · 非硬地板）· <code>approval.py:2217-2228</code>（隔离容器后端整链跳过 · 含硬地板 · 挂宿主路径则复活）· <code>approval.py:2819-2855</code>（被拒／超时训诫原文 · 「Silence is not consent」）· <code>approval.py:2600-2664</code>（诚实漏洞：非交互非网关非 cron 无人会话静默 fail-open）· <code>approval.py:1862-1867</code>（cron 无人默认拒）· <code>tools/tirith_security.py</code> · <code>cli-config.yaml.example:355-358</code>（内容扫描器默认开 · 默认 fail-open）· <code>tools/environments/local.py:241-282</code> · <code>code_execution_tool.py:78-207</code>（剥密钥：默认开 · GATEWAY 令牌无条件剥）· <code>tools/send_message_tool.py</code>（agent 发消息＝零审批）· <code>tools/mcp_tool.py:3859-3943</code>（MCP 调用不过环境审批）· <code>tools/checkpoint_manager.py</code> · <code>hermes_cli/config.py:1298-1317</code>（文件快照／rollback · 默认关 · v2 从开翻关）· <code>SECURITY.md:60-65</code> · <code>SECURITY.md:130-153</code>（唯一边界是 OS · 剥密钥非隔离 · 启发式非边界）· <code>SECURITY.md:192-219</code>（外部面 caller allowlist：治入口不治出口）· <code>SECURITY.md:276-321</code>（闯祸后果归运维 · 无 bug bounty）
   </div>
-</div>
+</div></div>
 
 <script>
 /* ============ 复用脚本（组件化 stepper，与 build.py 的 SHARED_JS 同一段逻辑）============ */
@@ -309,7 +370,7 @@ if(MERMAID_OK){
     background:"#1e2531",primaryColor:"#161b26",primaryBorderColor:"#2a3342",
     primaryTextColor:"#e6edf3",lineColor:"#8b98a9",fontSize:"13.5px"}});
 }
-/* 本章无 stepper（机制形状是闸门链 + 文案并排 + 矩阵）；保留组件化逻辑以备后用、并与设计系统一致。 */
+/* 本章无 stepper（机制形状是覆盖网 + 对角对照 + 文案并排）；保留组件化逻辑以备后用、并与设计系统一致。 */
 document.querySelectorAll('.stepper').forEach(function(st){
   var frames=[].slice.call(st.querySelectorAll('.frame'));
   var caps=[]; var cj=st.querySelector('.captions'); if(cj){try{caps=JSON.parse(cj.textContent);}catch(e){}}
