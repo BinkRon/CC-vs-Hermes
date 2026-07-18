@@ -153,6 +153,45 @@ body{display:flex}
 .chapter.active{display:block;animation:fade .25s ease}
 @media(max-width:800px){body{flex-direction:column}.sidebar{width:100%;height:auto;position:static;flex:none}}
 
+/* 导读章专属：两轴地图（手工排版）+ 章节地图行表 —— scoped .ch00，只引用全局 tokens */
+.ch00 .cc{color:var(--blue);font-weight:650}
+.ch00 .hm{color:var(--purple);font-weight:650}
+.ch00 .axmap{margin:18px 0 6px}
+.ch00 .axzone{border:1px solid var(--border);border-radius:14px;padding:20px 22px;background:var(--surface)}
+.ch00 .axzone+.axzone{margin-top:14px}
+.ch00 .axzone.outer{border-style:dashed;background:transparent}
+.ch00 .axzone-k{font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--text);margin-bottom:14px}
+.ch00 .axzone-k small{font-weight:400;letter-spacing:0;color:var(--faint);margin-left:10px;font-size:12.5px}
+.ch00 .axcycle{display:grid;grid-template-columns:1fr 24px 1fr 24px 1fr 24px 1fr;align-items:stretch}
+.ch00 .axstep{border:1.5px solid var(--border);border-radius:10px;background:var(--surface-2);padding:12px 13px;text-align:center;display:flex;flex-direction:column;justify-content:flex-start}
+.ch00 .axstep .n{font-weight:700;font-size:15px}
+.ch00 .axstep .d{color:var(--muted);font-size:13px;line-height:1.5;margin-top:4px;flex:1}
+.ch00 .axstep .chb{align-self:center;margin-top:10px;font-size:11.5px;color:var(--faint);border:1px solid var(--border);border-radius:999px;padding:1px 10px;white-space:nowrap}
+.ch00 .axarr{display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:16px}
+.ch00 .axloop{color:var(--faint);font-size:13px;text-align:center;margin-top:12px}
+.ch00 .axtri{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.ch00 .axgrp{border:1px dashed var(--border);border-radius:10px;padding:12px 14px;background:var(--surface)}
+.ch00 .axgrp .g{font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.06em;margin-bottom:8px}
+.ch00 .axrel{display:flex;align-items:baseline;gap:9px;padding:5px 0;font-size:14px}
+.ch00 .axrel .chb{flex:none;font-size:11.5px;color:var(--faint);border:1px solid var(--border);border-radius:999px;padding:1px 10px;white-space:nowrap}
+.ch00 .axrel .q{color:var(--muted);font-size:12.5px}
+.ch00 .axmap>.cap{color:var(--faint);font-size:13px;margin-top:12px;text-align:center}
+.ch00 .toc{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:16px 0}
+.ch00 .toc .tgrp{background:var(--surface-2);font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--muted);padding:8px 18px;border-top:1px solid var(--border)}
+.ch00 .toc .tgrp:first-child{border-top:0}
+.ch00 .toc .trow{display:grid;grid-template-columns:220px 1fr;gap:14px;padding:11px 18px;border-top:1px solid var(--border);font-size:14.5px;background:var(--surface)}
+.ch00 .toc .tl{font-weight:650}
+.ch00 .toc .tq{color:var(--muted)}
+.ch00 .quote-art{border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:10px;background:var(--surface);padding:14px 20px;margin:14px 0;font-size:15.5px}
+.ch00 .quote-art .src{color:var(--faint);font-size:12.5px;margin-top:6px}
+@media(max-width:820px){
+  .ch00 .axcycle{grid-template-columns:1fr}
+  .ch00 .axarr{transform:rotate(90deg);padding:6px 0}
+  .ch00 .axtri{grid-template-columns:1fr}
+  .ch00 .toc .trow{grid-template-columns:1fr;gap:2px}
+}
+
+
 /* ============ 第 01 章专属排版（scoped 于 .ch01；build.py 收进合订本 head，不污染共享系统、不泄漏别章）============ */
 .ch01{--col:100%}
 
@@ -1254,6 +1293,8 @@ body{display:flex}
 <body>
 <aside class="sidebar">
 <div class="brand">Claude Code vs Hermes<small>Harness 设计对比</small></div>
+<div class="grp">导读</div>
+<div class="navitem" data-t="ch-00">00 导读</div>
 <div class="grp">轴一 · Loop 之内</div>
 <div class="navitem" data-t="ch-01">01 控制侧</div>
 <div class="navitem" data-t="ch-02">02 输入侧</div>
@@ -1270,6 +1311,108 @@ body{display:flex}
 <div class="navitem" data-t="ch-syn2">综合② Loop 之外怎么设计</div>
 </aside>
 <main class="content">
+<section class="chapter" id="ch-00"><div class="chwrap"><div class="ch00">
+
+  <div class="eyebrow"><span class="badge">第 0 篇 · 导读</span><span class="tag">拆法与读法</span></div>
+  <h1>导读：比的是壳，不是模型</h1>
+  <p class="subtitle">两条轴、两把仪器、十章正文——读任何一章之前，先拿到这张地图。</p>
+
+  <div class="thesis">
+    <div class="thesis-tag">TL;DR</div>
+    <p style="margin:0 0 12px">这本册子对比 Claude Code 与 Hermes Agent 的 <b>harness</b>——包在模型外面、把它变成能干活的 agent 的那整层控制脚手架。两家产品的表面能力高度相似，值得比的差异几乎都住在壳这一层；而对比有一个贯穿全书的支点：<b>Hermes 的作者自己训练模型，Claude Code 的壳团队把模型当固定契约</b>。</p>
+    <p style="margin:0">拆法是两条正交轴：轴一解剖<b>一个回合之内</b>（输入 / 计算 / 输出 / 控制四侧），轴二穷尽<b>回合之外</b>（时空、其他主体、它自己）。每章带一把固定的提问仪器。这篇导读只给地图与问法，不给任何一章的结论。</p>
+  </div>
+
+  <h2><span class="num">00</span>问题：两个都能干活的 agent，怎么比才不漏、也不偏</h2>
+  <div class="problem">
+    <p>把两个 agent 放在一起比，有两种省力的写法。第一种，拿 A 家的功能清单去 B 家里逐项找，找不到就记一笔「缺失」——清单是围着 A 的产品形状长出来的，这么比<b>从第一行起就带着偏见</b>。第二种，各写各的使用体感——读起来热闹，但回答不了一个基本问题：<b>有没有整块维度被漏掉</b>？体感不自带完备性。</p>
+    <p>所以这项研究先不急着比，先回答一个更基础的问题：一个 agent 的 harness，总共由哪些「格子」构成？这个划分必须不依附任何一家的产品形态，还得说清自己凭什么穷尽。然后，才把两家的做法填进格子里。这本册子的两条轴，就是那次划分的结果。</p>
+  </div>
+
+  <h2><span class="num">01</span>对象与支点：一家自己训模型，一家把模型当固定契约</h2>
+  <p>被比较的两家：<span class="cc">Claude Code</span> 是 Anthropic 的编码 agent，驱动它的模型是 Claude；<span class="hm">Hermes Agent</span> 出自 NousResearch，驱动它的模型是自家训练的 Hermes 系列。两个都是「模型＋壳」的复合体，这本册子只比壳。</p>
+  <p>壳，就是 <b>harness</b>：模型本身是个一次性函数——没有记性，碰不到真实世界，也不知道什么时候该停；把它包装成有状态、能行动、会自己决定何时停、能跨时间存在的 agent 的那整层脚手架，就是 harness。表面上两家都能听懂任务、调工具、改文件，但「怎么做到」的分歧，几乎全部住在这一层。</p>
+  <p>全书的对比有一个支点。它不是研究结论，是公开事实：<b>Hermes 的作者训练自己的模型</b>，壳想要的行为可以直接训进权重；对 Claude Code 的壳团队而言，<b>模型是一份固定契约</b>，一切只能在壳里想办法。同一个问题摆在两家面前，一家永远比另一家多一个选项——这个不对称会在全书反复出现。</p>
+
+  <h2><span class="num">02</span>拆法：先解剖回合之内，再穷尽回合之外</h2>
+  <p class="lead">第一刀是解剖，第二刀是补集——两条轴合起来，就是左侧栏的目录。</p>
+
+  <div class="axmap">
+    <div class="axzone">
+      <div class="axzone-k">轴一 · 一个回合之内<small>解剖一个循环——四侧缺一，回合就转不起来</small></div>
+      <div class="axcycle">
+        <div class="axstep"><div class="n">输入侧</div><div class="d">拼这一轮给模型看什么</div><span class="chb">02 章</span></div>
+        <div class="axarr">→</div>
+        <div class="axstep"><div class="n">计算侧</div><div class="d">调模型，拿输出</div><span class="chb">不立章 · 散在各章</span></div>
+        <div class="axarr">→</div>
+        <div class="axstep"><div class="n">输出侧</div><div class="d">把输出变成动作，回捕结果</div><span class="chb">03 章</span></div>
+        <div class="axarr">→</div>
+        <div class="axstep"><div class="n">控制侧</div><div class="d">决定再转一圈，还是停</div><span class="chb">01 章</span></div>
+      </div>
+      <div class="axloop">↺ 控制侧判定「继续」，就带着新结果回到输入侧——直到它判定可以停</div>
+    </div>
+    <div class="axzone outer">
+      <div class="axzone-k">轴二 · 回合之外<small>不属于循环本身的，只能是这三类</small></div>
+      <div class="axtri">
+        <div class="axgrp">
+          <div class="g">它所处的时空</div>
+          <div class="axrel"><span class="chb">04 章</span><span>时间 <span class="q">· 何时被唤起</span></span></div>
+          <div class="axrel"><span class="chb">06 章</span><span>环境 <span class="q">· 动作落在何地</span></span></div>
+        </div>
+        <div class="axgrp">
+          <div class="g">它之外的其他主体</div>
+          <div class="axrel"><span class="chb">05 章</span><span>用户 <span class="q">· 对它有权威的人</span></span></div>
+          <div class="axrel"><span class="chb">07 章</span><span>其他 Agent <span class="q">· 与它平级的同类</span></span></div>
+        </div>
+        <div class="axgrp">
+          <div class="g">它自己</div>
+          <div class="axrel"><span class="chb">08 章</span><span>self-improvement <span class="q">· 自己的过去与未来</span></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="cap">内圈（实线）：从「模型必须被循环调用」演绎出的四侧解剖。外圈（虚线）：按补集切出的回合之外——章号即左侧栏目录。</div>
+  </div>
+
+  <p>轴一从一个绕不开的事实推出来：模型一次只算一步，必须被外面的循环反复调用，才成为一个能把事做完的 agent。于是一个回合之内必然有四件事——拼材料、算一步、执行动作、决定去留。这条轴是<b>演绎</b>出来的，保证不漏一整个环节；代价是浅——它不告诉你每一侧内部有什么，还默默假设了「单轮、同步、有人在场」。</p>
+  <p>轴二负责把这个假设丢掉的东西捡回来。定义很朴素：<b>不属于循环本身的一切</b>。而「不属于循环的」可以按补集分干净：它所处的时空（何时被唤起、动作落在何地）、它之外的其他主体（对它有权威的人、与它平级的同类）、以及它自己的过去与未来。三类摊开，就是轴二的各章。敢说「不漏」，凭的是这个划分方式，不是列举的勤奋。</p>
+  <p>这套切法上过一次现实的审计。研究早期靠归纳只摸到「时空」与「其他主体」名下的四章；第五章——loop 与它自己——是被 Hermes 官方仓库自述的第一句话照出来的：</p>
+  <div class="quote-art">「The self-improving AI agent built by Nous Research.」<div class="src">Hermes Agent · 仓库 README 首句</div></div>
+  <p>当时手里那份按另一家产品形状长出来的功能清单里，没有这一格。这也定下了全书对功能清单的用法：<b>不当尺子，只当审计员</b>——清单不自我审查，恰好能照出优雅框架默默漏掉的东西。</p>
+
+  <h2><span class="num">03</span>读法：每章带一把固定的提问仪器</h2>
+  <p>轴一的三章共用一个问法：<b>「这个行为，是训进模型里的，还是写进壳里的？」</b>同一个可靠性要求，一家可以压进权重，一家只能靠壳里的工程。看两家各把它放在哪，比罗列功能表深一层——这也是「计算侧不立章」的原因：它的材料就散在轴一各章的这个问法里。</p>
+  <p>轴二换一个问法：<b>「什么现实逼出了它？」</b>回合之外的部件，补的往往不再是模型的缺陷，而是世界、人和部署环境的现实——「训模型还是改壳」在这里大多失去意义，仪器跟着换。</p>
+  <p>唯一的例外是 08 章：self-improvement 坐在两条轴的接缝上，<b>两把仪器都用</b>——既问什么现实逼出了它，也问学到的东西进了权重还是进了壳。每章末尾的 verdict 由当章仪器给出；这篇导读不预演其中任何一个。</p>
+
+  <h2><span class="num">04</span>章节地图：每章在问什么</h2>
+  <p class="lead">只列问题，不列答案——答案是每章自己的事。</p>
+  <div class="toc">
+    <div class="tgrp">轴一 · Loop 之内</div>
+    <div class="trow"><span class="tl">01 控制侧</span><span class="tq">循环怎么转、怎么停？出了错，怎么保证一次失败不终结整个任务？</span></div>
+    <div class="trow"><span class="tl">02 输入侧</span><span class="tq">模型每一轮「看到」的那份材料，是怎么拼出来的？</span></div>
+    <div class="trow"><span class="tl">03 输出行动侧</span><span class="tq">模型吐出的原始输出，怎么变成对真实世界的动作？</span></div>
+    <div class="tgrp">综合</div>
+    <div class="trow"><span class="tl">综合① 一个 Loop 怎么设计</span><span class="tq">读完轴一的收束：把三章的分野拧成一个设计思路。</span></div>
+    <div class="tgrp">轴二 · Loop 之外</div>
+    <div class="trow"><span class="tl">04 Loop 与时间</span><span class="tq">你不在的时候，它把「你不在」当成什么？</span></div>
+    <div class="trow"><span class="tl">05 Loop 与用户</span><span class="tq">它该多懂你？这份「懂」由谁说了算？</span></div>
+    <div class="trow"><span class="tl">06 Loop 与环境</span><span class="tq">动作落在真实机器上，闯了祸算谁的？</span></div>
+    <div class="trow"><span class="tl">07 Loop 与其他 Agent</span><span class="tq">什么时候值得拆出分身？拆完之后靠什么协作？</span></div>
+    <div class="trow"><span class="tl">08 Loop 的 self-improvement</span><span class="tq">跑过一千次任务之后，它变强了吗？「变强」由谁来评估？</span></div>
+    <div class="tgrp">综合</div>
+    <div class="trow"><span class="tl">综合② Loop 之外怎么设计</span><span class="tq">读完轴二的收束：五章的 verdict 汇到哪一个变量上。</span></div>
+  </div>
+  <p>侧栏顺序即推荐读序。每章自成一篇、可以跳读；两篇综合是各轴读完后的收束，默认你已读完该轴各章。</p>
+
+  <h2><span class="num">05</span>方法与边界：每个论断都能被追问出处</h2>
+  <p>全书的事实性论断都对着两家的真实代码核验过，出处以文件与行号的形式存在各章页脚；正文不出现代码，但真实的提示词原文、错误消息与阈值数字会作为证据直接展示。每篇成稿要过独立的质量门才收录：作者自审、对照真实代码的事实核验、独立的完整性核验（专防「为了讲一个干净的故事而丢掉机制」），以及一道排版设计门。</p>
+  <p>两条边界请读者带着。其一，<b>版本切片</b>：两家都在快速迭代，各章描述的是核验时刻的代码事实——研究期间 Hermes 主线明显前移，轴二各章都在章末注明了自己核验的切片。其二，<b>默认不等于绝对</b>：凡写「默认行为」的地方不外推成「永远如此」，实验性、未对普通用户开放的能力会被明确标注——这些交代通常收在各章末尾的边界说明里。</p>
+
+  <div class="foot">
+    制品溯源：<code>hermes-agent/README.md:19</code>（「The self-improving AI agent built by Nous Research.」）。本章其余内容为研究框架与方法声明，真相源是本项目的框架文档，不指向被研究的代码。
+  </div>
+
+</div></div></section>
 <section class="chapter" id="ch-01"><div class="chwrap">
 <div class="ch01">
 

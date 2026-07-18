@@ -9,6 +9,7 @@ FIND = os.path.join(ROOT, "findings")
 
 # 章节清单（顺序即阅读顺序；group 用于左栏分组）
 CHAPTERS = [
+    {"file": "00-intro.html",               "group": "导读",            "label": "00 导读",       "id": "ch-00"},
     {"file": "01-inside-control-loop.html", "group": "轴一 · Loop 之内", "label": "01 控制侧",     "id": "ch-01"},
     {"file": "02-inside-input.html",        "group": "轴一 · Loop 之内", "label": "02 输入侧",     "id": "ch-02"},
     {"file": "03-inside-output.html",       "group": "轴一 · Loop 之内", "label": "03 输出行动侧", "id": "ch-03"},
