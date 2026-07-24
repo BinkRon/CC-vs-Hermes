@@ -47,7 +47,7 @@
 1. **研究**：每个代码库 1 个研究员（Opus max effort）各啃一库 → 结构化 JSON（产品逻辑 + 图规格 + `file:line`）。
 2. **综合**：**我**把 JSON 收敛成产品论点（这是核心，也是最易出错处，见下）。
 3. **渲染**：1 个渲染员套 `_design-system.html` 出单章 HTML。
-4. **过三道门**（见下）→ 修正 → 同步 `backlog.csv` 状态 + `progress.md` 任务块（契约 4；done 则删块并把结论沉 `archive.md`）→ `python3 build.py` 并入合订本。
+4. **过四道门**（见下）→ 修正 → 同步 `backlog.csv` 状态 + `progress.md` 任务块（契约 4；done 则删块并把结论沉 `archive.md`）→ `python3 build.py` 并入合订本。
 
 ---
 
